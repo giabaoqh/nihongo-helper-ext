@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>JP Dictionary Dashboard</title>
+  <link rel="stylesheet" href="styles/theme.css">
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="logo-icon">辞</span>
+        <h1 class="logo-text">JP Dictionary</h1>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="search-tab">Tra cứu</button>
+      <button class="tab-btn" data-tab="saved-tab">Từ đã lưu</button>
+      <button class="tab-btn" data-tab="settings-tab">Cài đặt</button>
+    </nav>
+
+    <!-- Content Sections -->
+    <main class="tab-content-wrapper">
+      <!-- Search Tab -->
+      <section id="search-tab" class="tab-section active">
+        <div class="search-bar-wrapper">
+          <input type="text" id="search-input" placeholder="Nhập Kanji, Kana, Romaji hoặc Tiếng Việt..." autofocus>
+          <span class="search-icon">🔍</span>
+        </div>
+        <div id="search-results" class="results-list">
+          <!-- Empty State Search -->
+          <div class="empty-state">
+            <div class="empty-icon">📖</div>
+            <h3>Sẵn sàng tra cứu</h3>
+            <p>Nhập từ tiếng Nhật hoặc nghĩa tiếng Việt để bắt đầu tìm kiếm ngoại tuyến siêu tốc.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Saved Tab -->
+      <section id="saved-tab" class="tab-section">
+        <div class="folder-filter-wrapper" style="margin-bottom: 12px; display: flex; gap: 6px; align-items: center; padding: 0 4px;">
+          <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap;">Thư mục:</span>
+          <select id="select-folder-filter" style="flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-primary); font-family: var(--font-family); color: var(--text-primary); outline: none; cursor: pointer;">
+            <option value="__all__">Tất cả</option>
+          </select>
+          <button id="btn-rename-folder" title="Đổi tên thư mục" style="display: none; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 4px; transition: transform 0.1s;">✏️</button>
+          <button id="btn-delete-folder" title="Xóa thư mục" style="display: none; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 4px; transition: transform 0.1s;">🗑️</button>
+        </div>
+        <div id="saved-words-list" class="results-list">
+          <!-- Sẽ được điền tự động bằng JavaScript -->
+          <div class="empty-state">
+            <div class="empty-icon">⭐</div>
+            <h3>Chưa lưu từ vựng nào</h3>
+            <p>Bôi đen từ tiếng Nhật khi duyệt web và click Ngôi sao để lưu từ tại đây.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Tab -->
+      <section id="settings-tab" class="tab-section">
+        <div class="settings-card">
+          <h3>Phiên bản Từ điển</h3>
+          <div class="settings-row">
+            <span>Dữ liệu ngoại tuyến:</span>
+            <span id="db-status">Đang tải...</span>
+          </div>
+          <button id="btn-init-db" class="btn-primary" style="display:none;">Tải dữ liệu từ điển</button>
+          
+          <div class="divider" style="margin: 15px 0;"></div>
+          
+          <h3>Hướng dẫn sử dụng</h3>
+          <p class="help-text">1. Bôi đen văn bản tiếng Nhật trên bất kỳ trang web nào để dịch nhanh qua tooltip.</p>
+          <p class="help-text">2. Nhấn nút hình Ngôi sao (☆) trên tooltip để lưu từ.</p>
+          <p class="help-text">3. Quản lý danh sách từ đã lưu trực tiếp trong thẻ này.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Load các script theo thứ tự liên kết -->
+  <script src="scripts/db.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+/**
+ * JP Dictionary Chrome Extension - popup.css
+ * 
+ * Định nghĩa giao diện Dashboard Popup của Extension.
+ * Tận dụng các biến CSS thiết kế từ theme.css.
+ */
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 380px;
+  height: 520px;
+  background-color: var(--bg-secondary);
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Thao tác thanh cuộn đẹp mắt */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-light);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Header */
+.app-header {
+  background-color: var(--bg-primary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+}
+
+.logo-text {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  transition: var(--transition);
+}
+
+.tab-btn:hover {
+  color: var(--primary);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  width: 70%;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: 2px;
+  animation: tabBorder 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tabBorder {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Content Sections */
+.tab-content-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-section {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  animation: tabFadeIn 0.25s var(--transition);
+}
+
+.tab-section.active {
+  display: flex;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Search Tab Specifics */
+.search-bar-wrapper {
+  padding: 12px 16px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+#search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font-family);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  outline: none;
+  transition: var(--transition);
+}
+
+#search-input:focus {
+  border-color: var(--primary);
+  background-color: var(--bg-primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.search-icon {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* Results & Saved Lists */
+.results-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Word Card */
+.word-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: var(--transition);
+  animation: cardEntry 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.word-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-md);
+}
+
+@keyframes cardEntry {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding-right: 28px; /* Tránh đè nút Lưu/Xóa */
+}
+
+.card-kanji {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.card-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-common {
+  background-color: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+}
+
+.badge-jlpt {
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  border: 1px solid #C7D2FE;
+}
+
+.card-reading {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.card-reading-val {
+  font-style: italic;
+}
+
+.card-pos {
+  font-size: 10px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.card-divider {
+  border-top: 1px solid var(--border);
+  margin: 6px 0 8px 0;
+}
+
+.card-info-group {
+  margin-bottom: 6px;
+}
+
+.card-info-group:last-child {
+  margin-bottom: 0;
+}
+
+.card-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-light);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.card-hanviet-val {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.card-meaning-val {
+  font-size: 12.5px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary);
+  margin-top: 2px;
+  max-height: 140px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* Card Action Button (Star / Trash) */
+.card-action-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 18px;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.card-action-btn:hover {
+  color: #f59e0b; /* Vàng kim */
+  transform: scale(1.15);
+}
+
+.card-action-btn.saved {
+  color: #f59e0b;
+}
+
+.card-action-btn.delete-btn:hover {
+  color: #ef4444; /* Đỏ */
+}
+
+/* Empty States */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  flex: 1;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
+}
+
+.empty-state h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Settings Tab Style */
+.settings-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-card h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin: 0 0 10px 0;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+#db-status {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.btn-primary {
+  width: 100%;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.help-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.divider {
+  border-top: 1px solid var(--border);
+}
+
+.card-folder-select {
+  position: absolute;
+  top: 12px;
+  right: 36px; /* Nằm cạnh nút Ngôi sao lưu từ */
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  max-width: 95px;
+  cursor: pointer;
+  display: none;
+}
+.card-folder-select:hover {
+  border-color: var(--primary-light);
+}
