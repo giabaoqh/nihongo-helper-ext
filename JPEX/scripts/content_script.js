@@ -19,22 +19,185 @@ const JAPANESE_REGEX = /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf\u3400-\u4dbf]/;
  * Loại bỏ các loại dấu ngoặc, dấu câu tiếng Nhật/tiếng Anh ở đầu và cuối văn bản bôi đen
  * để giúp các công cụ tra cứu (Jisho, Database) khớp từ chuẩn xác 100%.
  */
+/**
+ * Loại bỏ các loại dấu ngoặc, dấu câu tiếng Nhật/tiếng Anh ở đầu và cuối văn bản bôi đen
+ * Hỗ trợ khoảng trắng toàn giác (Full-width space \u3000)
+ */
 function cleanSelectedText(text) {
   if (!text) return '';
   return text
-    .replace(/^[\s「」『』【】（）()\[\]{}、。，．,.!！？?・::：\-\/\\|_“”"’‘]+|[\s「」『』【】（）()\[\]{}、。，．,.!！？?・::：\-\/\\|_“”"’‘]+$/g, '')
+    .replace(/^[\s\u3000「」『』【】（）()\[\]{}、。，．,.!！？?・::：\-\/\\|_“”"’‘]+|[\s\u3000「」『』【】（）()\[\]{}、。，．,.!！？?・::：\-\/\\|_“”"’‘]+$/g, '')
     .trim();
 }
 
+/**
+ * Trích xuất văn bản sạch từ vùng bôi đen (loại bỏ hoàn toàn thẻ furigana <rt> và <rp>)
+ * Khắc phục triệt để lỗi bị nhân đôi chữ (như "学校がっこう") trên các trang web có phiên âm
+ */
+function getCleanSelectedText(selection) {
+  if (!selection || selection.rangeCount === 0) return '';
+  try {
+    const range = selection.getRangeAt(0);
+    const container = document.createElement('div');
+    container.appendChild(range.cloneContents());
+
+    // Loại bỏ thẻ Furigana <rt> và <rp>
+    const furiganaEls = container.querySelectorAll('rt, rp');
+    furiganaEls.forEach(el => el.remove());
+
+    const text = container.textContent || container.innerText || '';
+    if (text && text.trim()) {
+      return cleanSelectedText(text);
+    }
+  } catch (err) {
+    console.warn('[JP-Dict] Không phân tách được DOM Selection, fallback selection.toString():', err);
+  }
+
+  return cleanSelectedText(selection.toString());
+}
+
+// Lưu trữ các đối tượng UI đang hiển thị
 // Lưu trữ các đối tượng UI đang hiển thị
 let activeFloatingIcon = null;
 let activeTooltipHost = null;
 
+// Quản lý trạng thái Dịch tự động khi bôi đen & Tra từ bằng Hover
+let isAutoTranslateEnabled = false;
+let isHoverLookupEnabled = true;
+let hoverKey = 'Shift';
+
+// Đọc cài đặt ban đầu từ storage
+if (typeof getAppSettings === 'function') {
+  getAppSettings().then(settings => {
+    isAutoTranslateEnabled = !!settings.autoTranslateOnSelect;
+    isHoverLookupEnabled = settings.hoverLookupEnabled !== false;
+    hoverKey = settings.hoverKey || 'Shift';
+    console.log('[JP-Dict Content] Cài đặt ban đầu:', { isAutoTranslateEnabled, isHoverLookupEnabled, hoverKey });
+  });
+}
+
+// Lắng nghe thay đổi cài đặt Realtime từ Popup hoặc Tooltip
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes['jpDictAppSettings']) {
+    const val = changes['jpDictAppSettings'].newValue;
+    if (val) {
+      if (typeof val.autoTranslateOnSelect !== 'undefined') {
+        isAutoTranslateEnabled = !!val.autoTranslateOnSelect;
+      }
+      if (typeof val.hoverLookupEnabled !== 'undefined') {
+        isHoverLookupEnabled = !!val.hoverLookupEnabled;
+      }
+      if (typeof val.hoverKey !== 'undefined') {
+        hoverKey = val.hoverKey;
+      }
+      console.log('[JP-Dict Content] Đã cập nhật cài đặt Realtime:', { isAutoTranslateEnabled, isHoverLookupEnabled, hoverKey });
+    }
+  }
+});
+
 // Lắng nghe sự kiện thả chuột (mouseup) trên toàn bộ trang web
 document.addEventListener('mouseup', handleTextSelection);
 
-// Lắng nghe phím nhấn để hỗ trợ phím tắt Shift dịch nhanh
+// Lắng nghe phím nhấn để hỗ trợ phím tắt Shift dịch nhanh khi bôi đen
 document.addEventListener('keydown', handleKeyDown);
+
+// Lắng nghe sự kiện rê chuột để hỗ trợ Hover tra từ siêu tốc
+let hoverLookupTimeout = null;
+let lastHoveredWord = '';
+document.addEventListener('mousemove', handleHoverLookup);
+
+/**
+ * Trích xuất từ tiếng Nhật tại tọa độ con trỏ (x, y) trên trang web
+ */
+function getJapaneseWordAtPoint(x, y) {
+  let range;
+  let textNode;
+  let offset;
+
+  if (document.caretRangeFromPoint) {
+    range = document.caretRangeFromPoint(x, y);
+    if (!range) return null;
+    textNode = range.startContainer;
+    offset = range.startOffset;
+  } else if (document.caretPositionFromPoint) {
+    const pos = document.caretPositionFromPoint(x, y);
+    if (!pos) return null;
+    textNode = pos.offsetNode;
+    offset = pos.offset;
+  }
+
+  if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return null;
+
+  const fullText = textNode.textContent;
+  if (!fullText || offset >= fullText.length) return null;
+
+  const charAtPoint = fullText[offset];
+  // Regex kiểm tra ký tự tiếng Nhật
+  const isJp = /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf\u3400-\u4dbf]/;
+  if (!charAtPoint || !isJp.test(charAtPoint)) return null;
+
+  // Mở rộng về phía trước tối đa 8 ký tự tiếng Nhật để tạo thành một từ vựng
+  let end = offset;
+  while (end < fullText.length && (end - offset) < 8 && isJp.test(fullText[end])) {
+    end++;
+  }
+
+  const word = fullText.slice(offset, end).trim();
+  if (!word) return null;
+
+  try {
+    const wordRange = document.createRange();
+    wordRange.setStart(textNode, offset);
+    wordRange.setEnd(textNode, end);
+    const rect = wordRange.getBoundingClientRect();
+    return { word, rect };
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Xử lý hover chuột khi giữ phím Shift (hoặc Alt)
+ */
+function handleHoverLookup(event) {
+  if (!isHoverLookupEnabled) return;
+
+  const isKeyPressed = (hoverKey === 'Alt') ? event.altKey : event.shiftKey;
+  if (!isKeyPressed) {
+    clearTimeout(hoverLookupTimeout);
+    return;
+  }
+
+  // Không kích hoạt nếu đang trong ô nhập liệu
+  const activeEl = document.activeElement;
+  if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+    return;
+  }
+
+  // Bỏ qua nếu chuột đang nằm trong Tooltip hoặc Floating Icon
+  if (activeTooltipHost && (activeTooltipHost === event.target || activeTooltipHost.contains(event.target))) {
+    return;
+  }
+  if (activeFloatingIcon && activeFloatingIcon.contains(event.target)) {
+    return;
+  }
+
+  clearTimeout(hoverLookupTimeout);
+  hoverLookupTimeout = setTimeout(() => {
+    const match = getJapaneseWordAtPoint(event.clientX, event.clientY);
+    if (match && match.word) {
+      if (match.word === lastHoveredWord && activeTooltipHost) {
+        return; // Đang hiển thị từ này
+      }
+      lastHoveredWord = match.word;
+      console.log(`[JP-Dict] Hover tra nhanh (${hoverKey}):`, match.word);
+
+      removeFloatingIcon();
+      removeTooltip();
+      showTooltip(match.word, match.rect);
+    }
+  }, 120);
+}
 
 /**
  * Xử lý phím tắt Shift để dịch nhanh đoạn bôi đen
@@ -49,8 +212,7 @@ function handleKeyDown(event) {
 
     const selection = window.getSelection();
     if (selection && !selection.isCollapsed) {
-      const rawText = selection.toString().trim();
-      const selectedText = cleanSelectedText(rawText);
+      const selectedText = getCleanSelectedText(selection);
       
       // Kiểm tra xem đoạn bôi đen có chứa tiếng Nhật không
       if (selectedText && JAPANESE_REGEX.test(selectedText)) {
@@ -94,8 +256,8 @@ function handleTextSelection(event) {
       return;
     }
 
-    const rawText = selection.toString().trim();
-    const selectedText = cleanSelectedText(rawText);
+    // Trích xuất văn bản sạch (đã bóc tách loại bỏ furigana <rt>)
+    const selectedText = getCleanSelectedText(selection);
 
     // BƯỚC 1: Kiểm tra điều kiện lọc tiếng Nhật
     if (!selectedText || !JAPANESE_REGEX.test(selectedText)) {
@@ -122,7 +284,14 @@ function handleTextSelection(event) {
       }
     }
 
-    // Tọa độ X, Y tuyệt đối của Floating Icon
+    // NẾU BẬT CHẾ ĐỘ TỰ ĐỘNG DỊCH: Hiển thị ngay bảng dịch (không cần nhấn icon)
+    if (isAutoTranslateEnabled) {
+      console.log('[JP-Dict] Đang ở chế độ TỰ ĐỘNG DỊCH -> Hiển thị Tooltip tức thì!');
+      showTooltip(selectedText, rect);
+      return;
+    }
+
+    // NẾU TẮT CHẾ ĐỘ TỰ ĐỘNG: Hiển thị Floating Icon để người dùng click
     const top = rect.bottom + window.scrollY + 6;
     const left = rect.right + window.scrollX - 12;
 
@@ -200,7 +369,7 @@ function showTooltip(text, rect) {
   const host = document.createElement('div');
   host.id = 'jp-dict-tooltip-host';
 
-  const tooltipWidth = 290;
+  const tooltipWidth = 350;
 
   // Căn giữa chiều ngang Tooltip dưới vùng bôi đen
   let left = rect.left + window.scrollX + (rect.width / 2) - (tooltipWidth / 2);
@@ -225,26 +394,24 @@ function showTooltip(text, rect) {
 
   const shadow = host.attachShadow({ mode: 'open' });
 
-  // CSS cô lập lấy cảm hứng từ theme.css
+  // CSS phong cách Dark Mode chuyên nghiệp theo chuẩn Mazii
   const style = document.createElement('style');
   style.textContent = `
     .tooltip-card {
       width: ${tooltipWidth}px;
       box-sizing: border-box;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(229, 231, 235, 0.9);
-      border-radius: 12px;
-      padding: 16px;
-      padding-top: 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-      font-family: 'Outfit', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #1f2937;
+      background: #121214;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 10px 12px 14px 12px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 4px 12px rgba(0, 0, 0, 0.4);
+      font-family: 'Noto Sans JP', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #f4f4f5;
       position: relative;
-      font-size: 14px;
-      line-height: 1.5;
-      animation: tooltipFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 13px;
+      line-height: 1.4;
+      animation: tooltipFadeIn 0.18s ease-out;
+      user-select: text;
     }
 
     .drag-handle {
@@ -252,84 +419,28 @@ function showTooltip(text, rect) {
       top: 0;
       left: 0;
       right: 0;
-      height: 20px;
+      height: 14px;
       cursor: grab;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px 12px 0 0;
       z-index: 10;
-      user-select: none;
-      -webkit-user-select: none;
     }
     .drag-handle:active {
       cursor: grabbing;
     }
     .drag-handle::after {
       content: '';
-      width: 32px;
-      height: 4px;
-      background: #d1d5db;
+      width: 28px;
+      height: 3px;
+      background: #3f3f46;
       border-radius: 2px;
-      transition: background 0.15s;
-    }
-    .drag-handle:hover::after {
-      background: #9ca3af;
-    }
-
-    .resize-handle {
-      position: absolute;
-      z-index: 11;
-    }
-    .resize-handle-se {
-      bottom: 0; right: 0;
-      width: 14px; height: 14px;
-      cursor: nwse-resize;
-      border-bottom-right-radius: 12px;
-    }
-    .resize-handle-sw {
-      bottom: 0; left: 0;
-      width: 14px; height: 14px;
-      cursor: nesw-resize;
-      border-bottom-left-radius: 12px;
-    }
-    .resize-handle-ne {
-      top: 0; right: 0;
-      width: 14px; height: 14px;
-      cursor: nesw-resize;
-      border-top-right-radius: 12px;
-    }
-    .resize-handle-nw {
-      top: 0; left: 0;
-      width: 14px; height: 14px;
-      cursor: nwse-resize;
-      border-top-left-radius: 12px;
-    }
-    .resize-handle-e {
-      top: 14px; right: 0; bottom: 14px;
-      width: 6px;
-      cursor: ew-resize;
-    }
-    .resize-handle-w {
-      top: 14px; left: 0; bottom: 14px;
-      width: 6px;
-      cursor: ew-resize;
-    }
-    .resize-handle-s {
-      bottom: 0; left: 14px; right: 14px;
-      height: 6px;
-      cursor: ns-resize;
-    }
-    .resize-handle-n {
-      top: 0; left: 14px; right: 14px;
-      height: 6px;
-      cursor: ns-resize;
     }
 
     @keyframes tooltipFadeIn {
       from {
         opacity: 0;
-        transform: translateY(6px) scale(0.97);
+        transform: translateY(6px) scale(0.98);
       }
       to {
         opacity: 1;
@@ -337,101 +448,376 @@ function showTooltip(text, rect) {
       }
     }
 
-    .action-buttons {
-      position: absolute;
-      top: 12px;
-      right: 12px;
+    /* Header thanh trên */
+    .tooltip-header {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
     }
 
-    .close-btn, .save-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      line-height: 1;
+    .header-left {
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: color 0.15s, transform 0.15s;
-    }
-
-    .close-btn {
-      font-size: 18px;
-      color: #9ca3af;
-    }
-    .close-btn:hover {
-      color: #ef4444;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
     .audio-btn {
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 15px;
-      padding: 0 4px;
-      color: #3b82f6;
+      font-size: 16px;
+      padding: 2px 4px;
+      color: #ffffff;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.15s, color 0.15s;
-      line-height: 1;
+      transition: transform 0.15s;
     }
     .audio-btn:hover {
-      color: #2563eb;
-      transform: scale(1.15);
-    }
-    .audio-btn:active {
-      transform: scale(0.9);
+      transform: scale(1.18);
+      color: #38bdf8;
     }
 
-    .save-btn {
-      font-size: 20px;
-      color: #9ca3af;
-    }
-    .save-btn:hover {
-      color: #f59e0b;
-      transform: scale(1.15);
-    }
-    .save-btn.saved {
-      color: #f59e0b;
+    .tab-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .folder-select {
-      display: none;
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      padding: 2px 4px;
-      font-size: 11px;
-      font-family: inherit;
-      color: #374151;
-      outline: none;
-      max-width: 95px;
+    .nav-tab {
+      background: none;
+      border: 1px solid transparent;
+      color: #3b82f6;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 5px;
       cursor: pointer;
-      margin-right: 4px;
-      vertical-align: middle;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .folder-select:hover {
-      border-color: #9ca3af;
+    .nav-tab:hover {
+      color: #60a5fa;
+    }
+    .nav-tab.active {
+      color: #ffffff;
+      background: #26262b;
+      border-color: #454550;
+      font-weight: 600;
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .close-btn, .save-btn, .auto-mode-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 3px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, transform 0.15s;
+    }
+    .close-btn {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .close-btn:hover {
+      color: #ef4444;
+    }
+    .save-btn {
+      font-size: 17px;
+    }
+    .save-btn:hover, .save-btn.saved {
+      color: #f59e0b;
+    }
+    .auto-mode-btn {
+      font-size: 13px;
+    }
+
+    /* Thanh thông báo & chọn thư mục lưu (Hiện gọn gàng bên dưới header) */
+    .save-banner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 6px;
+      padding: 5px 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: #fbbf24;
+      box-sizing: border-box;
+      animation: tooltipFadeIn 0.15s ease-out;
+    }
+    .save-banner-icon {
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .save-banner-text {
+      white-space: nowrap;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .save-banner .folder-select {
+      flex: 1;
+      min-width: 0;
+      background: #18181b;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 11px;
+      color: #f3f4f6;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Vùng hiển thị kết quả */
+    .results-info-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-bottom: 8px;
+    }
+    .search-icon {
+      font-size: 12px;
+    }
+    .highlight-query {
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .cards-scroll-container {
+      max-height: 310px;
+      overflow-y: auto;
+      padding-right: 3px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cards-scroll-container::-webkit-scrollbar {
+      width: 4px;
+    }
+    .cards-scroll-container::-webkit-scrollbar-thumb {
+      background: #3f3f46;
+      border-radius: 4px;
+    }
+
+    /* Thẻ từ vựng (Card) */
+    .dict-card {
+      background: #18181b;
+      border: 1px solid #2e2e36;
+      border-radius: 6px;
+      padding: 8px 10px;
+      transition: border-color 0.15s;
+    }
+    .dict-card:hover {
+      border-color: #4b4b55;
+    }
+
+    .card-line-1 {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 2px;
+    }
+    .card-word {
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .card-reading {
+      color: #e4e4e7;
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .card-line-2 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #d4d4d8;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 3px;
+    }
+
+    .card-line-3 {
+      font-size: 13px;
+      color: #f4f4f5;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    /* Badges & Meaning Rows */
+    .badge-lang {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+    .badge-lang.vi {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .badge-lang.en {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+    .card-meaning-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+    .card-meaning-row.en {
+      color: #d1d5db;
+      font-size: 12px;
+    }
+
+    /* Kanji Card */
+    .kanji-single-card {
+      padding: 12px 14px;
+    }
+    .kanji-main-char {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+    .kanji-meta {
+      font-size: 11px;
+      color: #a1a1aa;
+      margin-top: 3px;
+      margin-bottom: 4px;
+    }
+
+    /* Tooltip Footer */
+    .tooltip-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #27272a;
+    }
+    .lang-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .lang-lbl {
+      font-size: 11px;
+      color: #71717a;
+      margin-right: 2px;
+    }
+    .lang-btn {
+      background: #18181b;
+      border: 1px solid #2e2e36;
+      color: #a1a1aa;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .lang-btn:hover {
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+    .lang-btn.active {
+      background: #2563eb;
+      border-color: #3b82f6;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .settings-hint-link {
+      font-size: 11px;
+      color: #71717a;
+      cursor: pointer;
+    }
+    .settings-hint-link:hover {
+      color: #38bdf8;
+      text-decoration: underline;
+    }
+
+    /* Translation View */
+    .trans-box-view {
+      padding: 4px 0;
+    }
+    .trans-src-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .trans-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .trans-row .badge-lang {
+      margin-top: 4px;
+    }
+    .trans-dst-text {
+      flex: 1;
+      font-size: 13px;
+      color: #f4f4f5;
+      line-height: 1.5;
+      background: #18181b;
+      border: 1px solid #27272a;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+    .trans-dst-text.en-trans {
+      color: #d1d5db;
+    }
+    .trans-action-hint {
+      color: #38bdf8;
+      font-size: 11px;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+    .trans-action-hint:hover {
+      text-decoration: underline;
+    }
+
+    /* Loader */
     .loader {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 0;
-      color: #6b7280;
+      padding: 24px 0;
+      color: #a1a1aa;
       font-size: 13px;
     }
     .spinner {
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(225, 29, 72, 0.1);
-      border-top: 3px solid #e11d48;
+      width: 22px;
+      height: 22px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-top: 2px solid #38bdf8;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin-bottom: 8px;
@@ -440,140 +826,6 @@ function showTooltip(text, rect) {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    /* Giao diện kết quả */
-    .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 8px;
-      margin-bottom: 4px;
-      padding-right: 48px; /* Tránh đè lên 2 nút action */
-    }
-    .kanji-val {
-      font-size: 20px;
-      font-weight: 700;
-      color: #111827;
-      word-break: break-all;
-    }
-    .badges-container {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-    .badge {
-      font-size: 9px;
-      font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-    .badge-common {
-      background-color: #ECFDF5;
-      color: #059669;
-      border: 1px solid #A7F3D0;
-    }
-    .badge-jlpt {
-      background-color: #EEF2FF;
-      color: #4F46E5;
-      border: 1px solid #C7D2FE;
-    }
-    .reading-row {
-      font-size: 13px;
-      color: #4b5563;
-      margin-bottom: 4px;
-    }
-    .reading-label {
-      font-weight: 600;
-      color: #9ca3af;
-      margin-right: 4px;
-    }
-    .reading-val {
-      font-style: italic;
-    }
-    .pos-val {
-      font-size: 11px;
-      color: #4b5563;
-      background: #f3f4f6;
-      display: inline-block;
-      padding: 1px 6px;
-      border-radius: 4px;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-    .divider {
-      border-top: 1px solid #e5e7eb;
-      margin: 8px 0;
-    }
-    .info-group {
-      margin-bottom: 8px;
-    }
-    .info-group:last-child {
-      margin-bottom: 0;
-    }
-    .label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #9ca3af;
-      letter-spacing: 0.05em;
-      margin-bottom: 2px;
-    }
-    .hanviet-val {
-      font-size: 15px;
-      font-weight: 600;
-      color: #e11d48;
-    }
-    .meaning-val {
-      font-size: 13px;
-      color: #1f2937;
-      background: rgba(243, 244, 246, 0.7);
-      padding: 8px 10px;
-      border-radius: 8px;
-      border-left: 3px solid #e11d48;
-      margin-top: 4px;
-      max-height: 180px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    
-    .words-breakdown-list {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-top: 6px;
-      max-height: 140px;
-      overflow-y: auto;
-    }
-    .word-breakdown-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      background: rgba(243, 244, 246, 0.6);
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      border: 1px solid rgba(229, 231, 235, 0.5);
-      gap: 8px;
-    }
-    .word-breakdown-left {
-      font-weight: 700;
-      color: #1f2937;
-      white-space: nowrap;
-    }
-    .word-breakdown-reading {
-      font-weight: 400;
-      color: #6b7280;
-      font-size: 10px;
-      margin-left: 4px;
-    }
-    .word-breakdown-meaning {
-      color: #374151;
-      font-weight: 600;
-      text-align: right;
-      word-break: break-word;
-    }
   `;
   shadow.appendChild(style);
 
@@ -581,13 +833,12 @@ function showTooltip(text, rect) {
   const card = document.createElement('div');
   card.className = 'tooltip-card';
 
-  // Thanh kéo (Drag Handle) ở đỉnh Tooltip
+  // Thanh kéo (Drag Handle)
   const dragHandle = document.createElement('div');
   dragHandle.className = 'drag-handle';
   dragHandle.title = 'Kéo để di chuyển';
   card.appendChild(dragHandle);
 
-  // --- Logic kéo thả Tooltip (Drag & Drop) ---
   let isDragging = false;
   let dragOffsetX = 0;
   let dragOffsetY = 0;
@@ -602,70 +853,13 @@ function showTooltip(text, rect) {
     dragHandle.style.cursor = 'grabbing';
   });
 
-  // --- Tay cầm co giãn kích thước (Resize Handles) ---
-  const resizeDirections = ['se', 'sw', 'ne', 'nw', 'e', 'w', 's', 'n'];
-  let isResizing = false;
-  let resizeDir = '';
-  let resizeStartX = 0;
-  let resizeStartY = 0;
-  let resizeStartW = 0;
-  let resizeStartH = 0;
-  let resizeStartLeft = 0;
-  let resizeStartTop = 0;
-  const MIN_W = 200;
-  const MIN_H = 100;
-
-  resizeDirections.forEach(dir => {
-    const handle = document.createElement('div');
-    handle.className = `resize-handle resize-handle-${dir}`;
-    card.appendChild(handle);
-
-    handle.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      isResizing = true;
-      resizeDir = dir;
-      resizeStartX = e.clientX;
-      resizeStartY = e.clientY;
-      resizeStartW = card.offsetWidth;
-      resizeStartH = card.offsetHeight;
-      const hostRect = host.getBoundingClientRect();
-      resizeStartLeft = hostRect.left + window.scrollX;
-      resizeStartTop = hostRect.top + window.scrollY;
-    });
-  });
-
   document.addEventListener('mousemove', (e) => {
-    if (!isDragging && !isResizing) return;
+    if (!isDragging) return;
     e.preventDefault();
-
-    if (isDragging) {
-      const newLeft = e.clientX - dragOffsetX + window.scrollX;
-      const newTop = e.clientY - dragOffsetY + window.scrollY;
-      host.style.left = `${newLeft}px`;
-      host.style.top = `${newTop}px`;
-      return;
-    }
-
-    if (isResizing) {
-      const dx = e.clientX - resizeStartX;
-      const dy = e.clientY - resizeStartY;
-      let newW = resizeStartW;
-      let newH = resizeStartH;
-      let newLeft = resizeStartLeft;
-      let newTop = resizeStartTop;
-
-      if (resizeDir.includes('e')) newW = Math.max(MIN_W, resizeStartW + dx);
-      if (resizeDir.includes('w')) { newW = Math.max(MIN_W, resizeStartW - dx); newLeft = resizeStartLeft + (resizeStartW - newW); }
-      if (resizeDir.includes('s')) newH = Math.max(MIN_H, resizeStartH + dy);
-      if (resizeDir.includes('n')) { newH = Math.max(MIN_H, resizeStartH - dy); newTop = resizeStartTop + (resizeStartH - newH); }
-
-      card.style.width = `${newW}px`;
-      card.style.height = `${newH}px`;
-      card.style.overflow = 'auto';
-      host.style.left = `${newLeft}px`;
-      host.style.top = `${newTop}px`;
-    }
+    const newLeft = e.clientX - dragOffsetX + window.scrollX;
+    const newTop = e.clientY - dragOffsetY + window.scrollY;
+    host.style.left = `${newLeft}px`;
+    host.style.top = `${newTop}px`;
   });
 
   document.addEventListener('mouseup', () => {
@@ -673,29 +867,79 @@ function showTooltip(text, rect) {
       isDragging = false;
       dragHandle.style.cursor = 'grab';
     }
-    if (isResizing) {
-      isResizing = false;
-    }
   });
 
-  // Chứa các nút góc trên bên phải
-  const actionContainer = document.createElement('div');
-  actionContainer.className = 'action-buttons';
+  // Header thanh điều hướng
+  const header = document.createElement('div');
+  header.className = 'tooltip-header';
 
-  // Dropdown Chọn thư mục
-  const folderSelect = document.createElement('select');
-  folderSelect.className = 'folder-select';
-  folderSelect.title = 'Chọn thư mục lưu từ';
-  actionContainer.appendChild(folderSelect);
+  // Header Trái: Loa + 3 Tab
+  const headerLeft = document.createElement('div');
+  headerLeft.className = 'header-left';
 
-  // Nút Lưu từ (Bookmarks Star)
+  const audioBtn = document.createElement('button');
+  audioBtn.className = 'audio-btn';
+  audioBtn.innerHTML = '🔊';
+  audioBtn.title = 'Phát âm tiếng Nhật';
+  audioBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    playPronunciation(text);
+  });
+  headerLeft.appendChild(audioBtn);
+
+  const tabNav = document.createElement('div');
+  tabNav.className = 'tab-nav';
+
+  const btnTabVocab = document.createElement('button');
+  btnTabVocab.className = 'nav-tab active';
+  btnTabVocab.innerText = 'Từ vựng';
+
+  const btnTabKanji = document.createElement('button');
+  btnTabKanji.className = 'nav-tab';
+  btnTabKanji.innerText = 'Hán tự';
+
+  const btnTabTrans = document.createElement('button');
+  btnTabTrans.className = 'nav-tab';
+  btnTabTrans.innerText = 'Dịch';
+
+  tabNav.appendChild(btnTabVocab);
+  tabNav.appendChild(btnTabKanji);
+  tabNav.appendChild(btnTabTrans);
+  headerLeft.appendChild(tabNav);
+  header.appendChild(headerLeft);
+
+  // Header Phải: Auto Mode + Sao Bookmark + Nút Đóng (Không để dropdown ở đây tránh vỡ layout)
+  const headerRight = document.createElement('div');
+  headerRight.className = 'header-right';
+
+  const autoModeBtn = document.createElement('button');
+  autoModeBtn.className = 'auto-mode-btn';
+  const updateAutoBtnUI = () => {
+    if (isAutoTranslateEnabled) {
+      autoModeBtn.innerHTML = '⚡';
+      autoModeBtn.title = 'Chế độ Dịch: TỰ ĐỘNG THẢ CHUỘT (Click để chuyển sang Bấm Icon)';
+    } else {
+      autoModeBtn.innerHTML = '👆';
+      autoModeBtn.title = 'Chế độ Dịch: BẤM ICON MỚI DỊCH (Click để chuyển sang Tự Động)';
+    }
+  };
+  updateAutoBtnUI();
+  autoModeBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    isAutoTranslateEnabled = !isAutoTranslateEnabled;
+    updateAutoBtnUI();
+    if (typeof updateAppSettings === 'function') {
+      await updateAppSettings({ autoTranslateOnSelect: isAutoTranslateEnabled });
+    }
+  });
+  headerRight.appendChild(autoModeBtn);
+
   const saveBtn = document.createElement('button');
   saveBtn.className = 'save-btn';
-  saveBtn.innerHTML = '☆'; // Ban đầu là sao trống
+  saveBtn.innerHTML = '☆';
   saveBtn.title = 'Lưu từ vào Dashboard';
-  actionContainer.appendChild(saveBtn);
+  headerRight.appendChild(saveBtn);
 
-  // Nút đóng "X"
   const closeBtn = document.createElement('button');
   closeBtn.className = 'close-btn';
   closeBtn.innerHTML = '&times;';
@@ -704,8 +948,31 @@ function showTooltip(text, rect) {
     e.stopPropagation();
     removeTooltip();
   });
-  actionContainer.appendChild(closeBtn);
-  card.appendChild(actionContainer);
+  headerRight.appendChild(closeBtn);
+
+  header.appendChild(headerRight);
+  card.appendChild(header);
+
+  // Thanh thông báo & chọn Thư mục lưu (Hiển thị riêng biệt dưới header, không làm co kéo tab)
+  const saveBanner = document.createElement('div');
+  saveBanner.className = 'save-banner';
+  saveBanner.style.display = 'none';
+
+  const saveBannerIcon = document.createElement('span');
+  saveBannerIcon.className = 'save-banner-icon';
+  saveBannerIcon.innerText = '⭐';
+  saveBanner.appendChild(saveBannerIcon);
+
+  const saveBannerText = document.createElement('span');
+  saveBannerText.className = 'save-banner-text';
+  saveBannerText.innerText = 'Đã lưu vào:';
+  saveBanner.appendChild(saveBannerText);
+
+  const folderSelect = document.createElement('select');
+  folderSelect.className = 'folder-select';
+  folderSelect.title = 'Chọn thư mục lưu từ';
+  saveBanner.appendChild(folderSelect);
+  card.appendChild(saveBanner);
 
   // Vùng hiển thị Loading
   const loader = document.createElement('div');
@@ -713,57 +980,61 @@ function showTooltip(text, rect) {
   const spinner = document.createElement('div');
   spinner.className = 'spinner';
   const loaderText = document.createElement('div');
-  loaderText.innerText = 'Đang kết nối API tra cứu...';
+  loaderText.innerText = 'Đang tra cứu từ điển...';
   loader.appendChild(spinner);
   loader.appendChild(loaderText);
   card.appendChild(loader);
 
-  // Vùng hiển thị thông tin kết quả (ẩn ban đầu)
+  // Vùng hiển thị các Tab Content
   const content = document.createElement('div');
   content.className = 'content';
   content.style.display = 'none';
-
   card.appendChild(content);
+
   shadow.appendChild(card);
   document.body.appendChild(host);
   activeTooltipHost = host;
 
-  // Lắng nghe click ra ngoài để ẩn tooltip
   document.addEventListener('mousedown', handleOutsideClick);
 
-  // Gửi thông điệp qua background service worker
-  chrome.runtime.sendMessage({ action: 'translate', text: text }, (response) => {
+  // Lấy cài đặt ngôn ngữ hiện hành
+  let currentTargetLang = 'both';
+  if (typeof getAppSettings === 'function') {
+    getAppSettings().then(s => {
+      if (s && s.targetLang) currentTargetLang = s.targetLang;
+    }).catch(() => {});
+  }
+
+  // Gửi thông điệp tra cứu
+  chrome.runtime.sendMessage({ action: 'translate', text: text, targetLang: currentTargetLang }, (response) => {
     if (chrome.runtime.lastError) {
       loaderText.innerText = 'Lỗi kết nối Extension. Hãy F5 trang web!';
-      console.error('[JP-Dict] Lỗi runtime.sendMessage:', chrome.runtime.lastError);
       return;
     }
 
     if (response && response.success) {
       const data = response.data;
+      currentTargetLang = data.targetLang || currentTargetLang;
       loader.style.display = 'none';
       content.style.display = 'block';
 
-      // 1. Kiểm tra trạng thái đã lưu để thiết lập giao diện nút sao & dropdown thư mục
+      // 1. Quản lý trạng thái lưu từ
       getSavedWords().then(async (words) => {
         const savedWord = words.find(w => w.kanji === data.kanji);
         if (savedWord) {
           saveBtn.innerHTML = '★';
           saveBtn.classList.add('saved');
           saveBtn.title = 'Xóa khỏi danh sách lưu';
-          
-          folderSelect.style.display = 'inline-block';
+          saveBanner.style.display = 'flex';
           await loadFolderOptions(folderSelect, savedWord.folder || "Mặc định");
         } else {
           saveBtn.innerHTML = '☆';
           saveBtn.classList.remove('saved');
           saveBtn.title = 'Lưu từ vào Dashboard';
-          
-          folderSelect.style.display = 'none';
+          saveBanner.style.display = 'none';
         }
       });
 
-      // 2. Thêm sự kiện click cho nút lưu
       saveBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const saved = saveBtn.classList.contains('saved');
@@ -772,21 +1043,18 @@ function showTooltip(text, rect) {
           saveBtn.innerHTML = '☆';
           saveBtn.classList.remove('saved');
           saveBtn.title = 'Lưu từ vào Dashboard';
-          
-          folderSelect.style.display = 'none';
+          saveBanner.style.display = 'none';
         } else {
           const defaultFolder = "Mặc định";
           await saveWord(data, defaultFolder);
           saveBtn.innerHTML = '★';
           saveBtn.classList.add('saved');
           saveBtn.title = 'Xóa khỏi danh sách lưu';
-          
-          folderSelect.style.display = 'inline-block';
+          saveBanner.style.display = 'flex';
           await loadFolderOptions(folderSelect, defaultFolder);
         }
       });
 
-      // Lắng nghe thay đổi thư mục chọn
       folderSelect.addEventListener('change', async (e) => {
         e.stopPropagation();
         const val = folderSelect.value;
@@ -798,7 +1066,6 @@ function showTooltip(text, rect) {
             await updateWordFolder(data.kanji, cleanName);
             await loadFolderOptions(folderSelect, cleanName);
           } else {
-            // Reset về thư mục cũ
             const words = await getSavedWords();
             const currentWord = words.find(w => w.kanji === data.kanji);
             await loadFolderOptions(folderSelect, currentWord ? currentWord.folder : "Mặc định");
@@ -808,89 +1075,201 @@ function showTooltip(text, rect) {
         }
       });
 
-      // 3. Tạo chuỗi HTML các Badge
-      let badgesHtml = '';
-      if (data.isCommon) {
-        badgesHtml += `<span class="badge badge-common">Phổ biến</span>`;
-      }
-      if (data.jlpt) {
-        badgesHtml += `<span class="badge badge-jlpt">${data.jlpt}</span>`;
-      }
+      // 2. Hàm dựng giao diện nội dung các Tab theo ngôn ngữ đã chọn
+      const renderPanes = (lang) => {
+        const vocabList = data.results || [data];
+        const kanjiList = data.kanjis || [];
+        const transObj = data.translation || { 
+          sourceText: text, 
+          translatedVi: data.meaningVi || data.meaning, 
+          translatedEn: data.meaningEn || '', 
+          translatedText: data.meaning 
+        };
 
-      // Tạo chuỗi HTML Từ loại
-      let posHtml = '';
-      if (data.partOfSpeech) {
-        posHtml = `<div class="pos-val">${data.partOfSpeech}</div>`;
-      }
+        // Render Cards Tab 1: Từ vựng
+        const vocabCardsHtml = vocabList.map(item => {
+          let meaningHtml = '';
+          const vi = item.meaningVi || (lang !== 'en' ? item.meaning : '');
+          const en = item.meaningEn || (lang === 'en' ? item.meaning : '');
 
-      // Tạo phần hiển thị phân tách từ nếu bôi đen câu dài
-      let breakdownHtml = '';
-      if (data.words && data.words.length > 0) {
-        const itemsHtml = data.words.map(w => {
-          const readingSpan = w.reading ? `<span class="word-breakdown-reading">(${w.reading})</span>` : '';
+          if (lang === 'both') {
+            meaningHtml = `
+              ${vi ? `<div class="card-meaning-row"><span class="badge-lang vi">VI</span> <span>${vi}</span></div>` : ''}
+              ${en ? `<div class="card-meaning-row en"><span class="badge-lang en">EN</span> <span>${en}</span></div>` : ''}
+              ${!vi && !en ? `<div>${item.meaning || 'Chưa rõ nghĩa'}</div>` : ''}
+            `;
+          } else if (lang === 'en') {
+            meaningHtml = `<div>${en || vi || item.meaning || 'Chưa rõ nghĩa'}</div>`;
+          } else {
+            meaningHtml = `<div>${vi || item.meaning || 'Chưa rõ nghĩa'}</div>`;
+          }
+
           return `
-            <div class="word-breakdown-item">
-              <div class="word-breakdown-left">
-                <span>${w.kanji}</span>${readingSpan}
+            <div class="dict-card">
+              <div class="card-line-1">
+                <span class="card-word">${item.kanji}</span>
+                <span class="card-reading">${item.reading || ''}</span>
               </div>
-              <div class="word-breakdown-meaning" title="${w.meaningVi}">${w.meaningVi}</div>
+              <div class="card-line-2">${item.hanviet || ''}</div>
+              <div class="card-line-3">${meaningHtml}</div>
             </div>
           `;
         }).join('');
 
-        breakdownHtml = `
-          <div class="divider"></div>
-          <div class="info-group">
-            <div class="label">Phân tách từng từ</div>
-            <div class="words-breakdown-list">${itemsHtml}</div>
+        // Render Cards Tab 2: Hán tự
+        const kanjiCardsHtml = kanjiList.length > 0 ? kanjiList.map(k => {
+          const metaParts = [];
+          if (k.strokes) metaParts.push(`${k.strokes} nét`);
+          if (k.radical) metaParts.push(`Bộ: ${k.radical}`);
+          const metaStr = metaParts.length > 0 ? `<div class="kanji-meta">${metaParts.join(' • ')}</div>` : '';
+
+          return `
+            <div class="dict-card kanji-single-card">
+              <div class="kanji-main-char">${k.char}</div>
+              <div class="card-line-2">${k.hanviet}</div>
+              ${metaStr}
+              <div class="card-line-3">${k.meaning}</div>
+            </div>
+          `;
+        }).join('') : `
+          <div class="dict-card kanji-single-card">
+            <div class="card-line-3">Không tìm thấy Hán tự trong từ khóa này.</div>
           </div>
         `;
-      }
 
-      // Đổ cấu trúc nội dung giàu thông tin vào Tooltip DOM (Có loa 🔊)
-      content.innerHTML = `
-        <div class="header-row">
-          <div class="kanji-val">${data.kanji}</div>
-          <button class="audio-btn" title="Phát âm">🔊</button>
-          <div class="badges-container">${badgesHtml}</div>
-        </div>
-        
-        <div class="reading-row">
-          <span class="reading-label">Cách đọc:</span>
-          <span class="reading-val">${data.reading}</span>
-        </div>
-        
-        ${posHtml}
-        
-        <div class="divider"></div>
-        
-        <div class="info-group">
-          <div class="label">Âm Hán Việt</div>
-          <div class="val hanviet-val">${data.hanviet}</div>
-        </div>
-        
-        <div class="info-group">
-          <div class="label">Nghĩa tiếng Việt</div>
-          <div class="val meaning-val">${data.meaning}</div>
-        </div>
-        
-        ${breakdownHtml}
-      `;
+        // Render Tab 3: Dịch
+        let transOutputHtml = '';
+        const transVi = transObj.translatedVi || (lang !== 'en' ? transObj.translatedText : '');
+        const transEn = transObj.translatedEn || (lang === 'en' ? transObj.translatedText : '');
 
-      // 3. Thêm sự kiện click phát âm thanh (Phát âm theo cách đọc Kana để chính xác 100%)
-      const audioBtn = content.querySelector('.audio-btn');
-      if (audioBtn) {
-        audioBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          playPronunciation(data.reading || data.kanji);
+        if (lang === 'both') {
+          transOutputHtml = `
+            ${transVi ? `
+              <div class="trans-row">
+                <span class="badge-lang vi">VI</span>
+                <div class="trans-dst-text">${transVi}</div>
+              </div>` : ''}
+            ${transEn ? `
+              <div class="trans-row">
+                <span class="badge-lang en">EN</span>
+                <div class="trans-dst-text en-trans">${transEn}</div>
+              </div>` : ''}
+            ${!transVi && !transEn ? `<div class="trans-dst-text">${transObj.translatedText}</div>` : ''}
+          `;
+        } else if (lang === 'en') {
+          transOutputHtml = `<div class="trans-dst-text">${transEn || transVi || transObj.translatedText}</div>`;
+        } else {
+          transOutputHtml = `<div class="trans-dst-text">${transVi || transObj.translatedText}</div>`;
+        }
+
+        content.innerHTML = `
+          <!-- TAB 1: TỪ VỰNG -->
+          <div class="tab-pane" id="pane-vocab">
+            <div class="results-info-row">
+              <span class="search-icon">🔍</span>
+              <span>${vocabList.length} kết quả của từ vựng</span>
+              <span class="highlight-query">${data.query || text}</span>
+            </div>
+            <div class="cards-scroll-container">
+              ${vocabCardsHtml}
+            </div>
+          </div>
+
+          <!-- TAB 2: HÁN TỰ -->
+          <div class="tab-pane" id="pane-kanji" style="display: none;">
+            <div class="results-info-row">
+              <span class="search-icon">🔍</span>
+              <span>${kanjiList.length} kết quả của Hán tự</span>
+              <span class="highlight-query">${data.query || text}</span>
+            </div>
+            <div class="cards-scroll-container">
+              ${kanjiCardsHtml}
+            </div>
+          </div>
+
+          <!-- TAB 3: DỊCH -->
+          <div class="tab-pane" id="pane-trans" style="display: none;">
+            <div class="trans-box-view">
+              <div class="trans-src-text">${transObj.sourceText}</div>
+              ${transOutputHtml}
+              <div class="trans-action-hint">Phân tích đa ngữ siêu tốc</div>
+            </div>
+          </div>
+
+          <!-- FOOTER: BỘ CHỌN NGÔN NGỮ & CÀI ĐẶT -->
+          <div class="tooltip-footer">
+            <div class="lang-selector-group">
+              <span class="lang-lbl">Dịch:</span>
+              <button class="lang-btn ${lang === 'both' ? 'active' : ''}" data-lang="both" title="Song ngữ Việt - Anh">Song ngữ</button>
+              <button class="lang-btn ${lang === 'vi' ? 'active' : ''}" data-lang="vi" title="Chỉ dịch Tiếng Việt">Việt</button>
+              <button class="lang-btn ${lang === 'en' ? 'active' : ''}" data-lang="en" title="English only">Anh</button>
+            </div>
+            <span class="settings-hint-link" title="Mở trang cài đặt">Cài đặt</span>
+          </div>
+        `;
+
+        // 3. Xử lý chuyển đổi Tab mượt mà
+        const paneVocab = content.querySelector('#pane-vocab');
+        const paneKanji = content.querySelector('#pane-kanji');
+        const paneTrans = content.querySelector('#pane-trans');
+
+        const tabs = [
+          { btn: btnTabVocab, pane: paneVocab },
+          { btn: btnTabKanji, pane: paneKanji },
+          { btn: btnTabTrans, pane: paneTrans }
+        ];
+
+        // Giữ tab active hiện tại
+        const activeIdx = tabs.findIndex(t => t.btn.classList.contains('active'));
+        tabs.forEach((t, idx) => {
+          t.pane.style.display = (idx === (activeIdx !== -1 ? activeIdx : 0)) ? 'block' : 'none';
         });
-      }
+
+        tabs.forEach(({ btn, pane }) => {
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            tabs.forEach(t => {
+              t.btn.classList.remove('active');
+              t.pane.style.display = 'none';
+            });
+            btn.classList.add('active');
+            pane.style.display = 'block';
+          };
+        });
+
+        // 4. Lắng nghe chuyển đổi ngôn ngữ dịch ngay trên Tooltip
+        const langBtns = content.querySelectorAll('.lang-btn');
+        langBtns.forEach(b => {
+          b.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const newLang = b.dataset.lang;
+            if (newLang !== currentTargetLang) {
+              currentTargetLang = newLang;
+              if (typeof updateAppSettings === 'function') {
+                await updateAppSettings({ targetLang: newLang });
+              }
+              renderPanes(newLang);
+            }
+          });
+        });
+
+        // 5. Nút Cài đặt
+        const settingsLink = content.querySelector('.settings-hint-link');
+        if (settingsLink) {
+          settingsLink.addEventListener('click', (e) => {
+            e.stopPropagation();
+            alert('Bạn có thể tùy chỉnh Chế độ Tự Động Dịch và Ngôn Ngữ Dịch Mặc Định trong thẻ Cài đặt của Tiện ích mở rộng!');
+          });
+        }
+      };
+
+      // Render nội dung ban đầu
+      renderPanes(currentTargetLang);
+
     } else {
-      loaderText.innerText = 'Không tìm thấy kết quả từ API hoặc kết nối hết hạn.';
+      loaderText.innerText = 'Không tìm thấy kết quả tra cứu.';
       const spinnerEl = loader.querySelector('.spinner');
-      if (spinnerEl) {
-        spinnerEl.style.display = 'none';
-      }
+      if (spinnerEl) spinnerEl.style.display = 'none';
     }
   });
 }

@@ -305,4 +305,51 @@ class JPEXDatabase {
     
     return finalResults;
   }
+
+  /**
+   * Tìm kiếm chính xác trên một chỉ mục cụ thể
+   * @param {string} indexName Tên chỉ mục ('kanji', 'kana', 'romaji')
+   * @param {string} query Giá trị cần so sánh chính xác
+   * @returns {Promise<Array>}
+   */
+  searchExactIndex(indexName, query) {
+    return new Promise((resolve) => {
+      try {
+        const transaction = this.db.transaction(['dictionary'], 'readonly');
+        const store = transaction.objectStore('dictionary');
+        const index = store.index(indexName);
+        const request = index.getAll(query);
+
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => resolve([]);
+      } catch (err) {
+        resolve([]);
+      }
+    });
+  }
+
+  /**
+   * Tra cứu từ chính xác (Exact match) cho việc tra từ bôi đen tức thì
+   * @param {string} text Từ tiếng Nhật cần tra
+   * @returns {Promise<Object|null>}
+   */
+  async findExact(text) {
+    if (!this.db || !text) return null;
+    const clean = text.trim();
+    const cleanLower = clean.toLowerCase();
+
+    // 1. Thử tìm trên Kanji
+    const kanjiMatches = await this.searchExactIndex('kanji', clean);
+    if (kanjiMatches && kanjiMatches.length > 0) return kanjiMatches[0];
+
+    // 2. Thử tìm trên Kana
+    const kanaMatches = await this.searchExactIndex('kana', cleanLower);
+    if (kanaMatches && kanaMatches.length > 0) return kanaMatches[0];
+
+    // 3. Thử tìm trên Romaji
+    const romajiMatches = await this.searchExactIndex('romaji', cleanLower);
+    if (romajiMatches && romajiMatches.length > 0) return romajiMatches[0];
+
+    return null;
+  }
 }

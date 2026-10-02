@@ -43,14 +43,55 @@
 
       <!-- Saved Tab -->
       <section id="saved-tab" class="tab-section">
-        <div class="folder-filter-wrapper" style="margin-bottom: 12px; display: flex; gap: 6px; align-items: center; padding: 0 4px;">
+        <div class="folder-filter-wrapper" style="margin-bottom: 12px; display: flex; gap: 6px; align-items: center; padding: 0 4px; flex-wrap: wrap;">
           <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary); white-space: nowrap;">Thư mục:</span>
-          <select id="select-folder-filter" style="flex: 1; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-primary); font-family: var(--font-family); color: var(--text-primary); outline: none; cursor: pointer;">
+          <select id="select-folder-filter" style="flex: 1; min-width: 90px; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; background: var(--bg-primary); font-family: var(--font-family); color: var(--text-primary); outline: none; cursor: pointer;">
             <option value="__all__">Tất cả</option>
           </select>
           <button id="btn-rename-folder" title="Đổi tên thư mục" style="display: none; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 4px; transition: transform 0.1s;">✏️</button>
           <button id="btn-delete-folder" title="Xóa thư mục" style="display: none; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 4px; transition: transform 0.1s;">🗑️</button>
+          <button id="btn-practice-flashcard" title="Luyện tập Flashcard" style="background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
+            🃏 Ôn tập
+          </button>
+          <button id="btn-export-csv" title="Xuất file CSV cho Anki / Excel" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
+            📥 Xuất
+          </button>
         </div>
+
+        <!-- Khung ôn tập Flashcard (SRS) -->
+        <div id="flashcard-container" style="display: none; margin-bottom: 12px; padding: 10px 4px;">
+          <div class="flashcard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span id="flashcard-counter" style="font-size: 12px; color: var(--primary); font-weight: 600;">1 / 10</span>
+            <span style="font-size: 11px; color: var(--text-secondary);">Chế độ Flashcard</span>
+            <button id="btn-close-flashcard" title="Thoát ôn tập" style="background: none; border: none; color: var(--text-secondary); font-size: 16px; cursor: pointer; padding: 2px 6px;">✕</button>
+          </div>
+          
+          <div id="flashcard-card" style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 16px; text-align: center; cursor: pointer; min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s ease; position: relative; user-select: none;">
+            <button id="fc-audio-btn" title="Phát âm" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 16px; cursor: pointer;">🔊</button>
+            <!-- Mặt trước (Front) -->
+            <div id="flashcard-front">
+              <div id="fc-kanji" style="font-size: 32px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;"></div>
+              <div style="font-size: 11px; color: var(--text-secondary);">(Bấm vào thẻ để lật xem nghĩa)</div>
+            </div>
+            <!-- Mặt sau (Back) -->
+            <div id="flashcard-back" style="display: none;">
+              <div id="fc-reading" style="font-size: 18px; color: var(--primary); font-weight: 600; margin-bottom: 4px;"></div>
+              <div id="fc-hanviet" style="font-size: 12px; font-weight: 700; color: #fbbf24; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;"></div>
+              <div id="fc-meaning" style="font-size: 13px; color: var(--text-primary); line-height: 1.4;"></div>
+            </div>
+          </div>
+
+          <!-- Nút đánh giá ghi nhớ -->
+          <div class="flashcard-actions" style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="fc-btn-again" style="flex: 1; padding: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+              ❌ Chưa nhớ
+            </button>
+            <button id="fc-btn-good" style="flex: 1; padding: 8px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+              ✅ Đã nhớ
+            </button>
+          </div>
+        </div>
+
         <div id="saved-words-list" class="results-list">
           <!-- Sẽ được điền tự động bằng JavaScript -->
           <div class="empty-state">
@@ -72,11 +113,59 @@
           <button id="btn-init-db" class="btn-primary" style="display:none;">Tải dữ liệu từ điển</button>
           
           <div class="divider" style="margin: 15px 0;"></div>
+
+          <h3>Tùy chọn Tra cứu</h3>
+          <div class="settings-row flex-between">
+            <div class="setting-desc">
+              <span class="setting-title">Tự động dịch khi bôi đen</span>
+              <small class="setting-hint">Thả chuột là hiện bảng dịch ngay (không cần click icon)</small>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-auto-translate">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="settings-row flex-between" style="margin-top: 14px;">
+            <div class="setting-desc">
+              <span class="setting-title">Tra nhanh khi Hover chuột</span>
+              <small class="setting-hint">Giữ phím tắt và rê chuột vào từ tiếng Nhật để tra ngay tức thì</small>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-hover-lookup">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="settings-row flex-between" style="margin-top: 12px;">
+            <div class="setting-desc">
+              <span class="setting-title">Phím tắt Hover</span>
+              <small class="setting-hint">Phím bấm giữ khi rê chuột</small>
+            </div>
+            <select id="select-hover-key" style="padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); font-size: 12px; outline: none; cursor: pointer;">
+              <option value="Shift">Phím Shift (Khuyên dùng)</option>
+              <option value="Alt">Phím Alt</option>
+            </select>
+          </div>
+
+          <div class="settings-row flex-between" style="margin-top: 14px;">
+            <div class="setting-desc">
+              <span class="setting-title">Ngôn ngữ dịch nghĩa</span>
+              <small class="setting-hint">Chọn ngôn ngữ hiển thị: Tiếng Việt, Tiếng Anh hoặc Song ngữ</small>
+            </div>
+            <select id="select-target-lang" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); font-size: 12px; outline: none; cursor: pointer;">
+              <option value="both">🌐 Song ngữ (Việt - Anh)</option>
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+              <option value="en">🇬🇧 Tiếng Anh</option>
+            </select>
+          </div>
+          
+          <div class="divider" style="margin: 15px 0;"></div>
           
           <h3>Hướng dẫn sử dụng</h3>
-          <p class="help-text">1. Bôi đen văn bản tiếng Nhật trên bất kỳ trang web nào để dịch nhanh qua tooltip.</p>
-          <p class="help-text">2. Nhấn nút hình Ngôi sao (☆) trên tooltip để lưu từ.</p>
-          <p class="help-text">3. Quản lý danh sách từ đã lưu trực tiếp trong thẻ này.</p>
+          <p class="help-text">1. Bôi đen từ vựng hoặc giữ Shift rồi rê chuột để tra tức thì.</p>
+          <p class="help-text">2. Nhấn nút hình Ngôi sao (☆) trên bảng tra để lưu từ theo Thư mục.</p>
+          <p class="help-text">3. Vào tab "Từ đã lưu" bấm "🃏 Ôn tập" để luyện Flashcard ghi nhớ.</p>
         </div>
       </section>
     </main>

@@ -26,5 +26,11 @@
         "scripts/content_script.js"
       ]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["data/*"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }

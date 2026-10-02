@@ -205,3 +205,40 @@ async function deleteFolder(folderName) {
     });
   });
 }
+
+const SETTINGS_KEY = 'jpDictAppSettings';
+
+/**
+ * Lấy cài đặt ứng dụng hiện thời
+ * @returns {Promise<Object>}
+ */
+function getAppSettings() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get([SETTINGS_KEY], (result) => {
+      const defaults = {
+        autoTranslateOnSelect: false, // Mặc định là tắt (bôi đen hiện icon, bấm icon mới dịch)
+        targetLang: 'both', // Ngôn ngữ dịch: 'both' (Song ngữ Việt-Anh), 'vi' (Tiếng Việt), 'en' (Tiếng Anh)
+        hoverLookupEnabled: true, // Tra từ nhanh khi giữ phím Shift + rê chuột
+        hoverKey: 'Shift' // Phím tắt: 'Shift' hoặc 'Alt'
+      };
+      resolve({ ...defaults, ...(result[SETTINGS_KEY] || {}) });
+    });
+  });
+}
+
+/**
+ * Cập nhật một hoặc nhiều cài đặt ứng dụng
+ * @param {Object} partialSettings Các thuộc tính cần cập nhật
+ * @returns {Promise<Object>}
+ */
+async function updateAppSettings(partialSettings) {
+  const current = await getAppSettings();
+  const updated = { ...current, ...partialSettings };
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ [SETTINGS_KEY]: updated }, () => {
+      console.log('[JP-Dict Storage] Đã lưu cài đặt:', updated);
+      resolve(updated);
+    });
+  });
+}
+

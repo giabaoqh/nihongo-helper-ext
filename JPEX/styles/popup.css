@@ -464,3 +464,103 @@ body {
 .card-folder-select:hover {
   border-color: var(--primary-light);
 }
+
+/* Tùy chọn Switch Toggle hiện đại */
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setting-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setting-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.setting-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Switch Toggle Styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #d1d5db;
+  transition: .25s ease;
+  border-radius: 22px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: .25s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: var(--primary, #e11d48);
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+/* Flashcard Card Styling */
+#flashcard-card {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+#flashcard-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+#flashcard-card:active {
+  transform: scale(0.98);
+}
+#fc-btn-again:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+}
+#fc-btn-good:hover {
+  background: rgba(16, 185, 129, 0.25) !important;
+}
+#btn-practice-flashcard:hover {
+  background: #1d4ed8 !important;
+  transform: translateY(-1px);
+}
+#btn-export-csv:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+

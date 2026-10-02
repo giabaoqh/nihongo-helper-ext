@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
   setupSearch();
   setupDatabase();
+  setupSettingsTab();
+  setupFlashcardAndExport();
 });
 
 /**
@@ -65,6 +67,7 @@ function setupTabs() {
         loadAndRenderSavedWords();
       } else if (activeTabId === 'settings-tab') {
         updateDbStatusUI();
+        setupSettingsTab();
       }
     });
   });
@@ -83,40 +86,48 @@ async function setupDatabase() {
     
     // Đọc phiên bản dữ liệu hiện hành
     const version = await db.getDatabaseVersion();
-    if (version > 0) {
-      dbStatus.innerText = `Phiên bản ${version} (Sẵn sàng)`;
-      btnInit.style.display = 'none';
-    } else {
-      dbStatus.innerText = 'Chưa có dữ liệu (Chờ tải)';
-      btnInit.style.display = 'block';
+    
+    // Hàm nạp từ điển từ file local core_dict.json
+    const loadCoreDictionary = async () => {
+      if (dbStatus) dbStatus.innerText = 'Đang nạp từ điển offline...';
+      if (btnInit) btnInit.disabled = true;
 
-      // Tự động kích hoạt nạp lười từ điển mẫu khi chạy lần đầu
-      dbStatus.innerText = 'Đang nạp từ điển lần đầu...';
-      btnInit.disabled = true;
-      
-      // Chạy cơ chế lazy seeding chia gói
-      await db.initializeDictionary(SEED_DICTIONARY, 1);
-      
-      dbStatus.innerText = 'Phiên bản 1.0 (Sẵn sàng)';
-      btnInit.style.display = 'none';
-      
-      // Refresh lại tìm kiếm nếu đang gõ
-      triggerSearch();
+      try {
+        const url = chrome.runtime.getURL('data/core_dict.json');
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        // Khởi tạo từ điển với version 2
+        await db.initializeDictionary(data, 2);
+        if (dbStatus) dbStatus.innerText = `Phiên bản 2.0 (Offline sẵn sàng - ${data.length} từ)`;
+        if (btnInit) btnInit.style.display = 'none';
+        triggerSearch();
+      } catch (err) {
+        console.warn('[Popup] Không đọc được core_dict.json, fallback nạp SEED_DICTIONARY:', err);
+        await db.initializeDictionary(SEED_DICTIONARY, 2);
+        if (dbStatus) dbStatus.innerText = 'Phiên bản 2.0 (Sẵn sàng)';
+        if (btnInit) btnInit.style.display = 'none';
+      }
+    };
+
+    if (version >= 2) {
+      if (dbStatus) dbStatus.innerText = `Phiên bản ${version}.0 (Offline sẵn sàng)`;
+      if (btnInit) btnInit.style.display = 'none';
+    } else {
+      // Tự động nâng cấp lên gói Offline mới nhất
+      await loadCoreDictionary();
     }
 
     // Sự kiện click nút tải thủ công (nếu cần tải lại)
-    btnInit.addEventListener('click', async () => {
-      dbStatus.innerText = 'Đang tải từ điển...';
-      btnInit.disabled = true;
-      await db.initializeDictionary(SEED_DICTIONARY, 1);
-      dbStatus.innerText = 'Phiên bản 1.0 (Sẵn sàng)';
-      btnInit.style.display = 'none';
-      triggerSearch();
-    });
+    if (btnInit) {
+      btnInit.addEventListener('click', async () => {
+        await loadCoreDictionary();
+      });
+    }
 
   } catch (error) {
     console.error('[Popup] Lỗi quản lý Database:', error);
-    dbStatus.innerText = 'Lỗi kết nối';
+    if (dbStatus) dbStatus.innerText = 'Lỗi kết nối';
   }
 }
 
@@ -125,11 +136,80 @@ async function setupDatabase() {
  */
 async function updateDbStatusUI() {
   const dbStatus = document.getElementById('db-status');
+  const btnInit = document.getElementById('btn-init-db');
   const version = await db.getDatabaseVersion();
   if (version > 0) {
-    dbStatus.innerText = `Phiên bản ${version}.0 (Sẵn sàng)`;
+    if (dbStatus) dbStatus.innerText = `Phiên bản ${version}.0 (Offline sẵn sàng)`;
+    if (btnInit) {
+      btnInit.innerText = 'Đồng bộ lại từ điển';
+      btnInit.style.display = 'inline-block';
+    }
   } else {
-    dbStatus.innerText = 'Chưa có dữ liệu';
+    if (dbStatus) dbStatus.innerText = 'Chưa có dữ liệu';
+    if (btnInit) {
+      btnInit.innerText = 'Nạp từ điển offline';
+      btnInit.style.display = 'inline-block';
+    }
+  }
+}
+
+/**
+ * Cấu hình các tùy chọn trong thẻ Cài đặt (Bật/tắt dịch tự động khi bôi đen, Hover, Ngôn ngữ)
+ */
+async function setupSettingsTab() {
+  const autoTranslateToggle = document.getElementById('toggle-auto-translate');
+  const hoverLookupToggle = document.getElementById('toggle-hover-lookup');
+  const hoverKeySelect = document.getElementById('select-hover-key');
+  const targetLangSelect = document.getElementById('select-target-lang');
+  if (!autoTranslateToggle) return;
+
+  try {
+    const settings = await getAppSettings();
+    autoTranslateToggle.checked = !!settings.autoTranslateOnSelect;
+    if (hoverLookupToggle) {
+      hoverLookupToggle.checked = settings.hoverLookupEnabled !== false;
+    }
+    if (hoverKeySelect) {
+      hoverKeySelect.value = settings.hoverKey || 'Shift';
+    }
+    if (targetLangSelect) {
+      targetLangSelect.value = settings.targetLang || 'both';
+    }
+
+    // Tránh gán lặp lại listener
+    if (!autoTranslateToggle.dataset.hasListener) {
+      autoTranslateToggle.dataset.hasListener = 'true';
+      autoTranslateToggle.addEventListener('change', async (e) => {
+        await updateAppSettings({ autoTranslateOnSelect: e.target.checked });
+        console.log('[JP-Dict Popup] Đã đổi trạng thái tự động dịch:', e.target.checked);
+      });
+    }
+
+    if (hoverLookupToggle && !hoverLookupToggle.dataset.hasListener) {
+      hoverLookupToggle.dataset.hasListener = 'true';
+      hoverLookupToggle.addEventListener('change', async (e) => {
+        await updateAppSettings({ hoverLookupEnabled: e.target.checked });
+        console.log('[JP-Dict Popup] Đã đổi trạng thái Hover tra nhanh:', e.target.checked);
+      });
+    }
+
+    if (hoverKeySelect && !hoverKeySelect.dataset.hasListener) {
+      hoverKeySelect.dataset.hasListener = 'true';
+      hoverKeySelect.addEventListener('change', async (e) => {
+        await updateAppSettings({ hoverKey: e.target.value });
+        console.log('[JP-Dict Popup] Đã đổi phím tắt Hover:', e.target.value);
+      });
+    }
+
+    if (targetLangSelect && !targetLangSelect.dataset.hasListener) {
+      targetLangSelect.dataset.hasListener = 'true';
+      targetLangSelect.addEventListener('change', async (e) => {
+        await updateAppSettings({ targetLang: e.target.value });
+        console.log('[JP-Dict Popup] Đã đổi ngôn ngữ dịch:', e.target.value);
+      });
+    }
+  } catch (err) {
+    console.error('[JP-Dict Popup] Lỗi nạp cài đặt:', err);
   }
 }
 
@@ -607,4 +687,197 @@ function playPronunciation(text) {
       console.error('[Popup] Trình duyệt không hỗ trợ Web Speech API.');
     }
   });
+}
+
+/**
+ * 6. Quản lý tính năng Ôn tập Flashcard (SRS) & Xuất dữ liệu CSV (Anki/Excel)
+ */
+let flashcardDeck = [];
+let flashcardIndex = 0;
+let isFlipped = false;
+
+function setupFlashcardAndExport() {
+  const btnPractice = document.getElementById('btn-practice-flashcard');
+  const btnExport = document.getElementById('btn-export-csv');
+  const flashcardContainer = document.getElementById('flashcard-container');
+  const btnCloseFlashcard = document.getElementById('btn-close-flashcard');
+  const savedWordsList = document.getElementById('saved-words-list');
+  const flashcardCard = document.getElementById('flashcard-card');
+  const flashcardFront = document.getElementById('flashcard-front');
+  const flashcardBack = document.getElementById('flashcard-back');
+  const fcKanji = document.getElementById('fc-kanji');
+  const fcReading = document.getElementById('fc-reading');
+  const fcHanviet = document.getElementById('fc-hanviet');
+  const fcMeaning = document.getElementById('fc-meaning');
+  const fcCounter = document.getElementById('flashcard-counter');
+  const fcAudioBtn = document.getElementById('fc-audio-btn');
+  const btnAgain = document.getElementById('fc-btn-again');
+  const btnGood = document.getElementById('fc-btn-good');
+  const selectFilter = document.getElementById('select-folder-filter');
+
+  const updateCardView = () => {
+    if (flashcardDeck.length === 0) {
+      if (flashcardContainer) flashcardContainer.style.display = 'none';
+      if (savedWordsList) savedWordsList.style.display = 'block';
+      return;
+    }
+
+    if (flashcardIndex >= flashcardDeck.length) {
+      // Hoàn tất lượt ôn tập
+      flashcardFront.innerHTML = `
+        <div style="font-size: 26px; margin-bottom: 6px;">🎉</div>
+        <div style="font-size: 16px; font-weight: 700; color: #10b981; margin-bottom: 4px;">Xuất sắc!</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">Bạn đã hoàn thành lượt ôn tập này.</div>
+      `;
+      flashcardBack.style.display = 'none';
+      flashcardFront.style.display = 'block';
+      fcCounter.innerText = 'Hoàn thành!';
+      btnAgain.innerText = '🔄 Ôn lại';
+      btnGood.innerText = '✕ Kết thúc';
+      return;
+    }
+
+    const currentWord = flashcardDeck[flashcardIndex];
+    fcCounter.innerText = `${flashcardIndex + 1} / ${flashcardDeck.length}`;
+    fcKanji.innerText = currentWord.kanji;
+    fcReading.innerText = currentWord.reading || currentWord.kana || '';
+    fcHanviet.innerText = currentWord.hanviet ? `HÁN VIỆT: ${currentWord.hanviet}` : '';
+    fcMeaning.innerText = currentWord.meaning || currentWord.meaningVi || 'Chưa rõ nghĩa';
+
+    isFlipped = false;
+    flashcardFront.style.display = 'block';
+    flashcardBack.style.display = 'none';
+    btnAgain.innerText = '❌ Chưa nhớ';
+    btnGood.innerText = '✅ Đã nhớ';
+  };
+
+  const flipCard = () => {
+    if (flashcardIndex >= flashcardDeck.length) return;
+    isFlipped = !isFlipped;
+    if (isFlipped) {
+      flashcardFront.style.display = 'none';
+      flashcardBack.style.display = 'block';
+    } else {
+      flashcardFront.style.display = 'block';
+      flashcardBack.style.display = 'none';
+    }
+  };
+
+  if (flashcardCard) {
+    flashcardCard.addEventListener('click', (e) => {
+      if (e.target === fcAudioBtn || fcAudioBtn.contains(e.target)) return;
+      flipCard();
+    });
+  }
+
+  if (fcAudioBtn) {
+    fcAudioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const currentWord = flashcardDeck[flashcardIndex];
+      if (currentWord) {
+        playPronunciation(currentWord.reading || currentWord.kana || currentWord.kanji);
+      }
+    });
+  }
+
+  if (btnAgain) {
+    btnAgain.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (flashcardIndex >= flashcardDeck.length) {
+        flashcardIndex = 0;
+        updateCardView();
+        return;
+      }
+      // Đẩy thẻ chưa thuộc về cuối lượt học để ôn lại
+      const missed = flashcardDeck[flashcardIndex];
+      flashcardDeck.push(missed);
+      flashcardIndex++;
+      updateCardView();
+    });
+  }
+
+  if (btnGood) {
+    btnGood.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (flashcardIndex >= flashcardDeck.length) {
+        flashcardContainer.style.display = 'none';
+        savedWordsList.style.display = 'block';
+        return;
+      }
+      flashcardIndex++;
+      updateCardView();
+    });
+  }
+
+  if (btnPractice) {
+    btnPractice.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const allWords = await getSavedWords();
+      const currentFilter = selectFilter ? selectFilter.value : '__all__';
+      let filtered = (currentFilter === '__all__')
+        ? allWords
+        : allWords.filter(w => (w.folder || 'Mặc định') === currentFilter);
+
+      if (filtered.length === 0) {
+        alert('Chưa có từ vựng nào trong thư mục này để ôn tập! Hãy tra cứu và bấm dấu Sao (★) để lưu từ.');
+        return;
+      }
+
+      // Xáo trộn ngẫu nhiên bộ thẻ (Shuffle)
+      flashcardDeck = [...filtered].sort(() => Math.random() - 0.5);
+      flashcardIndex = 0;
+      savedWordsList.style.display = 'none';
+      flashcardContainer.style.display = 'block';
+      updateCardView();
+    });
+  }
+
+  if (btnCloseFlashcard) {
+    btnCloseFlashcard.addEventListener('click', (e) => {
+      e.stopPropagation();
+      flashcardContainer.style.display = 'none';
+      savedWordsList.style.display = 'block';
+    });
+  }
+
+  // Xuất file CSV cho Anki và Excel
+  if (btnExport) {
+    btnExport.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const allWords = await getSavedWords();
+      const currentFilter = selectFilter ? selectFilter.value : '__all__';
+      let wordsToExport = (currentFilter === '__all__')
+        ? allWords
+        : allWords.filter(w => (w.folder || 'Mặc định') === currentFilter);
+
+      if (wordsToExport.length === 0) {
+        alert('Không có từ vựng nào trong thư mục này để xuất!');
+        return;
+      }
+
+      // Tạo chuỗi CSV có UTF-8 BOM (\uFEFF) để Excel mở không bị lỗi font tiếng Việt/tiếng Nhật
+      let csvContent = '\uFEFFKanji,Cách đọc (Kana),Âm Hán Việt,Giải nghĩa,Thư mục,JLPT\n';
+      wordsToExport.forEach(w => {
+        const escapeCsv = (str) => `"${(str || '').replace(/"/g, '""')}"`;
+        const kanji = escapeCsv(w.kanji);
+        const kana = escapeCsv(w.reading || w.kana || '');
+        const hv = escapeCsv(w.hanviet || '');
+        const meaning = escapeCsv(w.meaning || w.meaningVi || '');
+        const folder = escapeCsv(w.folder || 'Mặc định');
+        const jlpt = escapeCsv(w.jlpt || '');
+        csvContent += `${kanji},${kana},${hv},${meaning},${folder},${jlpt}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      const folderSlug = currentFilter === '__all__' ? 'tat_ca' : currentFilter.replace(/[\s/]/g, '_');
+      link.setAttribute('download', `TuVung_JPEX_${folderSlug}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+  }
 }
