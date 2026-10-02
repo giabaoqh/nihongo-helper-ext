@@ -1005,18 +1005,34 @@ function showTooltip(text, rect) {
     }).catch(() => {});
   }
 
-  // Gửi thông điệp tra cứu
-  chrome.runtime.sendMessage({ action: 'translate', text: text, targetLang: currentTargetLang }, (response) => {
-    if (chrome.runtime.lastError) {
-      loaderText.innerText = 'Lỗi kết nối Extension. Hãy F5 trang web!';
+  // Gửi thông điệp tra cứu với cơ chế phòng ngừa lỗi Extension Context Invalidated (khi reload extension)
+  const showReloadPrompt = () => {
+    loaderText.innerHTML = `
+      <div style="font-weight: 600; color: #f59e0b; margin-bottom: 6px;">Tiện ích vừa được tải lại!</div>
+      <div style="font-size: 11px; color: #a1a1aa; margin-bottom: 8px;">Vui lòng F5 tải lại trang web để kết nối phiên bản mới.</div>
+      <button onclick="window.location.reload()" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">🔄 Tải lại trang (F5)</button>
+    `;
+    const spinnerEl = loader.querySelector('.spinner');
+    if (spinnerEl) spinnerEl.style.display = 'none';
+  };
+
+  try {
+    if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage || !chrome.runtime.id) {
+      showReloadPrompt();
       return;
     }
 
-    if (response && response.success) {
-      const data = response.data;
-      currentTargetLang = data.targetLang || currentTargetLang;
-      loader.style.display = 'none';
-      content.style.display = 'block';
+    chrome.runtime.sendMessage({ action: 'translate', text: text, targetLang: currentTargetLang }, (response) => {
+      if (chrome.runtime.lastError) {
+        showReloadPrompt();
+        return;
+      }
+
+      if (response && response.success) {
+        const data = response.data;
+        currentTargetLang = data.targetLang || currentTargetLang;
+        loader.style.display = 'none';
+        content.style.display = 'block';
 
       // 1. Quản lý trạng thái lưu từ
       getSavedWords().then(async (words) => {
@@ -1272,6 +1288,9 @@ function showTooltip(text, rect) {
       if (spinnerEl) spinnerEl.style.display = 'none';
     }
   });
+  } catch (err) {
+    showReloadPrompt();
+  }
 }
 
 /**
