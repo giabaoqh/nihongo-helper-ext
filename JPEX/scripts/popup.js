@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupDatabase();
   setupSettingsTab();
   setupFlashcardAndExport();
+  setupOcrButton();
 });
 
 /**
@@ -50,27 +51,51 @@ function setupTabs() {
   const tabs = document.querySelectorAll('.tab-btn');
   const sections = document.querySelectorAll('.tab-section');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      // Gỡ bỏ class active cũ
-      tabs.forEach(t => t.classList.remove('active'));
-      sections.forEach(s => s.classList.remove('active'));
-
-      // Áp dụng class active mới
-      tab.classList.add('active');
-      const activeTabId = tab.getAttribute('data-tab');
-      document.getElementById(activeTabId).classList.add('active');
-
-      // Tự động load dữ liệu khi chuyển sang tab phù hợp
-      if (activeTabId === 'saved-tab') {
-        initFolderFilter();
-        loadAndRenderSavedWords();
-      } else if (activeTabId === 'settings-tab') {
-        updateDbStatusUI();
-        setupSettingsTab();
+  const switchTab = (activeTabId) => {
+    tabs.forEach(t => {
+      if (t.getAttribute('data-tab') === activeTabId) {
+        t.classList.add('active');
+      } else {
+        t.classList.remove('active');
       }
     });
+    sections.forEach(s => {
+      if (s.id === activeTabId) {
+        s.classList.add('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+
+    if (activeTabId === 'saved-tab') {
+      initFolderFilter();
+      loadAndRenderSavedWords();
+    } else if (activeTabId === 'settings-tab') {
+      updateDbStatusUI();
+      setupSettingsTab();
+    }
+  };
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const activeTabId = tab.getAttribute('data-tab');
+      switchTab(activeTabId);
+    });
   });
+
+  // Tự động chuyển tab nếu được yêu cầu từ URL hoặc storage
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetTab = urlParams.get('tab');
+  if (targetTab === 'settings' || targetTab === 'settings-tab') {
+    switchTab('settings-tab');
+  } else {
+    chrome.storage.local.get(['activePopupTab'], (res) => {
+      if (res && res.activePopupTab) {
+        switchTab(res.activePopupTab);
+        chrome.storage.local.remove(['activePopupTab']);
+      }
+    });
+  }
 }
 
 /**
@@ -690,7 +715,7 @@ function playPronunciation(text) {
 }
 
 /**
- * 6. Quản lý tính năng Ôn tập Flashcard (SRS) & Xuất dữ liệu CSV (Anki/Excel)
+ * 6. Quản lý tính năng Ôn tập Flashcard (SRS) & Xuất dữ liệu CSV (Excel)
  */
 let flashcardDeck = [];
 let flashcardIndex = 0;
@@ -840,7 +865,7 @@ function setupFlashcardAndExport() {
     });
   }
 
-  // Xuất file CSV cho Anki và Excel
+  // Xuất file CSV cho Excel
   if (btnExport) {
     btnExport.addEventListener('click', async (e) => {
       e.stopPropagation();
@@ -878,6 +903,51 @@ function setupFlashcardAndExport() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+    });
+  }
+}
+
+
+  // Nạp & lưu cài đặt Furigana & Phím nóng
+  const toggleFurigana = document.getElementById('toggle-furigana');
+  const selectFuriganaHotkey = document.getElementById('select-furigana-hotkey');
+
+  if (typeof getAppSettings === 'function') {
+    getAppSettings().then(settings => {
+      if (toggleFurigana) toggleFurigana.checked = !!settings.furiganaEnabled;
+      if (selectFuriganaHotkey && settings.furiganaHotkey) selectFuriganaHotkey.value = settings.furiganaHotkey;
+    });
+  }
+
+  if (toggleFurigana) {
+    toggleFurigana.addEventListener('change', async () => {
+      if (typeof updateAppSettings === 'function') {
+        await updateAppSettings({ furiganaEnabled: toggleFurigana.checked });
+      }
+    });
+  }
+
+  if (selectFuriganaHotkey) {
+    selectFuriganaHotkey.addEventListener('change', async () => {
+      if (typeof updateAppSettings === 'function') {
+        await updateAppSettings({ furiganaHotkey: selectFuriganaHotkey.value });
+      }
+    });
+  }
+
+/**
+ * Nút kích hoạt Chụp vùng màn hình OCR từ Header
+ */
+function setupOcrButton() {
+  const ocrBtn = document.getElementById('btn-header-ocr');
+  if (ocrBtn) {
+    ocrBtn.addEventListener('click', () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0] && tabs[0].id) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: 'startScreenOcr' });
+          window.close();
+        }
+      });
     });
   }
 }

@@ -217,9 +217,11 @@ function getAppSettings() {
     chrome.storage.local.get([SETTINGS_KEY], (result) => {
       const defaults = {
         autoTranslateOnSelect: false, // Mặc định là tắt (bôi đen hiện icon, bấm icon mới dịch)
-        targetLang: 'both', // Ngôn ngữ dịch: 'both' (Song ngữ Việt-Anh), 'vi' (Tiếng Việt), 'en' (Tiếng Anh)
+        targetLang: 'vi', // Ngôn ngữ dịch: 'both' (Song ngữ Việt-Anh), 'vi' (Tiếng Việt), 'en' (Tiếng Anh)
         hoverLookupEnabled: true, // Tra từ nhanh khi giữ phím Shift + rê chuột
-        hoverKey: 'Shift' // Phím tắt: 'Shift' hoặc 'Alt'
+        hoverKey: 'Shift', // Phím tắt: 'Shift' hoặc 'Alt'
+        furiganaEnabled: false, // Tự động chèn Furigana toàn trang
+        furiganaHotkey: 'Alt+F' // Phím nóng bật/tắt Furigana toàn trang
       };
       resolve({ ...defaults, ...(result[SETTINGS_KEY] || {}) });
     });

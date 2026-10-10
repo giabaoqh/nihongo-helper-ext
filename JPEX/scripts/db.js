@@ -11,7 +11,7 @@
 class JPEXDatabase {
   constructor() {
     this.dbName = 'JPEX_DictionaryDB';
-    this.dbVersion = 3; // Nâng cấp lên phiên bản 3 để cập nhật schema sạch sẽ cho tính năng AI Tutor
+    this.dbVersion = 3; // Nâng cấp lên phiên bản 3 để cập nhật schema sạch sẽ cho các tính năng mở rộng
     this.db = null;
   }
 

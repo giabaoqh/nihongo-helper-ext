@@ -15,6 +15,37 @@
 // Biểu thức chính quy phát hiện ký tự tiếng Nhật
 const JAPANESE_REGEX = /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf\u3400-\u4dbf]/;
 
+// ========================================================
+// MỞ KHÓA BÔI ĐEN TRÊN CÁC TRANG WEB CHỐNG COPY / CHỐNG CHỌN
+// ========================================================
+function unlockTextSelectionOnProtectedPages() {
+  try {
+    const style = document.createElement('style');
+    style.id = 'jpex-unlock-selection-style';
+    style.textContent = `
+      body, html, main, article, section, p, span, div, h1, h2, h3, h4, h5, h6, li, td, th, a, b, strong, em, i, ruby, rt {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+      }
+    `;
+    (document.head || document.documentElement).appendChild(style);
+
+    // Chặn website hủy sự kiện chọn văn bản (selectstart)
+    window.addEventListener('selectstart', (e) => {
+      e.stopPropagation();
+    }, true);
+
+    // Khôi phục menu chuột phải nếu bị web chặn
+    window.addEventListener('contextmenu', (e) => {
+      e.stopPropagation();
+    }, true);
+  } catch (e) {}
+}
+unlockTextSelectionOnProtectedPages();
+
+
 /**
  * Loại bỏ các loại dấu ngoặc, dấu câu tiếng Nhật/tiếng Anh ở đầu và cuối văn bản bôi đen
  * để giúp các công cụ tra cứu (Jisho, Database) khớp từ chuẩn xác 100%.
@@ -65,6 +96,14 @@ let activeTooltipHost = null;
 let isAutoTranslateEnabled = false;
 let isHoverLookupEnabled = true;
 let hoverKey = 'Shift';
+let furiganaHotkey = 'Alt+F';
+let isFuriganaActive = false;
+let compoundWordsCache = null;
+let kanjiReadingsCache = null;
+
+// Bộ nhớ đệm tra cứu phía Client (0ms khi tra lại từ vừa xem)
+const CLIENT_LOOKUP_CACHE = new Map();
+const MAX_CLIENT_CACHE = 300;
 
 // Đọc cài đặt ban đầu từ storage
 if (typeof getAppSettings === 'function') {
@@ -72,25 +111,43 @@ if (typeof getAppSettings === 'function') {
     isAutoTranslateEnabled = !!settings.autoTranslateOnSelect;
     isHoverLookupEnabled = settings.hoverLookupEnabled !== false;
     hoverKey = settings.hoverKey || 'Shift';
-    console.log('[JP-Dict Content] Cài đặt ban đầu:', { isAutoTranslateEnabled, isHoverLookupEnabled, hoverKey });
-  });
+    if (settings.furiganaHotkey) furiganaHotkey = settings.furiganaHotkey;
+    if (typeof settings.furiganaEnabled !== 'undefined') {
+      isFuriganaActive = !!settings.furiganaEnabled;
+      if (isFuriganaActive) {
+        injectFuriganaOnPage().catch(() => {});
+      }
+    }
+    console.log('[JP-Dict Content] Cài đặt ban đầu:', { isAutoTranslateEnabled, isHoverLookupEnabled, hoverKey, furiganaHotkey });
+  }).catch(() => {});
 }
 
 // Lắng nghe thay đổi cài đặt Realtime từ Popup hoặc Tooltip
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes['jpDictAppSettings']) {
-    const val = changes['jpDictAppSettings'].newValue;
-    if (val) {
-      if (typeof val.autoTranslateOnSelect !== 'undefined') {
-        isAutoTranslateEnabled = !!val.autoTranslateOnSelect;
+  if (area === 'local') {
+    if (changes['jpDictAppSettings']) {
+      const val = changes['jpDictAppSettings'].newValue;
+      if (val) {
+        if (typeof val.autoTranslateOnSelect !== 'undefined') {
+          isAutoTranslateEnabled = !!val.autoTranslateOnSelect;
+        }
+        if (typeof val.hoverLookupEnabled !== 'undefined') {
+          isHoverLookupEnabled = !!val.hoverLookupEnabled;
+        }
+        if (typeof val.hoverKey !== 'undefined') {
+          hoverKey = val.hoverKey;
+        }
+        if (typeof val.furiganaHotkey !== 'undefined') {
+          furiganaHotkey = val.furiganaHotkey;
+        }
+        console.log('[JP-Dict Content] Đã cập nhật cài đặt Realtime:', { isAutoTranslateEnabled, isHoverLookupEnabled, hoverKey, furiganaHotkey });
       }
-      if (typeof val.hoverLookupEnabled !== 'undefined') {
-        isHoverLookupEnabled = !!val.hoverLookupEnabled;
+    }
+    if (changes['furiganaEnabled']) {
+      const enabled = !!changes['furiganaEnabled'].newValue;
+      if (enabled !== isFuriganaActive) {
+        toggleFuriganaInjection(enabled).catch(() => {});
       }
-      if (typeof val.hoverKey !== 'undefined') {
-        hoverKey = val.hoverKey;
-      }
-      console.log('[JP-Dict Content] Đã cập nhật cài đặt Realtime:', { isAutoTranslateEnabled, isHoverLookupEnabled, hoverKey });
     }
   }
 });
@@ -298,8 +355,14 @@ function handleTextSelection(event) {
     // Tạo thẻ Custom Tag để tránh bị ghi đè CSS từ trang web
     const icon = document.createElement('jp-dict-floating-icon');
     icon.id = 'jp-dict-floating-icon';
-    icon.innerText = '辞';
     icon.title = 'Tra cứu từ này';
+
+    const iconUrl = (chrome.runtime && chrome.runtime.getURL) ? chrome.runtime.getURL('icons/icon48.png') : '';
+    if (iconUrl) {
+      icon.innerHTML = `<img src="${iconUrl}" alt="JP" style="width: 100% !important; height: 100% !important; border-radius: 50% !important; object-fit: cover !important; pointer-events: none !important; display: block !important;">`;
+    } else {
+      icon.innerText = '辞';
+    }
 
     // Cấu hình CSS inline kèm '!important'
     const styles = {
@@ -309,24 +372,21 @@ function handleTextSelection(event) {
       'justify-content': 'center',
       'top': `${top}px`,
       'left': `${left}px`,
-      'width': '26px',
-      'height': '26px',
+      'width': '28px',
+      'height': '28px',
       'border-radius': '50%',
-      'background-color': '#E11D48', // Trích xuất từ --primary
-      'color': '#FFFFFF',
-      'border': 'none',
+      'background-color': '#ffffff',
+      'border': '2px solid #ffffff',
       'outline': 'none',
       'cursor': 'pointer',
-      'box-shadow': '0 4px 12px rgba(225, 29, 72, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1)',
-      'font-size': '13px',
-      'font-weight': 'bold',
-      'font-family': '"Outfit", "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif',
+      'box-shadow': '0 4px 14px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(225, 29, 72, 0.35)',
       'z-index': '2147483647',
       'transition': 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s',
       'padding': '0',
-      'line-height': '1',
+      'overflow': 'hidden',
       'user-select': 'none',
-      '-webkit-user-select': 'none'
+      '-webkit-user-select': 'none',
+      'box-sizing': 'border-box'
     };
 
     for (const [key, value] of Object.entries(styles)) {
@@ -335,12 +395,12 @@ function handleTextSelection(event) {
 
     // Hiệu ứng Hover mượt mà
     icon.addEventListener('mouseenter', () => {
-      icon.style.setProperty('transform', 'scale(1.15)', 'important');
-      icon.style.setProperty('box-shadow', '0 6px 16px rgba(225, 29, 72, 0.55), 0 3px 6px rgba(0, 0, 0, 0.15)', 'important');
+      icon.style.setProperty('transform', 'scale(1.2)', 'important');
+      icon.style.setProperty('box-shadow', '0 6px 18px rgba(0, 0, 0, 0.45), 0 0 0 2px #38bdf8', 'important');
     });
     icon.addEventListener('mouseleave', () => {
       icon.style.setProperty('transform', 'none', 'important');
-      icon.style.setProperty('box-shadow', '0 4px 12px rgba(225, 29, 72, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1)', 'important');
+      icon.style.setProperty('box-shadow', '0 4px 14px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(225, 29, 72, 0.35)', 'important');
     });
 
     // Sự kiện Click vào Icon -> Hiện Tooltip
@@ -997,15 +1057,7 @@ function showTooltip(text, rect) {
 
   document.addEventListener('mousedown', handleOutsideClick);
 
-  // Lấy cài đặt ngôn ngữ hiện hành
-  let currentTargetLang = 'both';
-  if (typeof getAppSettings === 'function') {
-    getAppSettings().then(s => {
-      if (s && s.targetLang) currentTargetLang = s.targetLang;
-    }).catch(() => {});
-  }
-
-  // Gửi thông điệp tra cứu với cơ chế phòng ngừa lỗi Extension Context Invalidated (khi reload extension)
+  // Gửi thông điệp tra cứu với cơ chế Client-Cache (0ms) & phòng ngừa lỗi Extension Context Invalidated
   const showReloadPrompt = () => {
     loaderText.innerHTML = `
       <div style="font-weight: 600; color: #f59e0b; margin-bottom: 6px;">Tiện ích vừa được tải lại!</div>
@@ -1016,278 +1068,257 @@ function showTooltip(text, rect) {
     if (spinnerEl) spinnerEl.style.display = 'none';
   };
 
+  const handleLookupSuccess = (response) => {
+    const data = response.data;
+    loader.style.display = 'none';
+    content.style.display = 'block';
+
+    // 1. Quản lý trạng thái lưu từ
+    getSavedWords().then(async (words) => {
+      const savedWord = words.find(w => w.kanji === data.kanji);
+      if (savedWord) {
+        saveBtn.innerHTML = '★';
+        saveBtn.classList.add('saved');
+        saveBtn.title = 'Xóa khỏi danh sách lưu';
+        saveBanner.style.display = 'flex';
+        await loadFolderOptions(folderSelect, savedWord.folder || "Mặc định");
+      } else {
+        saveBtn.innerHTML = '☆';
+        saveBtn.classList.remove('saved');
+        saveBtn.title = 'Lưu từ vào Dashboard';
+        saveBanner.style.display = 'none';
+      }
+    }).catch(() => {});
+
+    saveBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const saved = saveBtn.classList.contains('saved');
+      if (saved) {
+        await deleteWord(data.kanji);
+        saveBtn.innerHTML = '☆';
+        saveBtn.classList.remove('saved');
+        saveBtn.title = 'Lưu từ vào Dashboard';
+        saveBanner.style.display = 'none';
+      } else {
+        const defaultFolder = "Mặc định";
+        await saveWord(data, defaultFolder);
+        saveBtn.innerHTML = '★';
+        saveBtn.classList.add('saved');
+        saveBtn.title = 'Xóa khỏi danh sách lưu';
+        saveBanner.style.display = 'flex';
+        await loadFolderOptions(folderSelect, defaultFolder);
+      }
+    });
+
+    folderSelect.addEventListener('change', async (e) => {
+      e.stopPropagation();
+      const val = folderSelect.value;
+      if (val === '__new_folder__') {
+        const newFolderName = prompt('Nhập tên thư mục mới:');
+        if (newFolderName && newFolderName.trim()) {
+          const cleanName = newFolderName.trim();
+          await createFolder(cleanName);
+          await updateWordFolder(data.kanji, cleanName);
+          await loadFolderOptions(folderSelect, cleanName);
+        } else {
+          const words = await getSavedWords();
+          const currentWord = words.find(w => w.kanji === data.kanji);
+          await loadFolderOptions(folderSelect, currentWord ? currentWord.folder : "Mặc định");
+        }
+      } else {
+        await updateWordFolder(data.kanji, val);
+      }
+    });
+
+    // 2. Render giao diện các Tab thuần Tiếng Việt
+    const renderPanes = () => {
+      const vocabList = data.results || [data];
+      const kanjiList = data.kanjis || [];
+      const transObj = data.translation || {
+        sourceText: text,
+        translatedVi: data.meaningVi || data.meaning,
+        translatedText: data.meaning
+      };
+
+      // Tab 1: Từ vựng
+      const vocabCardsHtml = vocabList.map(item => {
+        const vi = item.meaningVi || item.meaning || 'Chưa rõ nghĩa';
+        const meaningHtml = `<div class="card-meaning-text">${vi}</div>`;
+
+        return `
+          <div class="dict-card">
+            <div class="card-line-1">
+              <span class="card-word">${item.kanji}</span>
+              <span class="card-reading">${item.reading || ''}</span>
+            </div>
+            ${item.hanviet && item.hanviet.trim() ? `<div class="card-hanviet-badge">${item.hanviet.trim()}</div>` : ''}
+            <div class="card-line-3">${meaningHtml}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Tab 2: Hán tự
+      const kanjiCardsHtml = kanjiList.length > 0 ? kanjiList.map(k => {
+        const metaParts = [];
+        if (k.strokes) metaParts.push(`${k.strokes} nét`);
+        if (k.radical) metaParts.push(`Bộ: ${k.radical}`);
+        const metaStr = metaParts.length > 0 ? `<div class="kanji-meta">${metaParts.join(' • ')}</div>` : '';
+        const readingHtml = k.reading ? `<div class="card-reading" style="margin-top: 4px; color: #38bdf8; font-size: 12px;">${k.reading}</div>` : '';
+
+        return `
+          <div class="dict-card kanji-single-card">
+            <div class="kanji-main-char">${k.char}</div>
+            <div class="card-line-2">${k.hanviet}</div>
+            ${readingHtml}
+            ${metaStr}
+            <div class="card-line-3">${k.meaning}</div>
+          </div>
+        `;
+      }).join('') : `
+        <div class="dict-card kanji-single-card">
+          <div class="card-line-3">Không tìm thấy Hán tự trong từ khóa này.</div>
+        </div>
+      `;
+
+      // Tab 3: Dịch
+      const viTrans = transObj.translatedVi || transObj.translatedText || 'Không có bản dịch';
+      const transOutputHtml = `
+        <div class="trans-row">
+          <span class="badge-lang vi">VI</span>
+          <div class="trans-dst-text">${viTrans}</div>
+        </div>
+      `;
+
+      content.innerHTML = `
+        <!-- TAB 1: TỪ VỰNG -->
+        <div class="tab-pane" id="pane-vocab">
+          <div class="results-info-row">
+            <span class="search-icon">🔍</span>
+            <span>${vocabList.length} kết quả của từ vựng</span>
+            <span class="highlight-query">${data.query || text}</span>
+          </div>
+          <div class="cards-scroll-container">
+            ${vocabCardsHtml}
+          </div>
+        </div>
+
+        <!-- TAB 2: HÁN TỰ -->
+        <div class="tab-pane" id="pane-kanji" style="display: none;">
+          <div class="results-info-row">
+            <span class="search-icon">🔍</span>
+            <span>${kanjiList.length} kết quả của Hán tự</span>
+            <span class="highlight-query">${data.query || text}</span>
+          </div>
+          <div class="cards-scroll-container">
+            ${kanjiCardsHtml}
+          </div>
+        </div>
+
+        <!-- TAB 3: DỊCH -->
+        <div class="tab-pane" id="pane-trans" style="display: none;">
+          <div class="trans-box-view">
+            <div class="trans-src-text">${transObj.sourceText}</div>
+            ${transOutputHtml}
+            <div class="trans-action-hint">Phân tích tiếng Nhật siêu tốc</div>
+          </div>
+        </div>
+
+        <!-- FOOTER: THÔNG TIN TIẾNG VIỆT & CÀI ĐẶT -->
+        <div class="tooltip-footer">
+          <div class="lang-selector-group">
+            <span class="lang-lbl" style="color: #10b981; font-weight: 600;">🇻🇳 Tiếng Việt</span>
+          </div>
+          <span class="settings-hint-link" title="Mở trang cài đặt">Cài đặt</span>
+        </div>
+      `;
+
+      // Chuyển đổi Tab
+      const paneVocab = content.querySelector('#pane-vocab');
+      const paneKanji = content.querySelector('#pane-kanji');
+      const paneTrans = content.querySelector('#pane-trans');
+
+      const tabs = [
+        { btn: btnTabVocab, pane: paneVocab },
+        { btn: btnTabKanji, pane: paneKanji },
+        { btn: btnTabTrans, pane: paneTrans }
+      ];
+
+      const activeIdx = tabs.findIndex(t => t.btn.classList.contains('active'));
+      tabs.forEach((t, idx) => {
+        t.pane.style.display = (idx === (activeIdx !== -1 ? activeIdx : 0)) ? 'block' : 'none';
+      });
+
+      tabs.forEach(({ btn, pane }) => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          tabs.forEach(t => {
+            t.btn.classList.remove('active');
+            t.pane.style.display = 'none';
+          });
+          btn.classList.add('active');
+          pane.style.display = 'block';
+        };
+      });
+
+      // Nút Cài đặt
+      const settingsLink = content.querySelector('.settings-hint-link');
+      if (settingsLink) {
+        settingsLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          settingsLink.textContent = 'Đang mở...';
+          try {
+            chrome.storage.local.set({ activePopupTab: 'settings-tab' }, () => {
+              chrome.runtime.sendMessage({ action: 'openExtensionPopup' }, (res) => {
+                setTimeout(() => { settingsLink.textContent = 'Cài đặt'; }, 800);
+                if (chrome.runtime.lastError || (res && !res.success)) {
+                  try { window.open(chrome.runtime.getURL('popup.html?tab=settings'), '_blank'); } catch (e2) {}
+                }
+              });
+            });
+          } catch (err) {
+            try { window.open(chrome.runtime.getURL('popup.html?tab=settings'), '_blank'); } catch (e2) {}
+          }
+        });
+      }
+    };
+
+    renderPanes();
+  };
+
+  // Kiểm tra bộ nhớ đệm Client (0ms)
+  if (CLIENT_LOOKUP_CACHE.has(text)) {
+    handleLookupSuccess(CLIENT_LOOKUP_CACHE.get(text));
+    return;
+  }
+
   try {
     if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage || !chrome.runtime.id) {
       showReloadPrompt();
       return;
     }
 
-    chrome.runtime.sendMessage({ action: 'translate', text: text, targetLang: currentTargetLang }, (response) => {
+    chrome.runtime.sendMessage({ action: 'translate', text: text, targetLang: 'vi' }, (response) => {
       if (chrome.runtime.lastError) {
         showReloadPrompt();
         return;
       }
 
       if (response && response.success) {
-        const data = response.data;
-        currentTargetLang = data.targetLang || currentTargetLang;
-        loader.style.display = 'none';
-        content.style.display = 'block';
-
-      // 1. Quản lý trạng thái lưu từ
-      getSavedWords().then(async (words) => {
-        const savedWord = words.find(w => w.kanji === data.kanji);
-        if (savedWord) {
-          saveBtn.innerHTML = '★';
-          saveBtn.classList.add('saved');
-          saveBtn.title = 'Xóa khỏi danh sách lưu';
-          saveBanner.style.display = 'flex';
-          await loadFolderOptions(folderSelect, savedWord.folder || "Mặc định");
-        } else {
-          saveBtn.innerHTML = '☆';
-          saveBtn.classList.remove('saved');
-          saveBtn.title = 'Lưu từ vào Dashboard';
-          saveBanner.style.display = 'none';
+        // Lưu vào bộ nhớ đệm Client
+        if (CLIENT_LOOKUP_CACHE.size >= MAX_CLIENT_CACHE) {
+          const firstKey = CLIENT_LOOKUP_CACHE.keys().next().value;
+          CLIENT_LOOKUP_CACHE.delete(firstKey);
         }
-      });
+        CLIENT_LOOKUP_CACHE.set(text, response);
 
-      saveBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const saved = saveBtn.classList.contains('saved');
-        if (saved) {
-          await deleteWord(data.kanji);
-          saveBtn.innerHTML = '☆';
-          saveBtn.classList.remove('saved');
-          saveBtn.title = 'Lưu từ vào Dashboard';
-          saveBanner.style.display = 'none';
-        } else {
-          const defaultFolder = "Mặc định";
-          await saveWord(data, defaultFolder);
-          saveBtn.innerHTML = '★';
-          saveBtn.classList.add('saved');
-          saveBtn.title = 'Xóa khỏi danh sách lưu';
-          saveBanner.style.display = 'flex';
-          await loadFolderOptions(folderSelect, defaultFolder);
-        }
-      });
-
-      folderSelect.addEventListener('change', async (e) => {
-        e.stopPropagation();
-        const val = folderSelect.value;
-        if (val === '__new_folder__') {
-          const newFolderName = prompt('Nhập tên thư mục mới:');
-          if (newFolderName && newFolderName.trim()) {
-            const cleanName = newFolderName.trim();
-            await createFolder(cleanName);
-            await updateWordFolder(data.kanji, cleanName);
-            await loadFolderOptions(folderSelect, cleanName);
-          } else {
-            const words = await getSavedWords();
-            const currentWord = words.find(w => w.kanji === data.kanji);
-            await loadFolderOptions(folderSelect, currentWord ? currentWord.folder : "Mặc định");
-          }
-        } else {
-          await updateWordFolder(data.kanji, val);
-        }
-      });
-
-      // 2. Hàm dựng giao diện nội dung các Tab theo ngôn ngữ đã chọn
-      const renderPanes = (lang) => {
-        const vocabList = data.results || [data];
-        const kanjiList = data.kanjis || [];
-        const transObj = data.translation || { 
-          sourceText: text, 
-          translatedVi: data.meaningVi || data.meaning, 
-          translatedEn: data.meaningEn || '', 
-          translatedText: data.meaning 
-        };
-
-        // Render Cards Tab 1: Từ vựng
-        const vocabCardsHtml = vocabList.map(item => {
-          let meaningHtml = '';
-          const vi = item.meaningVi || (lang !== 'en' ? item.meaning : '');
-          const en = item.meaningEn || (lang === 'en' ? item.meaning : '');
-
-          if (lang === 'both') {
-            meaningHtml = `
-              ${vi ? `<div class="card-meaning-row"><span class="badge-lang vi">VI</span> <span>${vi}</span></div>` : ''}
-              ${en ? `<div class="card-meaning-row en"><span class="badge-lang en">EN</span> <span>${en}</span></div>` : ''}
-              ${!vi && !en ? `<div>${item.meaning || 'Chưa rõ nghĩa'}</div>` : ''}
-            `;
-          } else if (lang === 'en') {
-            meaningHtml = `<div>${en || vi || item.meaning || 'Chưa rõ nghĩa'}</div>`;
-          } else {
-            meaningHtml = `<div>${vi || item.meaning || 'Chưa rõ nghĩa'}</div>`;
-          }
-
-          return `
-            <div class="dict-card">
-              <div class="card-line-1">
-                <span class="card-word">${item.kanji}</span>
-                <span class="card-reading">${item.reading || ''}</span>
-              </div>
-              <div class="card-line-2">${item.hanviet || ''}</div>
-              <div class="card-line-3">${meaningHtml}</div>
-            </div>
-          `;
-        }).join('');
-
-        // Render Cards Tab 2: Hán tự
-        const kanjiCardsHtml = kanjiList.length > 0 ? kanjiList.map(k => {
-          const metaParts = [];
-          if (k.strokes) metaParts.push(`${k.strokes} nét`);
-          if (k.radical) metaParts.push(`Bộ: ${k.radical}`);
-          const metaStr = metaParts.length > 0 ? `<div class="kanji-meta">${metaParts.join(' • ')}</div>` : '';
-
-          return `
-            <div class="dict-card kanji-single-card">
-              <div class="kanji-main-char">${k.char}</div>
-              <div class="card-line-2">${k.hanviet}</div>
-              ${metaStr}
-              <div class="card-line-3">${k.meaning}</div>
-            </div>
-          `;
-        }).join('') : `
-          <div class="dict-card kanji-single-card">
-            <div class="card-line-3">Không tìm thấy Hán tự trong từ khóa này.</div>
-          </div>
-        `;
-
-        // Render Tab 3: Dịch
-        let transOutputHtml = '';
-        const transVi = transObj.translatedVi || (lang !== 'en' ? transObj.translatedText : '');
-        const transEn = transObj.translatedEn || (lang === 'en' ? transObj.translatedText : '');
-
-        if (lang === 'both') {
-          transOutputHtml = `
-            ${transVi ? `
-              <div class="trans-row">
-                <span class="badge-lang vi">VI</span>
-                <div class="trans-dst-text">${transVi}</div>
-              </div>` : ''}
-            ${transEn ? `
-              <div class="trans-row">
-                <span class="badge-lang en">EN</span>
-                <div class="trans-dst-text en-trans">${transEn}</div>
-              </div>` : ''}
-            ${!transVi && !transEn ? `<div class="trans-dst-text">${transObj.translatedText}</div>` : ''}
-          `;
-        } else if (lang === 'en') {
-          transOutputHtml = `<div class="trans-dst-text">${transEn || transVi || transObj.translatedText}</div>`;
-        } else {
-          transOutputHtml = `<div class="trans-dst-text">${transVi || transObj.translatedText}</div>`;
-        }
-
-        content.innerHTML = `
-          <!-- TAB 1: TỪ VỰNG -->
-          <div class="tab-pane" id="pane-vocab">
-            <div class="results-info-row">
-              <span class="search-icon">🔍</span>
-              <span>${vocabList.length} kết quả của từ vựng</span>
-              <span class="highlight-query">${data.query || text}</span>
-            </div>
-            <div class="cards-scroll-container">
-              ${vocabCardsHtml}
-            </div>
-          </div>
-
-          <!-- TAB 2: HÁN TỰ -->
-          <div class="tab-pane" id="pane-kanji" style="display: none;">
-            <div class="results-info-row">
-              <span class="search-icon">🔍</span>
-              <span>${kanjiList.length} kết quả của Hán tự</span>
-              <span class="highlight-query">${data.query || text}</span>
-            </div>
-            <div class="cards-scroll-container">
-              ${kanjiCardsHtml}
-            </div>
-          </div>
-
-          <!-- TAB 3: DỊCH -->
-          <div class="tab-pane" id="pane-trans" style="display: none;">
-            <div class="trans-box-view">
-              <div class="trans-src-text">${transObj.sourceText}</div>
-              ${transOutputHtml}
-              <div class="trans-action-hint">Phân tích đa ngữ siêu tốc</div>
-            </div>
-          </div>
-
-          <!-- FOOTER: BỘ CHỌN NGÔN NGỮ & CÀI ĐẶT -->
-          <div class="tooltip-footer">
-            <div class="lang-selector-group">
-              <span class="lang-lbl">Dịch:</span>
-              <button class="lang-btn ${lang === 'both' ? 'active' : ''}" data-lang="both" title="Song ngữ Việt - Anh">Song ngữ</button>
-              <button class="lang-btn ${lang === 'vi' ? 'active' : ''}" data-lang="vi" title="Chỉ dịch Tiếng Việt">Việt</button>
-              <button class="lang-btn ${lang === 'en' ? 'active' : ''}" data-lang="en" title="English only">Anh</button>
-            </div>
-            <span class="settings-hint-link" title="Mở trang cài đặt">Cài đặt</span>
-          </div>
-        `;
-
-        // 3. Xử lý chuyển đổi Tab mượt mà
-        const paneVocab = content.querySelector('#pane-vocab');
-        const paneKanji = content.querySelector('#pane-kanji');
-        const paneTrans = content.querySelector('#pane-trans');
-
-        const tabs = [
-          { btn: btnTabVocab, pane: paneVocab },
-          { btn: btnTabKanji, pane: paneKanji },
-          { btn: btnTabTrans, pane: paneTrans }
-        ];
-
-        // Giữ tab active hiện tại
-        const activeIdx = tabs.findIndex(t => t.btn.classList.contains('active'));
-        tabs.forEach((t, idx) => {
-          t.pane.style.display = (idx === (activeIdx !== -1 ? activeIdx : 0)) ? 'block' : 'none';
-        });
-
-        tabs.forEach(({ btn, pane }) => {
-          btn.onclick = (e) => {
-            e.stopPropagation();
-            tabs.forEach(t => {
-              t.btn.classList.remove('active');
-              t.pane.style.display = 'none';
-            });
-            btn.classList.add('active');
-            pane.style.display = 'block';
-          };
-        });
-
-        // 4. Lắng nghe chuyển đổi ngôn ngữ dịch ngay trên Tooltip
-        const langBtns = content.querySelectorAll('.lang-btn');
-        langBtns.forEach(b => {
-          b.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const newLang = b.dataset.lang;
-            if (newLang !== currentTargetLang) {
-              currentTargetLang = newLang;
-              if (typeof updateAppSettings === 'function') {
-                await updateAppSettings({ targetLang: newLang });
-              }
-              renderPanes(newLang);
-            }
-          });
-        });
-
-        // 5. Nút Cài đặt
-        const settingsLink = content.querySelector('.settings-hint-link');
-        if (settingsLink) {
-          settingsLink.addEventListener('click', (e) => {
-            e.stopPropagation();
-            alert('Bạn có thể tùy chỉnh Chế độ Tự Động Dịch và Ngôn Ngữ Dịch Mặc Định trong thẻ Cài đặt của Tiện ích mở rộng!');
-          });
-        }
-      };
-
-      // Render nội dung ban đầu
-      renderPanes(currentTargetLang);
-
-    } else {
-      loaderText.innerText = 'Không tìm thấy kết quả tra cứu.';
-      const spinnerEl = loader.querySelector('.spinner');
-      if (spinnerEl) spinnerEl.style.display = 'none';
-    }
-  });
+        handleLookupSuccess(response);
+      } else {
+        loaderText.innerText = 'Không tìm thấy kết quả tra cứu.';
+        const spinnerEl = loader.querySelector('.spinner');
+        if (spinnerEl) spinnerEl.style.display = 'none';
+      }
+    });
   } catch (err) {
     showReloadPrompt();
   }
@@ -1332,25 +1363,25 @@ function removeTooltip() {
 /**
  * Phát âm thanh của từ vựng tiếng Nhật (Hybrid: Google TTS & Web Speech API fallback)
  */
-function playPronunciation(text) {
-  const cleanText = text.replace(/\([^)]*\)/g, '').trim(); // Bỏ phần giải nghĩa phụ trong ngoặc nếu có
-  const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(cleanText)}`;
-  
-  const audio = new Audio(googleTtsUrl);
-  audio.play().catch((err) => {
-    console.warn('[JP-Dict] Không phát được Google TTS (do CSP). Dùng Web Speech API:', err);
-    
-    // Fallback sang Web Speech API (Không bị chặn bởi CSP)
-    if ('speechSynthesis' in window) {
+function playPronunciation(text, rate = 1.0) {
+  const cleanText = text.replace(/\([^)]*\)/g, '').trim();
+  if ('speechSynthesis' in window) {
+    try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'ja-JP';
-      utterance.rate = 0.85; // Tốc độ vừa phải
+      utterance.rate = rate;
+      const jaVoice = window.speechSynthesis.getVoices().find(v => v.lang === 'ja-JP' || v.lang.startsWith('ja'));
+      if (jaVoice) utterance.voice = jaVoice;
       window.speechSynthesis.speak(utterance);
-    } else {
-      console.error('[JP-Dict] Trình duyệt không hỗ trợ Web Speech API.');
-    }
-  });
+      return;
+    } catch (e) {}
+  }
+
+  const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=${encodeURIComponent(cleanText)}`;
+  const audio = new Audio(googleTtsUrl);
+  audio.playbackRate = rate;
+  audio.play().catch(() => {});
 }
 
 /**
@@ -1376,3 +1407,529 @@ async function loadFolderOptions(selectElement, selectedFolder = "Mặc định"
   newFolderOption.innerText = '+ Tạo thư mục...';
   selectElement.appendChild(newFolderOption);
 }
+
+// ==========================================
+// TÍNH NĂNG TỰ ĐỘNG CHÈN FURIGANA TOÀN TRANG
+// ==========================================
+
+function ensureGlobalFuriganaStyles() {
+  if (document.getElementById('jpex-furigana-global-style')) return;
+  const styleEl = document.createElement('style');
+  styleEl.id = 'jpex-furigana-global-style';
+  styleEl.textContent = `
+    .jpex-ruby {
+      ruby-position: over !important;
+      -webkit-ruby-position: before !important;
+    }
+    .jpex-rt {
+      font-size: 0.65em !important;
+      color: #0284c7 !important;
+      user-select: none !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif !important;
+      font-weight: 500 !important;
+      line-height: 1 !important;
+      letter-spacing: 0.02em !important;
+    }
+    #jpex-furigana-toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 2147483647;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #jpex-furigana-toast.jpex-furi-toast-show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #jpex-furigana-toast.active {
+      background: #0284c7;
+      color: #ffffff;
+      border: 1px solid #38bdf8;
+    }
+    #jpex-furigana-toast.inactive {
+      background: #27272a;
+      color: #e4e4e7;
+      border: 1px solid #3f3f46;
+    }
+  `;
+  (document.head || document.documentElement).appendChild(styleEl);
+}
+
+function showFuriganaToast(isActive) {
+  ensureGlobalFuriganaStyles();
+  let toast = document.getElementById('jpex-furigana-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'jpex-furigana-toast';
+    document.body.appendChild(toast);
+  }
+  toast.innerText = isActive ? '🈓 Furigana: ĐÃ BẬT ✨' : '🈓 Furigana: ĐÃ TẮT';
+  toast.className = 'jpex-furi-toast-show ' + (isActive ? 'active' : 'inactive');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.className = '';
+  }, 1600);
+}
+
+async function loadFuriganaDictionaries() {
+  if (compoundWordsCache && kanjiReadingsCache) return;
+
+  try {
+    const [cw, kr] = await Promise.all([
+      !compoundWordsCache
+        ? fetch(chrome.runtime.getURL('data/compound_words.json')).then(r => r.json()).catch(() => ({}))
+        : compoundWordsCache,
+      !kanjiReadingsCache
+        ? fetch(chrome.runtime.getURL('data/kanji_readings.json')).then(r => r.json()).catch(() => ({}))
+        : kanjiReadingsCache
+    ]);
+
+    compoundWordsCache = compoundWordsCache || cw;
+    kanjiReadingsCache = kanjiReadingsCache || kr;
+  } catch (err) {
+    console.error('[JP-Dict Content] Lỗi tải từ điển Furigana:', err);
+  }
+}
+
+function createRubyNode(kanji, reading) {
+  const ruby = document.createElement('ruby');
+  ruby.className = 'jpex-ruby';
+  ruby.appendChild(document.createTextNode(kanji));
+  const rt = document.createElement('rt');
+  rt.className = 'jpex-rt';
+  rt.innerText = reading;
+  ruby.appendChild(rt);
+  return ruby;
+}
+
+function annotateTextToFragment(text, cw, kr) {
+  const fragment = document.createDocumentFragment();
+  let i = 0;
+  while (i < text.length) {
+    const char = text[i];
+    if (/[\u4e00-\u9faf]/.test(char)) {
+      let matched = false;
+      if (cw) {
+        for (let len = Math.min(8, text.length - i); len >= 2; len--) {
+          const sub = text.substr(i, len);
+          if (cw[sub]) {
+            const fullReading = cw[sub];
+            const kanaMatch = sub.match(/[\u3040-\u309f]+$/);
+            if (kanaMatch && fullReading.endsWith(kanaMatch[0])) {
+              const kanjiPart = sub.substring(0, sub.length - kanaMatch[0].length);
+              const rubyPart = fullReading.substring(0, fullReading.length - kanaMatch[0].length);
+              fragment.appendChild(createRubyNode(kanjiPart, rubyPart));
+              fragment.appendChild(document.createTextNode(kanaMatch[0]));
+            } else {
+              fragment.appendChild(createRubyNode(sub, fullReading));
+            }
+            i += len;
+            matched = true;
+            break;
+          }
+        }
+      }
+
+      if (!matched) {
+        let r = (kr && kr[char] && kr[char].f) ? kr[char].f.replace(/-/g, '') : '';
+        if (r) {
+          fragment.appendChild(createRubyNode(char, r));
+        } else {
+          fragment.appendChild(document.createTextNode(char));
+        }
+        i++;
+      }
+    } else {
+      fragment.appendChild(document.createTextNode(char));
+      i++;
+    }
+  }
+  return fragment;
+}
+
+async function injectFuriganaOnPage() {
+  ensureGlobalFuriganaStyles();
+  await loadFuriganaDictionaries();
+
+  const kanjiRegex = /[\u4e00-\u9faf]/;
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: function(node) {
+        if (!node.nodeValue || !kanjiRegex.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        const tag = parent.tagName.toLowerCase();
+        if (['script', 'style', 'textarea', 'input', 'ruby', 'rt', 'rp', 'pre', 'code'].includes(tag)) return NodeFilter.FILTER_REJECT;
+        if (parent.closest('#jp-dict-tooltip-host') || parent.closest('#jpex-furigana-toast')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const textNodes = [];
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode);
+    if (textNodes.length >= 1000) break;
+  }
+
+  textNodes.forEach(node => {
+    if (!node.parentNode || !kanjiRegex.test(node.nodeValue)) return;
+    const fragment = annotateTextToFragment(node.nodeValue, compoundWordsCache, kanjiReadingsCache);
+    node.parentNode.replaceChild(fragment, node);
+  });
+}
+
+function removeFuriganaFromPage() {
+  document.querySelectorAll('.jpex-ruby').forEach(ruby => {
+    let text = '';
+    ruby.childNodes.forEach(child => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        text += child.nodeValue;
+      } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName !== 'RT' && child.tagName !== 'RP') {
+        text += child.textContent;
+      }
+    });
+    ruby.replaceWith(document.createTextNode(text));
+  });
+  document.body.normalize();
+}
+
+async function toggleFuriganaInjection(forceState) {
+  isFuriganaActive = (typeof forceState === 'boolean') ? forceState : !isFuriganaActive;
+  showFuriganaToast(isFuriganaActive);
+  
+  if (chrome.storage && chrome.storage.local) {
+    chrome.storage.local.set({ furiganaEnabled: isFuriganaActive });
+  }
+
+  if (isFuriganaActive) {
+    await injectFuriganaOnPage();
+  } else {
+    removeFuriganaFromPage();
+  }
+}
+
+function matchesFuriganaHotkey(e, hotkeyStr) {
+  if (!hotkeyStr) return false;
+  const parts = hotkeyStr.split('+').map(p => p.trim().toUpperCase());
+  const key = parts[parts.length - 1];
+  const needAlt = parts.includes('ALT');
+  const needCtrl = parts.includes('CTRL') || parts.includes('CONTROL');
+  const needShift = parts.includes('SHIFT');
+  const needMeta = parts.includes('META') || parts.includes('CMD');
+
+  if (needAlt !== e.altKey) return false;
+  if (needCtrl !== e.ctrlKey) return false;
+  if (needShift !== e.shiftKey) return false;
+  if (needMeta !== e.metaKey) return false;
+
+  return e.key.toUpperCase() === key || e.code.toUpperCase() === ('KEY' + key);
+}
+
+document.addEventListener('keydown', (e) => {
+  const activeEl = document.activeElement;
+  if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+    return;
+  }
+
+  if (matchesFuriganaHotkey(e, furiganaHotkey)) {
+    e.preventDefault();
+    toggleFuriganaInjection();
+  }
+
+  // Phím tắt Chụp vùng màn hình dịch chữ (Manga / Screen OCR): Alt + S
+  if (e.altKey && (e.key.toUpperCase() === 'S' || e.code === 'KeyS')) {
+    e.preventDefault();
+    initScreenOcrOverlay();
+  }
+});
+
+// ========================================================
+// TÍNH NĂNG CHỤP VÙNG MÀN HÌNH DỊCH CHỮ (MANGA / SCREEN OCR)
+// ========================================================
+
+function showOcrToast(message, isSuccess = true) {
+  let toast = document.getElementById('jpex-ocr-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'jpex-ocr-toast';
+    Object.assign(toast.style, {
+      position: 'fixed',
+      top: '24px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: '2147483647',
+      padding: '9px 18px',
+      borderRadius: '8px',
+      fontSize: '13px',
+      fontWeight: '600',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+      pointerEvents: 'none',
+      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+      opacity: '0'
+    });
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.style.background = isSuccess ? '#0284c7' : '#dc2626';
+  toast.style.color = '#ffffff';
+  toast.style.border = isSuccess ? '1px solid #38bdf8' : '1px solid #f87171';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(-10px)';
+  }, 2500);
+}
+
+function initScreenOcrOverlay() {
+  const existingOverlay = document.getElementById('jpex-ocr-overlay');
+  if (existingOverlay) {
+    existingOverlay.remove();
+    return;
+  }
+
+  removeFloatingIcon();
+  removeTooltip();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'jpex-ocr-overlay';
+  Object.assign(overlay.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100vw',
+    height: '100vh',
+    zIndex: '2147483645',
+    background: 'rgba(0, 0, 0, 0.28)',
+    cursor: 'crosshair',
+    userSelect: 'none',
+    webkitUserSelect: 'none'
+  });
+
+  const hint = document.createElement('div');
+  hint.id = 'jpex-ocr-hint';
+  hint.innerHTML = `
+    <span style="display: inline-flex; align-items: center; gap: 6px;">
+      <span style="font-size: 15px;">📸</span> 
+      <span>Kéo chuột khoanh vùng chữ tiếng Nhật cần dịch</span>
+    </span>
+    <span style="color: #a1a1aa; font-size: 11px; padding: 2px 7px; background: #27272a; border-radius: 4px; font-weight: 500;">Nhấn ESC để hủy</span>
+  `;
+  Object.assign(hint.style, {
+    position: 'fixed',
+    top: '20px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: '#18181b',
+    color: '#ffffff',
+    padding: '8px 18px',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: '600',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.55)',
+    border: '1px solid #3f3f46',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    pointerEvents: 'none',
+    zIndex: '2147483647'
+  });
+  overlay.appendChild(hint);
+
+  const box = document.createElement('div');
+  box.id = 'jpex-ocr-box';
+  Object.assign(box.style, {
+    position: 'fixed',
+    border: '2px dashed #38bdf8',
+    background: 'rgba(56, 189, 248, 0.12)',
+    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.45)',
+    pointerEvents: 'none',
+    display: 'none',
+    zIndex: '2147483646'
+  });
+  overlay.appendChild(box);
+
+  let isSelecting = false;
+  let startX = 0;
+  let startY = 0;
+  let currentRect = null;
+
+  const onMouseDown = (e) => {
+    if (e.button !== 0) return;
+    isSelecting = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    box.style.left = `${startX}px`;
+    box.style.top = `${startY}px`;
+    box.style.width = '0px';
+    box.style.height = '0px';
+    box.style.display = 'block';
+  };
+
+  const onMouseMove = (e) => {
+    if (!isSelecting) return;
+    const x = Math.min(startX, e.clientX);
+    const y = Math.min(startY, e.clientY);
+    const w = Math.abs(e.clientX - startX);
+    const h = Math.abs(e.clientY - startY);
+
+    box.style.left = `${x}px`;
+    box.style.top = `${y}px`;
+    box.style.width = `${w}px`;
+    box.style.height = `${h}px`;
+    currentRect = { x, y, width: w, height: h };
+  };
+
+  const cleanupOverlay = () => {
+    document.removeEventListener('keydown', onKeyDown);
+    overlay.remove();
+  };
+
+  const onMouseUp = (e) => {
+    if (!isSelecting) return;
+    isSelecting = false;
+
+    if (!currentRect || currentRect.width < 12 || currentRect.height < 12) {
+      cleanupOverlay();
+      return;
+    }
+
+    const rect = { ...currentRect };
+    cleanupOverlay();
+
+    // Hiển thị chỉ báo loading tại vị trí vừa khoanh vùng
+    const spinner = document.createElement('div');
+    spinner.id = 'jpex-ocr-spinner';
+    spinner.innerHTML = `
+      <div style="width: 14px; height: 14px; border: 2px solid #38bdf8; border-top-color: transparent; border-radius: 50%; animation: jpex-spin 0.8s linear infinite;"></div>
+      <span>Đang nhận diện chữ tiếng Nhật...</span>
+    `;
+    Object.assign(spinner.style, {
+      position: 'fixed',
+      left: `${Math.max(10, rect.x)}px`,
+      top: `${rect.y + rect.height + 8}px`,
+      zIndex: '2147483647',
+      background: '#18181b',
+      color: '#38bdf8',
+      border: '1px solid #0284c7',
+      borderRadius: '8px',
+      padding: '8px 14px',
+      fontSize: '12px',
+      fontWeight: '600',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.55)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    });
+    document.body.appendChild(spinner);
+
+    // Gửi yêu cầu chụp toàn màn hình tab
+    chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (capRes) => {
+      if (!capRes || !capRes.success || !capRes.dataUrl) {
+        spinner.remove();
+        showOcrToast('❌ Không thể chụp màn hình. Vui lòng thử lại!', false);
+        return;
+      }
+
+      // Cắt ảnh theo tọa độ vùng chọn bằng Canvas
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const dpr = window.devicePixelRatio || 1;
+          const canvas = document.createElement('canvas');
+          canvas.width = rect.width * dpr;
+          canvas.height = rect.height * dpr;
+          const ctx = canvas.getContext('2d');
+
+          ctx.drawImage(
+            img,
+            rect.x * dpr,
+            rect.y * dpr,
+            rect.width * dpr,
+            rect.height * dpr,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          const croppedBase64 = canvas.toDataURL('image/png');
+
+          // Gửi ảnh cắt tới background.js để gọi OCR
+          chrome.runtime.sendMessage({ action: 'performOcr', base64Image: croppedBase64 }, (ocrRes) => {
+            spinner.remove();
+            if (ocrRes && ocrRes.success && ocrRes.text) {
+              let cleanText = ocrRes.text.trim();
+              // Chuẩn hóa xóa khoảng trắng thừa giữa các ký tự tiếng Nhật
+              cleanText = cleanText.replace(/([\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf])\s+([\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf])/g, '$1$2');
+
+              const targetRect = {
+                left: rect.x,
+                right: rect.x + rect.width,
+                top: rect.y,
+                bottom: rect.y + rect.height,
+                width: rect.width,
+                height: rect.height
+              };
+
+              showTooltip(cleanText, targetRect);
+            } else {
+              showOcrToast('❌ Không tìm thấy chữ trong vùng chọn. Hãy khoanh vùng sát chữ hơn!', false);
+            }
+          });
+        } catch (err) {
+          spinner.remove();
+          showOcrToast('❌ Lỗi xử lý hình ảnh: ' + err.message, false);
+        }
+      };
+      img.onerror = () => {
+        spinner.remove();
+        showOcrToast('❌ Không tải được dữ liệu ảnh chụp.', false);
+      };
+      img.src = capRes.dataUrl;
+    });
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      cleanupOverlay();
+    }
+  };
+
+  overlay.addEventListener('mousedown', onMouseDown);
+  overlay.addEventListener('mousemove', onMouseMove);
+  overlay.addEventListener('mouseup', onMouseUp);
+  overlay.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    cleanupOverlay();
+  });
+  document.addEventListener('keydown', onKeyDown);
+
+  document.body.appendChild(overlay);
+}
+
+// Lắng nghe lệnh kích hoạt OCR từ Popup Extension
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'startScreenOcr') {
+    initScreenOcrOverlay();
+    sendResponse({ success: true });
+  }
+});

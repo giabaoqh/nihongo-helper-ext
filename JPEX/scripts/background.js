@@ -123,40 +123,57 @@ let localKanjiMap = null;
 let localKanjiDetails = null;
 let localDictList = null;
 let localDictMap = null;
+let localKanjiReadings = null;
+let localCompoundWords = null;
+let isDataLoading = false;
+let dataLoadPromise = null;
+
+const TRANSLATION_CACHE = new Map();
+const MAX_CACHE_SIZE = 500;
 
 /**
- * Đảm bảo nạp sẵn dữ liệu Offline từ file JSON nội bộ trong Extension
+ * Đảm bảo nạp sẵn dữ liệu Offline từ file JSON nội bộ trong Extension (Nạp song song siêu tốc)
  */
 async function ensureLocalDataLoaded() {
-  if (localKanjiMap && localKanjiDetails && localDictMap) return;
+  if (localKanjiMap && localKanjiDetails && localDictMap && localKanjiReadings && localCompoundWords ) return;
+  if (isDataLoading && dataLoadPromise) return dataLoadPromise;
 
-  try {
-    if (!localKanjiMap) {
-      const kvRes = await fetch(chrome.runtime.getURL('data/kanji_hanviet.json'));
-      localKanjiMap = await kvRes.json();
-      console.log(`[JP-Dict Background] Đã nạp thành công Bảng Hán Việt offline (${Object.keys(localKanjiMap).length} Hán tự).`);
-    }
+  isDataLoading = true;
+  dataLoadPromise = (async () => {
+    try {
+      const [kv, kd, kr, dict, cw] = await Promise.all([
+        !localKanjiMap ? fetch(chrome.runtime.getURL('data/kanji_hanviet.json')).then(r => r.json()).catch(() => ({})) : localKanjiMap,
+        !localKanjiDetails ? fetch(chrome.runtime.getURL('data/kanji_details.json')).then(r => r.json()).catch(() => ({})) : localKanjiDetails,
+        !localKanjiReadings ? fetch(chrome.runtime.getURL('data/kanji_readings.json')).then(r => r.json()).catch(() => ({})) : localKanjiReadings,
+        !localDictList ? fetch(chrome.runtime.getURL('data/core_dict.json')).then(r => r.json()).catch(() => ([])) : localDictList,
+        !localCompoundWords ? fetch(chrome.runtime.getURL('data/compound_words.json')).then(r => r.json()).catch(() => ({})) : localCompoundWords,
+              ]);
 
-    if (!localKanjiDetails) {
-      const kdRes = await fetch(chrome.runtime.getURL('data/kanji_details.json'));
-      localKanjiDetails = await kdRes.json();
-      console.log(`[JP-Dict Background] Đã nạp thành công Bảng Giải nghĩa Hán tự offline (${Object.keys(localKanjiDetails).length} mục).`);
+      localKanjiMap = localKanjiMap || kv;
+      localKanjiDetails = localKanjiDetails || kd;
+      localKanjiReadings = localKanjiReadings || kr;
+      localCompoundWords = localCompoundWords || cw;
+      
+      if (!localDictMap && Array.isArray(dict)) {
+        localDictList = dict;
+        localDictMap = new Map();
+        localDictList.forEach(item => {
+          if (item.kanji) localDictMap.set(item.kanji, item);
+          if (item.kana && !localDictMap.has(item.kana)) localDictMap.set(item.kana, item);
+        });
+      }
+    } catch (err) {
+      console.error('[JP-Dict Background] Lỗi nạp Local Data:', err);
+    } finally {
+      isDataLoading = false;
     }
+  })();
 
-    if (!localDictMap) {
-      const dictRes = await fetch(chrome.runtime.getURL('data/core_dict.json'));
-      localDictList = await dictRes.json();
-      localDictMap = new Map();
-      localDictList.forEach(item => {
-        if (item.kanji) localDictMap.set(item.kanji, item);
-        if (item.kana && !localDictMap.has(item.kana)) localDictMap.set(item.kana, item);
-      });
-      console.log(`[JP-Dict Background] Đã nạp ${localDictList.length} từ vựng cốt lõi vào bộ nhớ đệm.`);
-    }
-  } catch (err) {
-    console.error('[JP-Dict Background] Lỗi nạp Local Data:', err);
-  }
+  return dataLoadPromise;
 }
+
+// Tự động nạp trước dữ liệu khi Service Worker khởi động
+ensureLocalDataLoaded().catch(() => {});
 
 /**
  * Tra cứu âm Hán Việt ngoại tuyến từ từ điển Kanji nội bộ
@@ -316,14 +333,115 @@ function getWordCandidates(text) {
 }
 
 // Lắng nghe yêu cầu dịch từ content script hoặc popup
+// Lắng nghe yêu cầu từ content script hoặc popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'openExtensionPopup') {
+    handleOpenExtensionPopup(sendResponse);
+    return true;
+  }
+
   if (request.action === 'translate') {
     handleTranslation(request.text, request.targetLang)
       .then(sendResponse)
       .catch(err => sendResponse({ success: false, error: err.message }));
-    return true; // Giữ kênh giao tiếp bất đồng bộ mở
+    return true;
+  }
+
+  // Chụp ảnh màn hình tab hiện tại cho Manga/Screen OCR
+  if (request.action === 'captureVisibleTab') {
+    chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
+      if (chrome.runtime.lastError || !dataUrl) {
+        sendResponse({
+          success: false,
+          error: chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Không chụp được màn hình'
+        });
+      } else {
+        sendResponse({ success: true, dataUrl: dataUrl });
+      }
+    });
+    return true;
+  }
+
+  // Gửi ảnh cắt lên OCR API nhận diện chữ tiếng Nhật
+  if (request.action === 'performOcr') {
+    handleOcrRequest(request.base64Image)
+      .then(sendResponse)
+      .catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
   }
 });
+
+/**
+ * Mở Popup / Dashboard Cài đặt của Extension tại góc trên bên phải
+ */
+function handleOpenExtensionPopup(sendResponse) {
+  chrome.storage.local.set({ activePopupTab: 'settings-tab' }, () => {
+    // 1. Thử gọi chrome.action.openPopup() (Manifest V3)
+    if (chrome.action && typeof chrome.action.openPopup === 'function') {
+      try {
+        const popupPromise = chrome.action.openPopup();
+        if (popupPromise && typeof popupPromise.then === 'function') {
+          popupPromise
+            .then(() => {
+              if (sendResponse) sendResponse({ success: true, mode: 'action' });
+            })
+            .catch((err) => {
+              console.warn('[JPEX] chrome.action.openPopup không được phép hoặc lỗi, chuyển sang mở cửa sổ popup:', err);
+              openPopupWindow(sendResponse);
+            });
+          return;
+        }
+      } catch (e) {
+        console.warn('[JPEX] chrome.action.openPopup exception:', e);
+      }
+    }
+    // 2. Dự phòng: Mở cửa sổ popup góc trên bên phải
+    openPopupWindow(sendResponse);
+  });
+}
+
+function openPopupWindow(sendResponse) {
+  const width = 420;
+  const height = 620;
+  if (chrome.windows && chrome.windows.getLastFocused) {
+    chrome.windows.getLastFocused({ populate: false }, (win) => {
+      const screenWidth = (win && win.width) ? win.width : 1280;
+      const winLeft = (win && typeof win.left === 'number') ? win.left : 0;
+      const winTop = (win && typeof win.top === 'number') ? win.top : 0;
+
+      const left = Math.max(0, winLeft + screenWidth - width - 25);
+      const top = Math.max(0, winTop + 75);
+
+      chrome.windows.create({
+        url: chrome.runtime.getURL('popup.html?tab=settings'),
+        type: 'popup',
+        width: width,
+        height: height,
+        left: left,
+        top: top,
+        focused: true
+      }, (createdWin) => {
+        if (chrome.runtime.lastError || !createdWin) {
+          fallbackOpenTab(sendResponse);
+        } else {
+          if (sendResponse) sendResponse({ success: true, mode: 'window' });
+        }
+      });
+    });
+  } else {
+    fallbackOpenTab(sendResponse);
+  }
+}
+
+function fallbackOpenTab(sendResponse) {
+  if (chrome.tabs && chrome.tabs.create) {
+    chrome.tabs.create({ url: chrome.runtime.getURL('popup.html?tab=settings') }, () => {
+      if (sendResponse) sendResponse({ success: true, mode: 'tab' });
+    });
+  } else {
+    if (sendResponse) sendResponse({ success: false });
+  }
+}
 
 /**
  * Hàm fetch tùy chỉnh hỗ trợ timeout
@@ -362,6 +480,9 @@ async function getPreferredTargetLang() {
  * Hàm xử lý tra cứu từ vựng đa dạng - Trả về đầy đủ 3 Tab: Từ vựng, Hán tự, Dịch
  * Hỗ trợ đa ngôn ngữ: 'vi' (Tiếng Việt), 'en' (Tiếng Anh), 'both' (Song ngữ Việt-Anh)
  */
+/**
+ * Xử lý yêu cầu dịch thuật và tra cứu đa nguồn siêu tốc
+ */
 async function handleTranslation(text, explicitTargetLang) {
   try {
     const cleanText = (text || '').trim();
@@ -369,56 +490,52 @@ async function handleTranslation(text, explicitTargetLang) {
       return { success: false, error: 'Văn bản trống' };
     }
 
-    const targetLang = explicitTargetLang || (await getPreferredTargetLang());
+    const targetLang = 'vi';
+    const meaningEn = '';
+    const enMeaning = '';
+    const cacheKey = `${cleanText}_vi`;
 
-    // 1. Luôn bảo đảm dữ liệu Offline đã sẵn sàng
+    // 1. Kiểm tra Cache bộ nhớ trước tiên (Trả kết quả trong 0ms)
+    if (TRANSLATION_CACHE.has(cacheKey)) {
+      return TRANSLATION_CACHE.get(cacheKey);
+    }
+
+    // 2. Bảo đảm dữ liệu ngoại tuyến đã sẵn sàng
     await ensureLocalDataLoaded();
 
-    // 2. Chạy cuộc gọi Google Translate để lấy bản dịch song ngữ Việt & Anh cho toàn bộ câu/từ
-    const translateViPromise = fetchWithTimeout(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=vi&dt=t&q=${encodeURIComponent(cleanText)}`, { timeout: 3500 })
+    // Khởi chạy song song Google Translate Tiếng Việt & Jisho
+    const translateViPromise = fetchWithTimeout(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=vi&dt=t&q=${encodeURIComponent(cleanText)}`,
+      { timeout: 1800 }
+    )
       .then(r => r.json())
       .then(json => (json && json[0]) ? json[0].map(x => x[0]).join('') : '')
       .catch(() => '');
 
-    const translateEnPromise = fetchWithTimeout(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=en&dt=t&q=${encodeURIComponent(cleanText)}`, { timeout: 3500 })
-      .then(r => r.json())
-      .then(json => (json && json[0]) ? json[0].map(x => x[0]).join('') : '')
-      .catch(() => '');
-
-    // 3. Phân tích các dạng nguyên mẫu & bỏ trợ từ
     const candidates = getWordCandidates(cleanText);
 
-    // Chạy cuộc gọi Jisho API lấy danh sách nhiều kết quả từ vựng & các cách đọc khác nhau
-    const jishoPromise = (async () => {
-      let res = await fetchWithTimeout(`https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(cleanText)}`, { timeout: 3500 })
-        .then(r => r.json())
-        .catch(() => null);
-
-      // Nếu từ gốc không có kết quả từ Jisho, thử tra cứu các dạng nguyên mẫu đã bóc tách
-      if ((!res || !res.data || res.data.length === 0) && candidates.length > 0) {
-        for (const candidate of candidates.slice(0, 2)) {
-          const candRes = await fetchWithTimeout(`https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(candidate)}`, { timeout: 2500 })
-            .then(r => r.json())
-            .catch(() => null);
-          if (candRes && candRes.data && candRes.data.length > 0) {
-            return candRes;
-          }
-        }
+    // Cuộc gọi Jisho với header trình duyệt và timeout 1500ms
+    const jishoPromise = fetchWithTimeout(
+      `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(cleanText)}`,
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        },
+        timeout: 1500
       }
-      return res;
-    })();
+    )
+      .then(r => r.json())
+      .catch(() => null);
 
-    // Chờ các dịch vụ hoàn thành
-    const [meaningVi, meaningEn, jishoData] = await Promise.all([
+    const [meaningVi, jishoData] = await Promise.all([
       translateViPromise,
-      translateEnPromise,
       jishoPromise
     ]);
 
     // 4. XÂY DỰNG DANH SÁCH KẾT QUẢ TỪ VỰNG (Tab 1: Từ vựng)
     const vocabResults = [];
 
-    // Ưu tiên gom các kết quả trùng khớp từ Local Dictionary trước
+    // Ưu tiên 1: Tra cứu từ dữ liệu cục bộ core_dict
     if (localDictList) {
       const searchTerms = [cleanText, ...candidates];
       localDictList.forEach(item => {
@@ -443,9 +560,24 @@ async function handleTranslation(text, explicitTargetLang) {
       });
     }
 
-    // Bổ sung các kết quả đa dạng từ Jisho API (như ảnh mẫu: 年、歳 とし / 歳、才 さい ...)
+    // Ưu tiên 2: Bổ sung cách đọc từ compound_words nếu có
+    if (localCompoundWords && localCompoundWords[cleanText] && !vocabResults.some(r => r.kanji === cleanText)) {
+      const hvClean = (getLocalHanViet(cleanText) || '').toUpperCase();
+      const defMeaning = meaningVi || (hvClean ? ('Hán Việt: ' + hvClean) : 'Từ vựng tiếng Nhật');
+      vocabResults.push({
+        kanji: cleanText,
+        reading: localCompoundWords[cleanText],
+        hanviet: hvClean,
+        meaningVi: defMeaning,
+        meaning: defMeaning,
+        jlpt: '',
+        pos: 'Từ vựng'
+      });
+    }
+
+    // Ưu tiên 3: Bổ sung các kết quả từ Jisho API
     if (jishoData && jishoData.data && jishoData.data.length > 0) {
-      const topEntries = jishoData.data.slice(0, 5); // Lấy tối đa 5 kết quả
+      const topEntries = jishoData.data.slice(0, 4);
       const sensesToTranslate = [];
 
       topEntries.forEach((entry) => {
@@ -483,13 +615,15 @@ async function handleTranslation(text, explicitTargetLang) {
         });
       });
 
-      // Dịch nghĩa tiếng Anh sang tiếng Việt theo từng dòng (\n) để giữ cấu trúc chính xác
+      // Dịch nhanh các nghĩa tiếng Anh sang tiếng Việt (timeout ngắn 1000ms để không làm chậm)
       if (sensesToTranslate.length > 0) {
         try {
           const joinedEng = sensesToTranslate.map(s => s.enDef).join('\n');
-          const batchTrans = await fetchWithTimeout(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(joinedEng)}`, { timeout: 3500 })
-            .then(r => r.json());
-          
+          const batchTrans = await fetchWithTimeout(
+            `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(joinedEng)}`,
+            { timeout: 1000 }
+          ).then(r => r.json()).catch(() => null);
+
           if (batchTrans && batchTrans[0]) {
             const fullVi = batchTrans[0].map(x => x[0]).join('');
             const splitVi = fullVi.split('\n').map(m => m.trim());
@@ -497,31 +631,19 @@ async function handleTranslation(text, explicitTargetLang) {
               if (splitVi[i]) s.meaningVi = splitVi[i];
             });
           }
-        } catch (e) {
-          // Bỏ qua lỗi dịch phụ
-        }
+        } catch (e) {}
 
-        // Đưa vào danh sách kết quả (loại trùng lặp theo cặp Kanji + Reading)
         sensesToTranslate.forEach(jItem => {
           const isDupe = vocabResults.some(r => r.kanji === jItem.kanji && r.reading === jItem.reading);
           if (!isDupe && vocabResults.length < 8) {
             const viMeaning = jItem.meaningVi || meaningVi || '';
-            const enMeaning = jItem.meaningEn || '';
-
-            // Định dạng nghĩa theo thiết lập ngôn ngữ targetLang
             let displayMeaning = viMeaning;
-            if (targetLang === 'en') {
-              displayMeaning = enMeaning || viMeaning;
-            } else if (targetLang === 'both') {
-              displayMeaning = viMeaning ? (enMeaning ? `${viMeaning} (${enMeaning})` : viMeaning) : enMeaning;
-            }
 
             vocabResults.push({
               kanji: jItem.kanji,
               reading: jItem.reading,
               hanviet: jItem.hanviet,
               meaningVi: viMeaning,
-              meaningEn: enMeaning,
               meaning: displayMeaning || 'Chưa rõ nghĩa',
               jlpt: jItem.jlpt,
               pos: jItem.pos
@@ -533,22 +655,15 @@ async function handleTranslation(text, explicitTargetLang) {
 
     // Nếu vẫn chưa có kết quả nào, tạo 1 kết quả cơ bản từ Google Translate
     if (vocabResults.length === 0) {
-      const hv = await getHanVietWithFallback(cleanText);
+      const hv = getLocalHanViet(cleanText);
       const viMeaning = meaningVi || '';
-      const enMeaning = meaningEn || '';
       let displayMeaning = viMeaning;
-      if (targetLang === 'en') {
-        displayMeaning = enMeaning || viMeaning;
-      } else if (targetLang === 'both') {
-        displayMeaning = viMeaning ? (enMeaning ? `${viMeaning} (${enMeaning})` : viMeaning) : enMeaning;
-      }
 
       vocabResults.push({
         kanji: cleanText,
-        reading: cleanText,
+        reading: (localCompoundWords && localCompoundWords[cleanText]) || cleanText,
         hanviet: (hv || '').toUpperCase(),
         meaningVi: viMeaning,
-        meaningEn: enMeaning,
         meaning: displayMeaning || 'Không tìm thấy kết quả',
         jlpt: '',
         pos: 'Từ vựng'
@@ -557,75 +672,164 @@ async function handleTranslation(text, explicitTargetLang) {
 
     // 5. XÂY DỰNG DANH SÁCH HÁN TỰ (Tab 2: Hán tự)
     const kanjiChars = cleanText.match(/[\u4e00-\u9faf\u3400-\u4dbf]/g) || [];
-    // Nếu trong cleanText không có Kanji nhưng kết quả từ vựng có Kanji, lấy Kanji từ kết quả đầu tiên
-    const targetKanjiList = kanjiChars.length > 0 
+    const targetKanjiList = kanjiChars.length > 0
       ? [...new Set(kanjiChars)]
       : (vocabResults[0] && vocabResults[0].kanji ? [...new Set(vocabResults[0].kanji.match(/[\u4e00-\u9faf\u3400-\u4dbf]/g) || [])] : []);
 
     const kanjiDetails = [];
-    for (const char of targetKanjiList) {
+    // Xử lý song song cho các chữ Kanji
+    await Promise.all(targetKanjiList.map(async (char) => {
       const detail = (localKanjiDetails && localKanjiDetails[char]) ? localKanjiDetails[char] : null;
       let hv = detail && detail.hanviet ? detail.hanviet : ((localKanjiMap && localKanjiMap[char]) ? localKanjiMap[char].toUpperCase() : '');
-      
+
       if (!hv || hv === 'CHƯA RÕ') {
-        hv = (await getHanVietWithFallback(char) || '').toUpperCase();
+        hv = (getLocalHanViet(char) || '').toUpperCase();
       }
 
-      let def = (detail && detail.meaning && detail.meaning !== 'Chữ Hán tiếng Nhật') 
-        ? detail.meaning 
+      let def = (detail && detail.meaning && detail.meaning !== 'Chữ Hán tiếng Nhật')
+        ? detail.meaning
         : (KANJI_CORE_MEANING[char] || '');
-      
+
       if (!def) {
         def = 'Chữ Hán trong tiếng Nhật.';
       }
 
+      let readingStr = '';
+      if (localKanjiReadings && localKanjiReadings[char] && localKanjiReadings[char].r) {
+        readingStr = localKanjiReadings[char].r;
+      } else if (detail && (detail.reading || detail.kana)) {
+        readingStr = detail.reading || detail.kana;
+      } else if (vocabResults) {
+        const matchedVocab = vocabResults.find(v => v.kanji === char || (v.kanji && v.kanji.includes(char)));
+        if (matchedVocab && matchedVocab.reading) readingStr = matchedVocab.reading;
+      }
+
       kanjiDetails.push({
         char: char,
+        reading: readingStr || '',
         hanviet: hv || 'CHƯA RÕ',
         meaning: def,
         strokes: detail && detail.strokes ? detail.strokes : '',
         radical: detail && detail.radical ? detail.radical : ''
       });
-    }
+    }));
+
+    // Sắp xếp Kanji theo đúng thứ tự xuất hiện ban đầu
+    kanjiDetails.sort((a, b) => targetKanjiList.indexOf(a.char) - targetKanjiList.indexOf(b.char));
 
     // 6. XÂY DỰNG TAB DỊCH (Tab 3: Dịch)
     const translationData = {
       sourceText: cleanText,
       translatedVi: meaningVi || (vocabResults[0] ? vocabResults[0].meaningVi : ''),
-      translatedEn: meaningEn || (vocabResults[0] ? vocabResults[0].meaningEn : ''),
-      translatedText: targetLang === 'en' ? (meaningEn || meaningVi) : (meaningVi || meaningEn),
-      targetLang: targetLang
+      translatedText: meaningVi || (vocabResults[0] ? vocabResults[0].meaningVi : ''),
+      targetLang: 'vi'
     };
 
-    // Chuẩn bị kết quả tương thích ngược cho các thành phần cũ
     const primary = vocabResults[0] || {};
 
-    return {
+    const responseObj = {
       success: true,
       data: {
         query: cleanText,
         targetLang: targetLang,
-        results: vocabResults,       // Danh sách nhiều cách đọc & nhiều nghĩa (Tab Từ vựng)
-        kanjis: kanjiDetails,         // Danh sách các chữ Hán tự (Tab Hán tự)
-        translation: translationData, // Bản dịch nhanh (Tab Dịch)
-        // Các trường tương thích ngược:
+        results: vocabResults,
+        kanjis: kanjiDetails,
+        translation: translationData,
         kanji: primary.kanji || cleanText,
         reading: primary.reading || '',
         hanviet: primary.hanviet || '',
         meaningVi: primary.meaningVi || meaningVi || '',
-        meaningEn: primary.meaningEn || meaningEn || '',
-        meaning: primary.meaning || meaningVi || meaningEn || '',
-        jlpt: primary.jlpt || '',
-        isCommon: true,
-        partOfSpeech: primary.pos || 'Từ vựng'
+        meaning: primary.meaningVi || meaningVi || ''
       }
     };
 
+    // 7. Lưu vào bộ nhớ đệm (LRU Cache)
+    if (TRANSLATION_CACHE.size >= MAX_CACHE_SIZE) {
+      const firstKey = TRANSLATION_CACHE.keys().next().value;
+      TRANSLATION_CACHE.delete(firstKey);
+    }
+    TRANSLATION_CACHE.set(cacheKey, responseObj);
+
+    return responseObj;
   } catch (error) {
-    console.error('[JP-Dict Background] Lỗi xử lý tra cứu:', error);
+    console.error('[JP-Dict Background] Lỗi xử lý dịch thuật:', error);
     return {
       success: false,
       error: error.message
     };
+  }
+}
+
+/**
+ * Lấy câu ví dụ mẫu từ Tatoeba / Google
+ */
+async function getExampleSentences(query) {
+  if (!query) return [];
+  try {
+    const url = "https://tatoeba.org/en/api_v0/search?from=jpn&query=" + encodeURIComponent(query) + "&trans_filter=limit&trans_to=vie&to=vie";
+    const res = await fetchWithTimeout(url, { timeout: 3500 });
+    const data = await res.json();
+    const examples = [];
+    if (data.results && data.results.length > 0) {
+      for (const r of data.results.slice(0, 3)) {
+        let viTrans = '';
+        if (r.translations && r.translations[0] && r.translations[0].length > 0) {
+          viTrans = r.translations[0][0].text;
+        }
+        examples.push({
+          japanese: r.text,
+          vietnamese: viTrans || 'Câu ví dụ tiếng Nhật'
+        });
+      }
+    }
+
+    if (examples.length === 0) {
+      const jpText = query + "を使います。";
+      let viTrans = '';
+      try {
+        const gRes = await fetchWithTimeout("https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=vi&dt=t&q=" + encodeURIComponent(jpText), { timeout: 1500 }).then(r => r.json());
+        if (gRes && gRes[0]) viTrans = gRes[0].map(x => x[0]).join('');
+      } catch(e) {}
+      examples.push({
+        japanese: jpText,
+        vietnamese: viTrans || ("Sử dụng " + query)
+      });
+    }
+    return examples;
+  } catch (err) {
+    return [];
+  }
+}
+
+/**
+ * Nhận diện chữ tiếng Nhật từ ảnh chụp (Manga / Screen OCR)
+ */
+async function handleOcrRequest(base64Image) {
+  if (!base64Image) {
+    return { success: false, error: 'Dữ liệu ảnh trống' };
+  }
+  try {
+    const formData = new FormData();
+    formData.append('apikey', 'helloworld');
+    formData.append('language', 'jpn');
+    formData.append('OCREngine', '2');
+    formData.append('isOverlayRequired', 'false');
+    formData.append('base64Image', base64Image);
+
+    const res = await fetchWithTimeout('https://api.ocr.space/parse/image', {
+      method: 'POST',
+      body: formData,
+      timeout: 12000
+    });
+    const data = await res.json();
+    if (data && data.ParsedResults && data.ParsedResults[0] && data.ParsedResults[0].ParsedText) {
+      let text = data.ParsedResults[0].ParsedText;
+      text = text.replace(/\r\n/g, '\n').replace(/\n+/g, ' ').trim();
+      return { success: true, text: text };
+    }
+    const errMsg = (data && data.ErrorMessage && data.ErrorMessage[0]) ? data.ErrorMessage[0] : 'Không tìm thấy chữ trong vùng chọn';
+    return { success: false, error: errMsg };
+  } catch (err) {
+    return { success: false, error: 'Lỗi kết nối OCR: ' + err.message };
   }
 }

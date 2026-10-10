@@ -3,7 +3,6 @@
  * 
  * Chứa cấu hình biến CSS (design tokens) dùng chung cho cả 
  * Giao diện Popup (Dashboard) và Tooltip (Content Script).
- * Tích hợp hệ màu sắc cho AI Tutor.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -13,12 +12,6 @@
   --primary: hsl(346, 77%, 49%);
   --primary-hover: hsl(346, 77%, 43%);
   --primary-light: hsla(346, 77%, 49%, 0.1);
-  
-  /* Hệ màu Indigo & Purple của AI Tutor */
-  --ai-accent: hsl(262, 83%, 58%);
-  --ai-accent-hover: hsl(262, 83%, 50%);
-  --ai-accent-light: hsla(262, 83%, 58%, 0.1);
-  --ai-accent-glow: 0 0 12px hsla(262, 83%, 58%, 0.4);
   
   --bg-primary: hsl(0, 0%, 100%);
   --bg-secondary: hsl(210, 40%, 98%);

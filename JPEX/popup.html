@@ -3,17 +3,21 @@
 <head>
   <meta charset="utf-8">
   <title>JP Dictionary Dashboard</title>
+  <link rel="icon" type="image/png" href="icons/icon32.png">
   <link rel="stylesheet" href="styles/theme.css">
   <link rel="stylesheet" href="styles/popup.css">
 </head>
 <body>
   <div class="dashboard-container">
     <!-- Header -->
-    <header class="app-header">
+    <header class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
       <div class="logo-area">
-        <span class="logo-icon">辞</span>
+        <img src="icons/icon48.png" alt="Logo" class="logo-img" style="width: 26px; height: 26px; border-radius: 6px; object-fit: contain;">
         <h1 class="logo-text">JP Dictionary</h1>
       </div>
+      <button id="btn-header-ocr" class="btn-ocr-header" title="Chụp vùng màn hình dịch chữ (Manga/Ảnh) [Alt + S]">
+        📸 Chụp dịch OCR
+      </button>
     </header>
 
     <!-- Navigation Tabs -->
@@ -53,7 +57,7 @@
           <button id="btn-practice-flashcard" title="Luyện tập Flashcard" style="background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
             🃏 Ôn tập
           </button>
-          <button id="btn-export-csv" title="Xuất file CSV cho Anki / Excel" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
+          <button id="btn-export-csv" title="Xuất file CSV / Excel" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
             📥 Xuất
           </button>
         </div>
@@ -104,68 +108,72 @@
 
       <!-- Settings Tab -->
       <section id="settings-tab" class="tab-section">
+        <!-- Thẻ 1: Chế độ Đọc Furigana & Phím nóng -->
+        <div class="settings-card" style="border-left: 3px solid #0284c7;">
+          <h3 style="color: #0284c7; display: flex; align-items: center; gap: 6px;">
+            <span>🈓</span> Chế độ Furigana toàn trang
+          </h3>
+
+          <div class="settings-row flex-between">
+            <div class="setting-desc">
+              <span class="setting-title">Kích hoạt Furigana</span>
+              <small class="setting-hint">Tự động gắn Hiragana lên đầu chữ Kanji khi duyệt web</small>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-furigana">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="settings-row flex-between" style="margin-top: 10px;">
+            <div class="setting-desc">
+              <span class="setting-title">Ngôn ngữ dịch nghĩa</span>
+              <small class="setting-hint">Đã cố định hoàn toàn sang Tiếng Việt cho toàn tiện ích</small>
+            </div>
+            <span style="font-size: 12px; font-weight: 600; color: #38bdf8; padding: 3px 8px; background: rgba(56, 189, 248, 0.1); border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3);">🇻🇳 Tiếng Việt</span>
+          </div>
+        </div>
+
+        
+        <!-- Thẻ 2: Chụp dịch Manga / Màn hình (Screen OCR) -->
+        <div class="settings-card" style="border-left: 3px solid #f59e0b;">
+          <h3 style="color: #f59e0b; display: flex; align-items: center; gap: 6px;">
+            <span>📸</span> Chụp vùng màn hình dịch chữ (Manga / Screen OCR)
+          </h3>
+
+          <div class="settings-row flex-between">
+            <div class="setting-desc">
+              <span class="setting-title">Phím tắt khoanh vùng</span>
+              <small class="setting-hint">Kéo chuột khoanh vùng chữ trong ảnh, truyện tranh để tra từ</small>
+            </div>
+            <span style="font-size: 12px; font-weight: 700; color: #f59e0b; padding: 3px 8px; background: rgba(245, 158, 11, 0.12); border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.35);">Alt + S</span>
+          </div>
+
+          <div class="settings-row flex-between" style="margin-top: 10px;">
+            <div class="setting-desc">
+              <span class="setting-title">Công nghệ nhận diện</span>
+              <small class="setting-hint">Tự động nhận diện chữ tiếng Nhật cả ngang & dọc</small>
+            </div>
+            <span style="font-size: 11px; color: #10b981; font-weight: 600;">⚡ Asian OCR v2</span>
+          </div>
+        </div>
+
+        <!-- Thẻ 3: Hướng dẫn sử dụng & Dữ liệu -->
         <div class="settings-card">
+          <h3>Hướng dẫn sử dụng nhanh</h3>
+          <p class="help-text">1. <b>Furigana toàn trang:</b> Nhấn phím nóng <code>Alt + F</code> trên bất kỳ trang web nào để bật/tắt phiên âm Hiragana ngay trên đầu chữ Hán.</p>
+          <p class="help-text">2. <b>Tra cứu từ vựng:</b> Bôi đen từ vựng rồi bấm vào biểu tượng hoặc giữ <b>Shift</b> + rê chuột qua từ để tra tức thì.</p>
+          <p class="help-text">3. <b>Chụp vùng dịch Manga / Ảnh (OCR):</b> Nhấn phím nóng <code>Alt + S</code> (hoặc bấm nút <b>📸 Chụp dịch OCR</b> ở trên) -> Kéo chuột khoanh vùng chữ cần tra -> Hệ thống tự động nhận diện chữ và mở bảng tra cứu.</p>
+          <p class="help-text">4. <b>Lưu từ & Ôn tập:</b> Bấm dấu sao (☆) trên bảng tra để lưu từ. Vào tab "Từ đã lưu" bấm "🃏 Ôn tập" để luyện Flashcard ghi nhớ.</p>
+
+          <div class="divider" style="margin: 15px 0;"></div>
+
           <h3>Phiên bản Từ điển</h3>
           <div class="settings-row">
             <span>Dữ liệu ngoại tuyến:</span>
             <span id="db-status">Đang tải...</span>
           </div>
           <button id="btn-init-db" class="btn-primary" style="display:none;">Tải dữ liệu từ điển</button>
-          
-          <div class="divider" style="margin: 15px 0;"></div>
-
-          <h3>Tùy chọn Tra cứu</h3>
-          <div class="settings-row flex-between">
-            <div class="setting-desc">
-              <span class="setting-title">Tự động dịch khi bôi đen</span>
-              <small class="setting-hint">Thả chuột là hiện bảng dịch ngay (không cần click icon)</small>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="toggle-auto-translate">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="settings-row flex-between" style="margin-top: 14px;">
-            <div class="setting-desc">
-              <span class="setting-title">Tra nhanh khi Hover chuột</span>
-              <small class="setting-hint">Giữ phím tắt và rê chuột vào từ tiếng Nhật để tra ngay tức thì</small>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="toggle-hover-lookup">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="settings-row flex-between" style="margin-top: 12px;">
-            <div class="setting-desc">
-              <span class="setting-title">Phím tắt Hover</span>
-              <small class="setting-hint">Phím bấm giữ khi rê chuột</small>
-            </div>
-            <select id="select-hover-key" style="padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); font-size: 12px; outline: none; cursor: pointer;">
-              <option value="Shift">Phím Shift (Khuyên dùng)</option>
-              <option value="Alt">Phím Alt</option>
-            </select>
-          </div>
-
-          <div class="settings-row flex-between" style="margin-top: 14px;">
-            <div class="setting-desc">
-              <span class="setting-title">Ngôn ngữ dịch nghĩa</span>
-              <small class="setting-hint">Chọn ngôn ngữ hiển thị: Tiếng Việt, Tiếng Anh hoặc Song ngữ</small>
-            </div>
-            <select id="select-target-lang" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); font-size: 12px; outline: none; cursor: pointer;">
-              <option value="both">🌐 Song ngữ (Việt - Anh)</option>
-              <option value="vi">🇻🇳 Tiếng Việt</option>
-              <option value="en">🇬🇧 Tiếng Anh</option>
-            </select>
-          </div>
-          
-          <div class="divider" style="margin: 15px 0;"></div>
-          
-          <h3>Hướng dẫn sử dụng</h3>
-          <p class="help-text">1. Bôi đen từ vựng hoặc giữ Shift rồi rê chuột để tra tức thì.</p>
-          <p class="help-text">2. Nhấn nút hình Ngôi sao (☆) trên bảng tra để lưu từ theo Thư mục.</p>
-          <p class="help-text">3. Vào tab "Từ đã lưu" bấm "🃏 Ôn tập" để luyện Flashcard ghi nhớ.</p>
         </div>
       </section>
     </main>
