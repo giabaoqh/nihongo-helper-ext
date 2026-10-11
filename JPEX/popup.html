@@ -15,9 +15,17 @@
         <img src="icons/icon48.png" alt="Logo" class="logo-img" style="width: 26px; height: 26px; border-radius: 6px; object-fit: contain;">
         <h1 class="logo-text">JP Dictionary</h1>
       </div>
-      <button id="btn-header-ocr" class="btn-ocr-header" title="Chụp vùng màn hình dịch chữ (Manga/Ảnh) [Alt + S]">
-        📸 Chụp dịch OCR
-      </button>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <button id="btn-header-workspace" class="btn-ocr-header" style="background: rgba(13, 148, 136, 0.15); color: #0d9488; border: 1px solid rgba(13, 148, 136, 0.35);" title="Mở Không gian Từ điển & Thẻ nhớ Toàn màn hình (Workspace)">
+          📚 Từ điển & Thẻ nhớ
+        </button>
+        <button id="btn-header-analyzer" class="btn-ocr-header" style="background: rgba(2, 132, 199, 0.15); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.35);" title="Phân tích câu tiếng Nhật (Sentence Analyzer) [Alt + A]">
+          🔍 Phân tích câu
+        </button>
+        <button id="btn-header-ocr" class="btn-ocr-header" title="Chụp vùng màn hình dịch chữ (Manga/Ảnh) [Alt + S]">
+          📸 OCR
+        </button>
+      </div>
     </header>
 
     <!-- Navigation Tabs -->
@@ -54,8 +62,11 @@
           </select>
           <button id="btn-rename-folder" title="Đổi tên thư mục" style="display: none; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 4px; transition: transform 0.1s;">✏️</button>
           <button id="btn-delete-folder" title="Xóa thư mục" style="display: none; background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 4px; transition: transform 0.1s;">🗑️</button>
-          <button id="btn-practice-flashcard" title="Luyện tập Flashcard" style="background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
+          <button id="btn-practice-flashcard" title="Mở Ôn tập Flashcard SRS Toàn màn hình" style="background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
             🃏 Ôn tập
+          </button>
+          <button id="btn-open-workspace-decks" title="Mở Quản lý Bộ thẻ Flashcard Toàn màn hình" style="background: rgba(2, 132, 199, 0.12); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.25); border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
+            🗂️ Bộ thẻ
           </button>
           <button id="btn-export-csv" title="Xuất file CSV / Excel" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
             📥 Xuất
@@ -164,7 +175,8 @@
           <p class="help-text">1. <b>Furigana toàn trang:</b> Nhấn phím nóng <code>Alt + F</code> trên bất kỳ trang web nào để bật/tắt phiên âm Hiragana ngay trên đầu chữ Hán.</p>
           <p class="help-text">2. <b>Tra cứu từ vựng:</b> Bôi đen từ vựng rồi bấm vào biểu tượng hoặc giữ <b>Shift</b> + rê chuột qua từ để tra tức thì.</p>
           <p class="help-text">3. <b>Chụp vùng dịch Manga / Ảnh (OCR):</b> Nhấn phím nóng <code>Alt + S</code> (hoặc bấm nút <b>📸 Chụp dịch OCR</b> ở trên) -> Kéo chuột khoanh vùng chữ cần tra -> Hệ thống tự động nhận diện chữ và mở bảng tra cứu.</p>
-          <p class="help-text">4. <b>Lưu từ & Ôn tập:</b> Bấm dấu sao (☆) trên bảng tra để lưu từ. Vào tab "Từ đã lưu" bấm "🃏 Ôn tập" để luyện Flashcard ghi nhớ.</p>
+          <p class="help-text">4. <b>Phân tích câu (Sentence Analyzer):</b> Bôi đen cả câu tiếng Nhật trên web rồi bấm chuột phải chọn <b>"Phân tích câu"</b> (hoặc phím tắt <code>Alt + A</code> / bấm nút <b>🔍 Phân tích câu</b> ở trên) để bóc tách từ vựng, thể ngữ pháp, Furigana và dịch nghĩa toàn câu.</p>
+          <p class="help-text">5. <b>Lưu từ & Ôn tập:</b> Bấm dấu sao (☆) trên bảng tra để lưu từ. Vào tab "Từ đã lưu" bấm "🃏 Ôn tập" để luyện Flashcard ghi nhớ.</p>
 
           <div class="divider" style="margin: 15px 0;"></div>
 

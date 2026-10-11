@@ -1,15 +1,11 @@
 /**
  * JP Dictionary Chrome Extension - background.js
- * 
- * Service Worker chạy ngầm của extension:
- * 1. Chế độ Ưu tiên Ngoại tuyến (Offline-First): Tra cứu tức thì từ dữ liệu cục bộ.
- * 2. Đa dạng hóa kết quả: Trả về nhiều cách đọc và nhiều nghĩa (như Mazii/JDict).
- * 3. Hỗ trợ 3 nhóm dữ liệu chuẩn:
- *    - results: Danh sách các từ vựng / cách đọc (Tab Từ vựng)
- *    - kanjis: Chi tiết các chữ Hán tự kèm âm Hán Việt và nghĩa (Tab Hán tự)
- *    - translation: Bản dịch câu/đoạn văn bản (Tab Dịch)
- * 4. Tự động bóc tách âm Hán Việt ngoại tuyến kèm fallback Thi Viện thông minh.
  */
+try {
+  importScripts('storage.js');
+} catch (e) {
+  console.warn('[Background] importScripts storage.js notice:', e);
+}
 
 const POS_MAP = {
   'Noun': 'Danh từ',
@@ -342,6 +338,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'translate') {
     handleTranslation(request.text, request.targetLang)
+      .then(sendResponse)
+      .catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  // Mở giao diện Phân tích câu (Sentence Analyzer)
+  if (request.action === 'openSentenceAnalyzer') {
+    openSentenceAnalyzerTab(request.text, sendResponse);
+    return true;
+  }
+
+  // Mở Không gian làm việc Toàn màn hình (Dictionary & Flashcards Workspace)
+  if (request.action === 'openWorkspace') {
+    openWorkspaceTab(request.view, request.query || request.search, sendResponse);
+    return true;
+  }
+
+  // Dịch nguyên câu tiếng Nhật sang Tiếng Việt cho Sentence Analyzer
+  if (request.action === 'translateSentence') {
+    handleSentenceTranslation(request.text)
       .then(sendResponse)
       .catch(err => sendResponse({ success: false, error: err.message }));
     return true;
@@ -833,3 +849,219 @@ async function handleOcrRequest(base64Image) {
     return { success: false, error: 'Lỗi kết nối OCR: ' + err.message };
   }
 }
+
+// ========================================================
+// JAPANESE SENTENCE ANALYZER - SERVICE WORKER SUPPORT
+// ========================================================
+
+const SENTENCE_TRANSLATE_CACHE = new Map();
+const MAX_SENTENCE_CACHE = 200;
+
+/**
+ * Xử lý dịch câu toàn diện cho Japanese Sentence Analyzer
+ * Sử dụng Google Translate API kết hợp LRU Cache trong bộ nhớ
+ */
+async function handleSentenceTranslation(text) {
+  const clean = (text || '').trim();
+  if (!clean) {
+    return { success: false, error: 'Câu tiếng Nhật trống' };
+  }
+
+  if (SENTENCE_TRANSLATE_CACHE.has(clean)) {
+    return {
+      success: true,
+      data: {
+        originalText: clean,
+        translatedText: SENTENCE_TRANSLATE_CACHE.get(clean),
+        provider: 'Nihongo Translation Core (Cache)'
+      }
+    };
+  }
+
+  try {
+    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=vi&dt=t&q=' + encodeURIComponent(clean);
+    const res = await fetchWithTimeout(url, { timeout: 4000 });
+    const json = await res.json();
+    let translated = '';
+    if (json && json[0] && Array.isArray(json[0])) {
+      translated = json[0].map(item => item[0]).join('');
+    }
+
+    if (translated) {
+      if (SENTENCE_TRANSLATE_CACHE.size >= MAX_SENTENCE_CACHE) {
+        const firstKey = SENTENCE_TRANSLATE_CACHE.keys().next().value;
+        SENTENCE_TRANSLATE_CACHE.delete(firstKey);
+      }
+      SENTENCE_TRANSLATE_CACHE.set(clean, translated);
+
+      return {
+        success: true,
+        data: {
+          originalText: clean,
+          translatedText: translated,
+          provider: 'Google Translate Service'
+        }
+      };
+    } else {
+      return { success: false, error: 'Không nhận được bản dịch phản hồi' };
+    }
+  } catch (err) {
+    console.warn('[JPEX] Lỗi dịch câu:', err);
+    return { success: false, error: 'Lỗi kết nối máy chủ dịch: ' + err.message };
+  }
+}
+
+/**
+ * Mở tab mới hoặc kích hoạt (focus) tab tương ứng nếu đã mở để tránh tạo nhiều tab trùng lặp
+ * @param {string} pageFileName Tên file HTML (ví dụ 'workspace.html' hoặc 'analyzer.html')
+ * @param {string} queryString Chuỗi query param nếu có (ví dụ '?view=dict&q=...')
+ * @param {Function} sendResponse Callback phản hồi
+ */
+function openOrFocusExtensionTab(pageFileName, queryString = '', sendResponse) {
+  const fullTargetUrl = chrome.runtime.getURL(pageFileName + queryString);
+  const baseTargetUrl = chrome.runtime.getURL(pageFileName);
+
+  if (!chrome.tabs || !chrome.tabs.query) {
+    if (chrome.tabs && chrome.tabs.create) {
+      chrome.tabs.create({ url: fullTargetUrl }, tab => {
+        if (sendResponse) sendResponse({ success: true, tabId: tab ? tab.id : null });
+      });
+    }
+    return;
+  }
+
+  // Tìm tab đã mở có URL chứa baseTargetUrl
+  chrome.tabs.query({}, (tabs) => {
+    const existingTab = tabs ? tabs.find(t => t.url && t.url.startsWith(baseTargetUrl)) : null;
+
+    if (existingTab && existingTab.id) {
+      // Đã mở tab này -> Cập nhật URL nếu có query mới và active tab
+      chrome.tabs.update(existingTab.id, {
+        active: true,
+        url: queryString ? fullTargetUrl : undefined
+      }, (updatedTab) => {
+        // Đồng thời focus vào cửa sổ chứa tab đó
+        if (existingTab.windowId && chrome.windows && chrome.windows.update) {
+          chrome.windows.update(existingTab.windowId, { focused: true }, () => {});
+        }
+        if (sendResponse) sendResponse({ success: true, tabId: existingTab.id, reused: true });
+      });
+    } else {
+      // Chưa mở -> Tạo tab mới
+      chrome.tabs.create({ url: fullTargetUrl }, (newTab) => {
+        if (sendResponse) sendResponse({ success: true, tabId: newTab ? newTab.id : null, reused: false });
+      });
+    }
+  });
+}
+
+/**
+ * Mở Tab Japanese Sentence Analyzer và nạp câu tiếng Nhật (Tái sử dụng tab nếu đã mở)
+ */
+function openSentenceAnalyzerTab(text, sendResponse) {
+  const cleanText = (text || '').trim();
+  chrome.storage.local.set({ pendingAnalyzerText: cleanText }, () => {
+    const queryParam = cleanText ? ('?text=' + encodeURIComponent(cleanText)) : '';
+    openOrFocusExtensionTab('analyzer.html', queryParam, sendResponse);
+  });
+}
+
+/**
+ * Mở Tab Dictionary & Flashcards Workspace (Tái sử dụng tab nếu đã mở)
+ */
+function openWorkspaceTab(view = 'overview', query = '', sendResponse) {
+  let queryString = '?view=' + encodeURIComponent(view);
+  if (query && query.trim()) {
+    queryString += '&q=' + encodeURIComponent(query.trim());
+  }
+  openOrFocusExtensionTab('workspace.html', queryString, sendResponse);
+}
+
+/**
+ * Đăng ký Context Menu khi bôi đen chữ trên trang web
+ */
+function initSentenceAnalyzerContextMenu() {
+  if (!chrome.contextMenus) return;
+
+  try {
+    // 1. Menu Phân tích câu
+    chrome.contextMenus.remove('analyze-japanese-sentence', () => {
+      if (chrome.runtime.lastError) {}
+      chrome.contextMenus.create({
+        id: 'analyze-japanese-sentence',
+        title: '🔍 Phân tích câu: "%s"',
+        contexts: ['selection']
+      }, () => {
+        if (chrome.runtime.lastError) {}
+      });
+    });
+
+    // 2. Menu Thêm từ vào ôn tập Flashcard
+    chrome.contextMenus.remove('add-to-flashcard-review', () => {
+      if (chrome.runtime.lastError) {}
+      chrome.contextMenus.create({
+        id: 'add-to-flashcard-review',
+        title: '🃏 Thêm "%s" vào ôn tập Flashcard',
+        contexts: ['selection']
+      }, () => {
+        if (chrome.runtime.lastError) {}
+      });
+    });
+  } catch (err) {
+    console.warn('[JPEX] Không tạo được Context Menu:', err);
+  }
+}
+
+// Khởi tạo menu khi extension cài đặt hoặc khởi động
+if (chrome.runtime && chrome.runtime.onInstalled) {
+  chrome.runtime.onInstalled.addListener(() => {
+    initSentenceAnalyzerContextMenu();
+  });
+}
+if (chrome.runtime && chrome.runtime.onStartup) {
+  chrome.runtime.onStartup.addListener(() => {
+    initSentenceAnalyzerContextMenu();
+  });
+}
+initSentenceAnalyzerContextMenu();
+
+// Xử lý thêm từ vào Flashcard trực tiếp từ vùng bôi đen (Context Menu)
+async function handleAddToFlashcardFromSelection(text, tab) {
+  try {
+    const clean = (text || '').trim();
+    if (!clean) return;
+    const res = await handleTranslation(clean, 'vi');
+    const wordData = (res && res.success && res.data) ? res.data : {
+      kanji: clean,
+      word: clean,
+      meaning: 'Từ vựng tiếng Nhật',
+      meaningVi: 'Từ vựng tiếng Nhật'
+    };
+    if (typeof addWordToReview === 'function') {
+      await addWordToReview(wordData, 'deck_default');
+    } else if (typeof saveWord === 'function') {
+      await saveWord(wordData, 'Mặc định');
+    }
+    console.log(`[JPEX Background] Đã thêm từ "${clean}" vào ôn tập Flashcard thành công.`);
+    if (tab && tab.id) {
+      chrome.tabs.sendMessage(tab.id, {
+        action: 'showNotificationToast',
+        message: `⭐ Đã thêm "${clean}" vào ôn tập Flashcard & Từ đã lưu!`
+      }).catch(() => {});
+    }
+  } catch (err) {
+    console.error('[JPEX Background] Lỗi thêm từ vào Flashcard từ ContextMenu:', err);
+  }
+}
+
+// Lắng nghe sự kiện click Context Menu
+if (chrome.contextMenus && chrome.contextMenus.onClicked) {
+  chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'analyze-japanese-sentence' && info.selectionText) {
+      openSentenceAnalyzerTab(info.selectionText);
+    } else if (info.menuItemId === 'add-to-flashcard-review' && info.selectionText) {
+      handleAddToFlashcardFromSelection(info.selectionText, tab);
+    }
+  });
+}
+

@@ -1,11 +1,13 @@
 {
   "manifest_version": 3,
   "name": "JP Dictionary Extension",
-  "version": "3.3",
-  "description": "Từ điển tiếng Nhật thông minh: tra cứu siêu tốc, Furigana Hiragana toàn trang và Ví dụ thực tế",
+  "version": "4.0",
+  "description": "Nihongo Helper: Không gian học tiếng Nhật toàn diện — Tra cứu từ điển, phân tích câu và ôn tập Flashcard SRS",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "contextMenus",
+    "tabs"
   ],
   "host_permissions": [
     "https://jisho.org/*",
@@ -51,6 +53,8 @@
     {
       "resources": [
         "popup.html",
+        "analyzer.html",
+        "workspace.html",
         "styles/*",
         "icons/*"
       ],

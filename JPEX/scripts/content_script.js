@@ -149,6 +149,30 @@ chrome.storage.onChanged.addListener((changes, area) => {
         toggleFuriganaInjection(enabled).catch(() => {});
       }
     }
+    if (changes['savedWords'] || changes['jpex_cards'] || changes['_lastSyncSignal']) {
+      if (activeTooltipHost && activeTooltipHost.shadowRoot) {
+        const shadow = activeTooltipHost.shadowRoot;
+        const saveBtn = shadow.querySelector('.save-btn');
+        const saveBanner = shadow.querySelector('.save-banner');
+        const cardWordEl = shadow.querySelector('.dict-word-kanji, .card-word, .trans-src-text');
+        const wordText = cardWordEl ? cardWordEl.innerText.trim() : '';
+        if (wordText && saveBtn && typeof isWordSaved === 'function') {
+          isWordSaved(wordText).then((saved) => {
+            if (saved) {
+              saveBtn.innerHTML = '★';
+              saveBtn.classList.add('saved');
+              saveBtn.title = 'Bỏ lưu khỏi danh sách';
+              if (saveBanner) saveBanner.style.display = 'flex';
+            } else {
+              saveBtn.innerHTML = '☆';
+              saveBtn.classList.remove('saved');
+              saveBtn.title = 'Lưu từ & Thêm vào ôn tập Flashcard';
+              if (saveBanner) saveBanner.style.display = 'none';
+            }
+          }).catch(() => {});
+        }
+      }
+    }
   }
 });
 
@@ -260,6 +284,18 @@ function handleHoverLookup(event) {
  * Xử lý phím tắt Shift để dịch nhanh đoạn bôi đen
  */
 function handleKeyDown(event) {
+  // Phím tắt Alt + A: Mở Phân tích câu tiếng Nhật (Sentence Analyzer)
+  if (event.altKey && (event.key === 'a' || event.key === 'A' || event.code === 'KeyA')) {
+    event.preventDefault();
+    let selectedText = '';
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed) {
+      selectedText = getCleanSelectedText(selection);
+    }
+    chrome.runtime.sendMessage({ action: 'openSentenceAnalyzer', text: selectedText });
+    return;
+  }
+
   if (event.key === 'Shift') {
     // Không kích hoạt nếu đang gõ trong ô nhập liệu
     const activeEl = document.activeElement;
@@ -605,6 +641,23 @@ function showTooltip(text, rect) {
     }
     .auto-mode-btn {
       font-size: 13px;
+    }
+    .tooltip-toast {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #047857;
+      color: #ffffff;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      pointer-events: none;
+      animation: tooltipFadeIn 0.2s ease;
+      white-space: nowrap;
     }
 
     /* Thanh thông báo & chọn thư mục lưu (Hiện gọn gàng bên dưới header) */
@@ -997,7 +1050,7 @@ function showTooltip(text, rect) {
   const saveBtn = document.createElement('button');
   saveBtn.className = 'save-btn';
   saveBtn.innerHTML = '☆';
-  saveBtn.title = 'Lưu từ vào Dashboard';
+  saveBtn.title = 'Lưu từ & Thêm vào ôn tập Flashcard';
   headerRight.appendChild(saveBtn);
 
   const closeBtn = document.createElement('button');
@@ -1025,12 +1078,12 @@ function showTooltip(text, rect) {
 
   const saveBannerText = document.createElement('span');
   saveBannerText.className = 'save-banner-text';
-  saveBannerText.innerText = 'Đã lưu vào:';
+  saveBannerText.innerText = 'Đã lưu vào bộ thẻ:';
   saveBanner.appendChild(saveBannerText);
 
   const folderSelect = document.createElement('select');
   folderSelect.className = 'folder-select';
-  folderSelect.title = 'Chọn thư mục lưu từ';
+  folderSelect.title = 'Chọn bộ thẻ lưu từ';
   saveBanner.appendChild(folderSelect);
   card.appendChild(saveBanner);
 
@@ -1073,40 +1126,88 @@ function showTooltip(text, rect) {
     loader.style.display = 'none';
     content.style.display = 'block';
 
-    // 1. Quản lý trạng thái lưu từ
-    getSavedWords().then(async (words) => {
-      const savedWord = words.find(w => w.kanji === data.kanji);
-      if (savedWord) {
-        saveBtn.innerHTML = '★';
-        saveBtn.classList.add('saved');
-        saveBtn.title = 'Xóa khỏi danh sách lưu';
-        saveBanner.style.display = 'flex';
-        await loadFolderOptions(folderSelect, savedWord.folder || "Mặc định");
-      } else {
-        saveBtn.innerHTML = '☆';
-        saveBtn.classList.remove('saved');
-        saveBtn.title = 'Lưu từ vào Dashboard';
-        saveBanner.style.display = 'none';
+    const targetWordKey = (data.kanji || data.word || text || '').trim();
+
+    // 1. Quản lý trạng thái lưu từ và đồng bộ với bộ thẻ Flashcard
+    const checkWordStatus = async () => {
+      try {
+        const isSaved = (typeof isWordSaved === 'function') 
+          ? await isWordSaved(targetWordKey)
+          : false;
+        
+        const words = (typeof getSavedWords === 'function') ? await getSavedWords() : [];
+        const curWord = words.find(w => (w.kanji === targetWordKey || w.word === targetWordKey));
+        const cards = (typeof getAllCards === 'function') ? await getAllCards() : [];
+        const curCard = cards.find(c => (c.word === targetWordKey || c.kanji === targetWordKey));
+
+        if (isSaved || curWord || curCard) {
+          saveBtn.innerHTML = '★';
+          saveBtn.classList.add('saved');
+          saveBtn.title = 'Bỏ lưu khỏi danh sách';
+          saveBanner.style.display = 'flex';
+
+          let targetFolderName = curWord ? curWord.folder : "Mặc định";
+          if (!curWord && curCard && curCard.deckId) {
+            const decks = (typeof getDecks === 'function') ? await getDecks() : [];
+            const matchedDeck = decks.find(d => d.id === curCard.deckId);
+            if (matchedDeck) targetFolderName = matchedDeck.name;
+          }
+          await loadFolderOptions(folderSelect, targetFolderName || "Mặc định");
+        } else {
+          saveBtn.innerHTML = '☆';
+          saveBtn.classList.remove('saved');
+          saveBtn.title = 'Lưu từ & Thêm vào ôn tập Flashcard';
+          const lastUsed = (typeof getLastSavedFolder === 'function') ? await getLastSavedFolder() : "Mặc định";
+          saveBanner.style.display = 'none';
+          await loadFolderOptions(folderSelect, lastUsed || "Mặc định");
+        }
+      } catch (err) {
+        console.warn('[Tooltip] Lỗi checkWordStatus:', err);
       }
-    }).catch(() => {});
+    };
+
+    checkWordStatus();
+
+    const doAddToReview = async () => {
+      const lastUsed = (typeof getLastSavedFolder === 'function') ? await getLastSavedFolder() : "Mặc định";
+      const selectedFolderName = folderSelect.value || lastUsed || "Mặc định";
+      const payload = {
+        word: targetWordKey,
+        kanji: targetWordKey,
+        reading: data.reading || '',
+        hanviet: data.hanviet || '',
+        meaning: data.meaningVi || data.meaning || 'Từ vựng tiếng Nhật',
+        meaningVi: data.meaningVi || data.meaning || 'Từ vựng tiếng Nhật'
+      };
+
+      if (typeof addWordToReview === 'function') {
+        await addWordToReview(payload, selectedFolderName);
+      } else if (typeof saveWord === 'function') {
+        await saveWord(payload, selectedFolderName);
+      }
+
+      saveBtn.innerHTML = '★';
+      saveBtn.classList.add('saved');
+      saveBtn.title = 'Bỏ lưu khỏi danh sách';
+      saveBanner.style.display = 'flex';
+      await loadFolderOptions(folderSelect, selectedFolderName);
+      showTooltipToast(shadow, `⭐ Đã thêm "${targetWordKey}" vào bộ thẻ "${selectedFolderName}"!`);
+    };
 
     saveBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const saved = saveBtn.classList.contains('saved');
       if (saved) {
-        await deleteWord(data.kanji);
+        if (typeof deleteWord === 'function') {
+          await deleteWord(targetWordKey);
+        }
         saveBtn.innerHTML = '☆';
         saveBtn.classList.remove('saved');
-        saveBtn.title = 'Lưu từ vào Dashboard';
+        saveBtn.title = 'Lưu từ & Thêm vào ôn tập Flashcard';
         saveBanner.style.display = 'none';
+        showTooltipToast(shadow, `Đã xóa "${targetWordKey}" khỏi danh sách lưu.`);
       } else {
-        const defaultFolder = "Mặc định";
-        await saveWord(data, defaultFolder);
-        saveBtn.innerHTML = '★';
-        saveBtn.classList.add('saved');
-        saveBtn.title = 'Xóa khỏi danh sách lưu';
-        saveBanner.style.display = 'flex';
-        await loadFolderOptions(folderSelect, defaultFolder);
+        await doAddToReview();
       }
     });
 
@@ -1114,19 +1215,30 @@ function showTooltip(text, rect) {
       e.stopPropagation();
       const val = folderSelect.value;
       if (val === '__new_folder__') {
-        const newFolderName = prompt('Nhập tên thư mục mới:');
+        const newFolderName = prompt('Nhập tên bộ thẻ mới:');
         if (newFolderName && newFolderName.trim()) {
           const cleanName = newFolderName.trim();
-          await createFolder(cleanName);
-          await updateWordFolder(data.kanji, cleanName);
+          if (typeof saveDeck === 'function') {
+            await saveDeck({ name: cleanName });
+          }
+          if (typeof updateWordFolder === 'function') {
+            await updateWordFolder(targetWordKey, cleanName);
+          } else if (typeof addWordToReview === 'function') {
+            await addWordToReview(data, cleanName);
+          }
           await loadFolderOptions(folderSelect, cleanName);
+          showTooltipToast(shadow, `Đã tạo bộ thẻ "${cleanName}" & chuyển từ thành công!`);
         } else {
-          const words = await getSavedWords();
-          const currentWord = words.find(w => w.kanji === data.kanji);
-          await loadFolderOptions(folderSelect, currentWord ? currentWord.folder : "Mặc định");
+          await checkWordStatus();
         }
       } else {
-        await updateWordFolder(data.kanji, val);
+        // CHUYỂN BỘ THẺ: Di chuyển từ vựng sang bộ thẻ mới, loại bỏ bản sao thừa ở bộ thẻ cũ
+        if (typeof updateWordFolder === 'function') {
+          await updateWordFolder(targetWordKey, val);
+        } else if (typeof addWordToReview === 'function') {
+          await addWordToReview(data, val);
+        }
+        showTooltipToast(shadow, `Đã chuyển sang bộ thẻ "${val}" & đồng bộ Flashcard!`);
       }
     });
 
@@ -1385,13 +1497,18 @@ function playPronunciation(text, rate = 1.0) {
 }
 
 /**
- * Nạp danh sách thư mục vào phần tử Select
+ * Nạp danh sách bộ thẻ & thư mục vào phần tử Select của Tooltip
  */
 async function loadFolderOptions(selectElement, selectedFolder = "Mặc định") {
-  const folders = await getSavedFolders();
   selectElement.innerHTML = '';
+  const decks = (typeof getDecks === 'function') ? await getDecks() : [];
+  const folders = (typeof getSavedFolders === 'function') ? await getSavedFolders() : ["Mặc định"];
   
-  folders.forEach(folder => {
+  const uniqueNames = new Set(['Mặc định']);
+  decks.forEach(d => { if (d && d.name) uniqueNames.add(d.name.trim()); });
+  folders.forEach(f => { if (f) uniqueNames.add(f.trim()); });
+  
+  uniqueNames.forEach(folder => {
     const option = document.createElement('option');
     option.value = folder;
     option.innerText = folder;
@@ -1401,11 +1518,71 @@ async function loadFolderOptions(selectElement, selectedFolder = "Mặc định"
     selectElement.appendChild(option);
   });
   
-  // Thêm tùy chọn tạo thư mục mới
+  // Thêm tùy chọn tạo bộ thẻ mới
   const newFolderOption = document.createElement('option');
   newFolderOption.value = '__new_folder__';
-  newFolderOption.innerText = '+ Tạo thư mục...';
+  newFolderOption.innerText = '+ Tạo bộ thẻ mới...';
   selectElement.appendChild(newFolderOption);
+}
+
+/**
+ * Hiển thị thông báo Toast nhanh bên trong Tooltip Shadow DOM
+ */
+function showTooltipToast(shadowRoot, message) {
+  if (!shadowRoot) return;
+  const existing = shadowRoot.querySelector('.tooltip-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'tooltip-toast';
+  toast.innerText = message;
+  shadowRoot.appendChild(toast);
+  setTimeout(() => {
+    if (toast.parentNode) toast.remove();
+  }, 2200);
+}
+
+/**
+ * Hiển thị thông báo Toast nổi trên toàn trang web (khi thao tác từ Context Menu)
+ */
+function showPageToast(message) {
+  const existing = document.getElementById('jpex-page-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'jpex-page-toast';
+  toast.innerText = message;
+  Object.assign(toast.style, {
+    position: 'fixed',
+    bottom: '24px',
+    right: '24px',
+    backgroundColor: '#0f172a',
+    color: '#38bdf8',
+    border: '1px solid #38bdf8',
+    padding: '10px 18px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: '600',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+    zIndex: '2147483647',
+    fontFamily: 'sans-serif',
+    pointerEvents: 'none',
+    transition: 'opacity 0.3s'
+  });
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 300);
+  }, 2600);
+}
+
+// Lắng nghe thông báo toast từ Background Service Worker
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'showNotificationToast' && request.message) {
+      showPageToast(request.message);
+    }
+  });
 }
 
 // ==========================================

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Analyzer Workspace — Nihongo Helper</title>
+  <meta name="description" content="Không gian phân tích câu tiếng Nhật toàn màn hình: Bóc tách ngữ pháp, giải chia thể động từ tính từ, Furigana và dịch nghĩa toàn câu">
+  <link rel="icon" type="image/png" href="icons/icon32.png">
+  <link rel="stylesheet" href="styles/theme.css">
+  <link rel="stylesheet" href="styles/analyzer.css">
+</head>
+<body>
+  <div class="analyzer-container">
+    <!-- Header -->
+    <header class="analyzer-header">
+      <div class="header-brand">
+        <img src="icons/icon48.png" alt="Logo" class="header-logo">
+        <div class="header-title-wrap">
+          <h1>
+            Sentence Analyzer Workspace
+            <span class="badge-version">v4.0</span>
+          </h1>
+          <p class="header-desc">Bóc tách hình thái học, phân tích ngữ pháp & dịch nghĩa toàn câu tiếng Nhật</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-open-workspace" class="btn-secondary" title="Mở Không gian Từ điển & Bộ thẻ Flashcard Toàn màn hình">
+          📚 Từ điển & Thẻ nhớ
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace (2 Columns) -->
+    <main class="workspace-main">
+      <!-- Cột trái: Workspace Controller -->
+      <aside class="workspace-left-col">
+        <!-- Input Card -->
+        <section class="analyzer-card" id="section-input">
+          <div class="card-title">
+            <span>Nhập câu tiếng Nhật</span>
+            <span id="char-counter" style="font-size: 12px; font-weight: normal; color: var(--text-secondary);">0 / 500 ký tự</span>
+          </div>
+
+          <div class="input-wrapper">
+            <textarea 
+              id="sentence-input" 
+              class="sentence-textarea" 
+              placeholder="Dán hoặc nhập câu tiếng Nhật cần phân tích (ví dụ: 昨日、友達と映画を見ました。)..." 
+              maxlength="500"
+              autofocus
+            ></textarea>
+            <div id="loading-bar" class="loading-bar"></div>
+          </div>
+
+          <div class="input-footer">
+            <span style="font-size: 11px; color: var(--text-secondary);">Nhấn <b>Enter</b> hoặc <b>Ctrl+Enter</b> để phân tích</span>
+            <div class="input-actions">
+              <button id="btn-clear" class="btn-clear" title="Xóa nội dung nhập">Xóa</button>
+              <button id="btn-analyze" class="btn-primary" disabled>
+                <span>⚡ Phân tích câu</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Samples -->
+          <div class="quick-samples-wrapper">
+            <span class="samples-label">Câu ví dụ thử nhanh:</span>
+            <div class="sample-chips">
+              <button class="sample-chip" data-sample="昨日、友達と映画を見ました。">
+                <span>昨日、友達と映画を見ました。</span>
+                <span style="font-size: 11px; opacity: 0.6;">N5</span>
+              </button>
+              <button class="sample-chip" data-sample="日本語を勉強しています。">
+                <span>日本語を勉強しています。</span>
+                <span style="font-size: 11px; opacity: 0.6;">N5</span>
+              </button>
+              <button class="sample-chip" data-sample="本を読んでから寝ました。">
+                <span>本を読んでから寝ました。</span>
+                <span style="font-size: 11px; opacity: 0.6;">N5</span>
+              </button>
+              <button class="sample-chip" data-sample="学校に行かなければなりません。">
+                <span>学校に行かなければなりません。</span>
+                <span style="font-size: 11px; opacity: 0.6;">N4</span>
+              </button>
+              <button class="sample-chip" data-sample="この問題は思ったより難しかったです。">
+                <span>この問題は思ったより難しかったです。</span>
+                <span style="font-size: 11px; opacity: 0.6;">N4</span>
+              </button>
+              <button class="sample-chip" data-sample="テストを実行して、エラーを修正しました。">
+                <span>テストを実行して、エラーを修正しました。</span>
+                <span style="font-size: 11px; opacity: 0.6;">IT</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lịch sử phân tích gần đây -->
+        <section class="analyzer-card recent-history-wrapper" id="section-history" style="display: none;">
+          <div class="card-title">
+            <span>Lịch sử phân tích gần đây</span>
+            <button id="btn-clear-history" style="background: none; border: none; font-size: 11px; color: var(--text-secondary); cursor: pointer;">Xóa lịch sử</button>
+          </div>
+          <div id="history-list" class="history-list"></div>
+        </section>
+      </aside>
+
+      <!-- Cột phải: Results Inspector -->
+      <section class="workspace-right-col">
+        <!-- Empty State (Khi chưa phân tích) -->
+        <div id="empty-state-view" class="empty-state-card">
+          <div class="empty-state-icon">📖</div>
+          <h2 class="empty-state-title">Sẵn sàng phân tích câu tiếng Nhật</h2>
+          <p class="empty-state-text">
+            Nhập hoặc dán câu tiếng Nhật ở cột bên trái, hoặc nhấp vào một trong các câu ví dụ để bóc tách từ vựng, thể ngữ pháp và dịch trọn vẹn toàn câu.
+          </p>
+        </div>
+
+        <!-- B. Sentence Overview Section -->
+        <section class="analyzer-card" id="section-overview" style="display: none;">
+          <div class="card-title">
+            <span>Tổng quan câu (Sentence Overview)</span>
+            <label class="switch-label">
+              <input type="checkbox" id="toggle-furigana" checked>
+              <span>Furigana (Phiên âm trên chữ Hán)</span>
+            </label>
+          </div>
+
+          <div class="overview-grid">
+            <!-- Câu gốc & Furigana -->
+            <div class="overview-box">
+              <div class="overview-label">
+                <span>Câu tiếng Nhật & Cách đọc</span>
+                <span id="reading-badge" style="font-size: 11px; color: var(--analyzer-accent);">Hiragana / Furigana</span>
+              </div>
+              <div id="sentence-display" class="sentence-display"></div>
+              <div id="reading-display" class="sentence-reading-display" style="display: none; margin-top: 6px;"></div>
+            </div>
+
+            <!-- Dịch nghĩa toàn câu -->
+            <div class="overview-box">
+              <div class="overview-label">
+                <span>Nghĩa tiếng Việt toàn câu</span>
+                <span id="translation-provider-badge" style="font-size: 11px; color: #10b981;">Nihongo Translation Core</span>
+              </div>
+              <div id="meaning-display" class="sentence-meaning-display">Đang dịch toàn câu...</div>
+            </div>
+          </div>
+
+          <!-- Copy Buttons -->
+          <div class="copy-btn-group">
+            <button id="btn-copy-sentence" class="btn-copy" title="Sao chép câu tiếng Nhật gốc">
+              📋 Sao chép câu gốc
+            </button>
+            <button id="btn-copy-reading" class="btn-copy" title="Sao chép phiên âm cách đọc">
+              📋 Sao chép cách đọc
+            </button>
+            <button id="btn-copy-translation" class="btn-copy" title="Sao chép bản dịch tiếng Việt">
+              📋 Sao chép bản dịch
+            </button>
+          </div>
+        </section>
+
+        <!-- C. Token Analysis Section -->
+        <section class="analyzer-card" id="section-tokens" style="display: none;">
+          <div class="card-title">
+            <span>Phân tách thành phần câu (Token Analysis)</span>
+            <span id="token-count-label" class="tokens-count-badge">0 thành phần</span>
+          </div>
+
+          <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+            Bảng phân tách từ vựng, thể ngữ pháp và trợ từ theo đúng thứ tự xuất hiện. Nhấp vào bất kỳ hàng nào để xem chi tiết hoặc tra cứu chuyên sâu.
+          </p>
+
+          <div class="tokens-table-wrapper">
+            <table class="tokens-table">
+              <thead>
+                <tr>
+                  <th style="width: 45px;">#</th>
+                  <th>Thành phần</th>
+                  <th>Cách đọc</th>
+                  <th>Dạng gốc</th>
+                  <th>Từ loại & Thể chia</th>
+                  <th>Nghĩa tiếng Việt / Vai trò</th>
+                </tr>
+              </thead>
+              <tbody id="tokens-tbody">
+                <!-- Render động bằng JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <!-- D. Token Details Inspector Modal -->
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="inspector-modal" role="dialog" aria-modal="true">
+        <div class="inspector-header">
+          <div class="inspector-title-area">
+            <h2 id="modal-surface">
+              <span>昨日</span>
+              <button id="btn-modal-tts" class="btn-tts" title="Nghe phát âm">🔊</button>
+            </h2>
+            <div id="modal-reading" style="color: var(--analyzer-accent); font-weight: 600; font-size: 15px; margin-top: 2px;">きのう</div>
+          </div>
+          <button id="btn-close-modal" class="btn-close-modal" title="Đóng bảng chi tiết">✕</button>
+        </div>
+
+        <div class="inspector-fields">
+          <div class="inspector-field">
+            <div class="field-label">Dạng từ điển (Base Form)</div>
+            <div id="modal-base-form" class="field-value font-medium">—</div>
+          </div>
+
+          <div class="inspector-field">
+            <div class="field-label">Từ loại & Chia thể (Grammar & Conjugation)</div>
+            <div id="modal-pos-conj" class="field-value">—</div>
+          </div>
+
+          <div class="inspector-field">
+            <div class="field-label">Nghĩa tiếng Việt & Vai trò</div>
+            <div id="modal-meaning" class="field-value">—</div>
+          </div>
+
+          <!-- Phân tích chữ Hán (Kanji Breakdown) -->
+          <div class="inspector-field" id="modal-kanji-section" style="display: none;">
+            <div class="field-label">Hán Tự & Âm Hán Việt (Kanji Breakdown)</div>
+            <div id="modal-kanji-list" class="kanji-breakdown-list"></div>
+          </div>
+        </div>
+
+        <div class="inspector-actions">
+          <button id="btn-modal-save" class="btn-secondary" style="flex: 1;">
+            ⭐ Lưu vào Flashcard
+          </button>
+          <button id="btn-modal-lookup" class="btn-primary" style="flex: 1;">
+            🔍 Tra cứu chi tiết
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-msg" class="toast-msg">
+      <span>Đã sao chép vào bộ nhớ tạm!</span>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/analyzer.js"></script>
+  <script src="scripts/analyzer_ui.js"></script>
+</body>
+</html>

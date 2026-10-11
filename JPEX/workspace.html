@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JP Dictionary & Flashcards — Workspace</title>
+  <link rel="icon" type="image/png" href="icons/icon32.png">
+  <link rel="stylesheet" href="styles/workspace.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar cố định trên desktop -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <img src="icons/icon48.png" alt="Logo" class="brand-logo">
+        <div>
+          <div class="brand-title">JP Dictionary</div>
+          <span class="brand-badge">Workspace</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <div class="menu-section-label">Học tập & Ôn tập</div>
+        
+        <a class="nav-item active" data-view="overview" id="nav-overview">
+          <div class="nav-item-content">
+            <span class="nav-icon">📊</span>
+            <span>Tổng quan</span>
+          </div>
+        </a>
+
+        <a class="nav-item" data-view="decks" id="nav-decks">
+          <div class="nav-item-content">
+            <span class="nav-icon">🗂️</span>
+            <span>Bộ thẻ Flashcard</span>
+          </div>
+          <span class="badge-counter" id="badge-total-decks">0</span>
+        </a>
+
+        <a class="nav-item" data-view="review" id="nav-review">
+          <div class="nav-item-content">
+            <span class="nav-icon">🃏</span>
+            <span>Ôn tập SRS</span>
+          </div>
+          <span class="badge-counter due" id="badge-due-cards">0</span>
+        </a>
+
+        <a class="nav-item" data-view="test" id="nav-test">
+          <div class="nav-item-content">
+            <span class="nav-icon">📝</span>
+            <span>Kiểm tra trắc nghiệm</span>
+          </div>
+        </a>
+
+        <div class="menu-section-label">Từ điển & Dữ liệu</div>
+
+        <a class="nav-item" data-view="dict" id="nav-dict">
+          <div class="nav-item-content">
+            <span class="nav-icon">📖</span>
+            <span>Tra cứu từ điển</span>
+          </div>
+        </a>
+
+        <a class="nav-item" data-view="saved" id="nav-saved">
+          <div class="nav-item-content">
+            <span class="nav-icon">⭐</span>
+            <span>Từ đã lưu</span>
+          </div>
+          <span class="badge-counter" id="badge-saved-words">0</span>
+        </a>
+
+        <a class="nav-item" data-view="stats" id="nav-stats">
+          <div class="nav-item-content">
+            <span class="nav-icon">📈</span>
+            <span>Thống kê tiến độ</span>
+          </div>
+        </a>
+
+        <div class="menu-section-label">Hệ thống</div>
+
+        <a class="nav-item" data-view="settings" id="nav-settings">
+          <div class="nav-item-content">
+            <span class="nav-icon">⚙️</span>
+            <span>Cài đặt & Sao lưu</span>
+          </div>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="footer-btn" id="btn-sidebar-analyzer" title="Mở Sentence Analyzer">
+          <span>🔍</span> Phân tích câu
+        </button>
+        <button class="footer-btn" id="btn-theme-toggle" title="Đổi giao diện Sáng / Tối">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Vùng nội dung chính -->
+    <main class="app-main">
+      <!-- Topbar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <h1 class="page-title" id="page-title">Tổng quan học tập</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-secondary btn-sm" id="btn-topbar-import" title="Nhập dữ liệu JSON hoặc tạo prompt cho AI">
+            📥 Nhập JSON / AI
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btn-topbar-export" title="Xuất dữ liệu JSON hoặc tạo prompt chia sẻ">
+            📤 Xuất JSON / Prompt
+          </button>
+          <a class="btn-analyzer-link" id="link-to-analyzer" title="Chuyển sang Japanese Sentence Analyzer">
+            <span>🔍</span> Sentence Analyzer
+          </a>
+        </div>
+      </header>
+
+      <!-- Container các View -->
+      <div class="view-container">
+        
+        <!-- ==============================================
+             VIEW 1: TỔNG QUAN (OVERVIEW)
+             ============================================== -->
+        <section class="view-section active" id="view-overview">
+          <div class="overview-banner">
+            <div class="banner-text">
+              <h2>Chào mừng bạn đến với JP Dictionary Workspace! 🇯🇵</h2>
+              <p>Không gian học tiếng Nhật toàn diện: Quản lý từ vựng ngoại tuyến, tạo các bộ thẻ tùy chỉnh và luyện nhớ bằng thuật toán Lặp lại ngắt quãng (SRS).</p>
+            </div>
+            <div class="banner-actions">
+              <button class="btn btn-primary btn-lg" id="btn-banner-review">
+                <span>🃏</span> Bắt đầu ôn tập ngay
+              </button>
+              <button class="btn btn-secondary btn-lg" id="btn-banner-new-deck">
+                <span>➕</span> Tạo bộ thẻ mới
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">🗂️</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-total-decks">0</div>
+                <div class="stat-label">Bộ thẻ Flashcard</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(13, 148, 136, 0.12); color: #0d9488;">🎴</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-total-cards">0</div>
+                <div class="stat-label">Tổng số thẻ từ vựng</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(225, 29, 72, 0.12); color: #e11d48;">⏰</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-due-today">0</div>
+                <div class="stat-label">Thẻ đến hạn hôm nay</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(5, 150, 105, 0.12); color: #059669;">🏆</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-reviewed-today">0</div>
+                <div class="stat-label">Lượt ôn tập hôm nay</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="decks-header-bar" style="margin-top: 32px;">
+            <h3 style="font-size: 18px; font-weight: 700;">Bộ thẻ của bạn</h3>
+            <button class="btn btn-secondary btn-sm" id="btn-view-all-decks">Xem tất cả bộ thẻ →</button>
+          </div>
+          <div class="decks-grid" id="overview-decks-grid">
+            <!-- Render danh sách bộ thẻ tại đây -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 2: TRA CỨU TỪ ĐIỂN (DICT LOOKUP)
+             ============================================== -->
+        <section class="view-section" id="view-dict">
+          <div class="dict-search-bar">
+            <div class="search-input-wrap">
+              <span class="search-input-icon">🔍</span>
+              <input type="text" id="dict-search-input" placeholder="Tra từ tiếng Nhật (Kanji, Hiragana, Katakana, Romaji) hoặc nghĩa Tiếng Việt...">
+            </div>
+            <button class="btn btn-primary" id="btn-dict-search-submit">Tìm kiếm</button>
+          </div>
+
+          <div id="dict-results-list" class="dict-results-container">
+            <!-- Kết quả tra từ điển được chèn vào đây -->
+            <div class="empty-placeholder">
+              <div class="empty-icon">📖</div>
+              <h3>Tra cứu từ điển đa năng</h3>
+              <p>Nhập từ tiếng Nhật hoặc nghĩa tiếng Việt để tìm kiếm ngoại tuyến siêu tốc và lưu trực tiếp vào Flashcard.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 3: TỪ ĐÃ LƯU (SAVED WORDS)
+             ============================================== -->
+        <section class="view-section" id="view-saved">
+          <div class="cards-toolbar">
+            <div style="display: flex; gap: 10px; align-items: center; flex: 1;">
+              <input type="text" class="form-input" id="saved-search-input" placeholder="Tìm kiếm từ đã lưu theo Kanji, Kana, nghĩa..." style="max-width: 320px;">
+              <select class="form-select" id="saved-folder-filter" style="max-width: 200px;">
+                <option value="__all__">Tất cả thư mục</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-saved-export-csv" title="Xuất danh sách từ đã lưu ra file Excel CSV (UTF-8 BOM)">📥 Xuất CSV</button>
+              <button class="btn btn-primary btn-sm" id="btn-saved-practice" title="Bắt đầu ôn tập các từ trong thư mục này">🃏 Ôn tập từ đã lưu</button>
+            </div>
+          </div>
+
+          <div class="cards-table-wrapper">
+            <table class="cards-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>Từ vựng (Kanji)</th>
+                  <th>Cách đọc (Kana)</th>
+                  <th>Hán Việt</th>
+                  <th>Nghĩa tiếng Việt</th>
+                  <th>Thư mục</th>
+                  <th style="width: 110px; text-align: center;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="saved-words-tbody">
+                <!-- Render từ đã lưu -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 4: QUẢN LÝ BỘ THẺ (DECKS MANAGER)
+             ============================================== -->
+        <section class="view-section" id="view-decks">
+          <div class="decks-header-bar">
+            <div>
+              <h2 style="font-size: 20px; font-weight: 700;">Danh sách Bộ thẻ Flashcard</h2>
+              <p style="color: var(--text-secondary); font-size: 13.5px;">Tạo bộ thẻ theo chủ đề (JLPT, Kanji, Giao tiếp, IT...) để luyện phản xạ ghi nhớ</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" id="btn-deck-import">📥 Nhập JSON / AI</button>
+              <button class="btn btn-primary" id="btn-create-deck-modal">➕ Tạo bộ thẻ mới</button>
+            </div>
+          </div>
+
+          <div class="decks-grid" id="decks-manager-grid">
+            <!-- Grid bộ thẻ -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 5: CHI TIẾT BỘ THẺ (DECK DETAIL)
+             ============================================== -->
+        <section class="view-section" id="view-deck-detail">
+          <div class="deck-detail-bar">
+            <div>
+              <button class="btn btn-ghost btn-sm" id="btn-back-to-decks" style="margin-bottom: 6px;">← Quay lại danh sách bộ thẻ</button>
+              <h2 style="font-size: 22px; font-weight: 700;" id="detail-deck-name">Tên bộ thẻ</h2>
+              <p style="color: var(--text-secondary); font-size: 13.5px;" id="detail-deck-desc">Mô tả bộ thẻ</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-primary" id="btn-start-review-this-deck">🃏 Ôn tập bộ thẻ này</button>
+              <button class="btn btn-secondary" id="btn-add-card-to-deck">➕ Thêm thẻ mới</button>
+              <button class="btn btn-secondary btn-sm" id="btn-edit-this-deck">✏️ Sửa bộ thẻ</button>
+              <button class="btn btn-secondary btn-sm" id="btn-export-this-deck">📤 Xuất JSON</button>
+              <button class="btn btn-secondary btn-sm" id="btn-import-this-deck">📥 Nhập JSON</button>
+              <button class="btn btn-danger btn-sm" id="btn-delete-this-deck">🗑️ Xóa bộ thẻ</button>
+            </div>
+          </div>
+
+          <div class="cards-toolbar">
+            <div style="display: flex; gap: 10px; align-items: center; flex: 1;">
+              <input type="text" class="form-input" id="deck-card-search" placeholder="Tìm kiếm thẻ trong bộ này..." style="max-width: 320px;">
+              <select class="form-select" id="deck-card-filter" style="max-width: 180px;">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="due">Cần ôn (Due)</option>
+                <option value="starred">Đã đánh dấu sao ⭐</option>
+                <option value="new">Thẻ mới</option>
+              </select>
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary);" id="detail-cards-count-label">
+              0 thẻ
+            </div>
+          </div>
+
+          <div class="cards-table-wrapper">
+            <table class="cards-table">
+              <thead>
+                <tr>
+                  <th style="width: 44px; text-align: center;">⭐</th>
+                  <th>Từ vựng (Kanji)</th>
+                  <th>Cách đọc</th>
+                  <th>Hán Việt</th>
+                  <th>Nghĩa tiếng Việt</th>
+                  <th>Lịch ôn tiếp theo</th>
+                  <th style="width: 100px; text-align: center;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="deck-cards-tbody">
+                <!-- Render các thẻ trong bộ -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 6: TRUNG TÂM ÔN TẬP SRS (SRS REVIEW HUB)
+             ============================================== -->
+        <section class="view-section" id="view-review">
+          <div class="overview-banner" style="margin-bottom: 24px;">
+            <div class="banner-text">
+              <h2 id="srs-due-count-heading">Trung tâm Ôn tập Lặp lại ngắt quãng (SRS) 🧠</h2>
+              <p id="srs-due-count-desc">Hệ thống tự động tính toán thời điểm vàng để bạn ôn lại thẻ trước khi quên theo thuật toán Spaced Repetition.</p>
+            </div>
+            <div class="banner-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-lg" id="btn-srs-start-due">
+                <span>🃏</span> Ôn tập thẻ đến hạn
+              </button>
+              <button class="btn btn-secondary btn-lg" id="btn-srs-review-all">
+                <span>🔄</span> Ôn tập tất cả thẻ
+              </button>
+              <button class="btn btn-secondary btn-lg" id="btn-srs-review-starred">
+                <span>⭐</span> Chỉ ôn thẻ khó
+              </button>
+            </div>
+          </div>
+
+          <div class="decks-header-bar" style="margin-bottom: 16px;">
+            <h3 style="font-size: 18px; font-weight: 700;">Danh sách thẻ cần ôn tập hôm nay</h3>
+            <span style="font-size: 13px; color: var(--text-secondary);" id="srs-table-count-label">0 thẻ</span>
+          </div>
+
+          <div class="cards-table-wrapper">
+            <table class="cards-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>Từ vựng (Kanji)</th>
+                  <th>Cách đọc</th>
+                  <th>Hán Việt</th>
+                  <th>Nghĩa tiếng Việt</th>
+                  <th>Bộ thẻ</th>
+                  <th>Trạng thái SRS</th>
+                </tr>
+              </thead>
+              <tbody id="srs-due-cards-tbody">
+                <!-- Render thẻ đến hạn hôm nay -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="srs-empty-placeholder" class="empty-placeholder" style="display: none;">
+            <div class="empty-icon">🎉</div>
+            <h3>Xuất sắc! Bạn không có thẻ nào cần ôn hôm nay</h3>
+            <p>Tất cả thẻ đã được hoàn thành. Bạn có thể bấm "Ôn tập tất cả thẻ" để củng cố thêm hoặc tra cứu từ mới để lưu vào bộ thẻ.</p>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 7: KIỂM TRA TRẮC NGHIỆM (QUIZ / TEST)
+             ============================================== -->
+        <section class="view-section" id="view-test">
+          <div class="deck-detail-bar" style="margin-bottom: 24px;">
+            <div>
+              <h2 style="font-size: 22px; font-weight: 700;">Kiểm tra trắc nghiệm Từ vựng</h2>
+              <p style="color: var(--text-secondary); font-size: 13.5px;">Chọn bộ thẻ hoặc toàn bộ từ vựng để kiểm tra phản xạ nghĩa từ qua câu hỏi 4 lựa chọn</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <select class="form-select" id="quiz-deck-select" style="min-width: 220px;"></select>
+              <button class="btn btn-primary" id="btn-start-quiz">Bắt đầu kiểm tra</button>
+            </div>
+          </div>
+
+          <div id="quiz-container" style="max-width: 720px; margin: 0 auto; display: none;">
+            <div class="stat-card" style="margin-bottom: 20px; justify-content: space-between;">
+              <span style="font-size: 15px; font-weight: 600;" id="quiz-progress-label">Câu 1/10</span>
+              <span style="font-size: 15px; font-weight: 700; color: #10b981;" id="quiz-score-label">Điểm: 0</span>
+            </div>
+
+            <div class="dict-card" style="text-align: center; padding: 40px 24px;">
+              <div style="font-size: 42px; font-weight: 700; font-family: var(--font-jp); margin-bottom: 8px;" id="quiz-question-word">--</div>
+              <div style="font-size: 20px; color: var(--primary); margin-bottom: 24px;" id="quiz-question-reading">--</div>
+
+              <div id="quiz-options-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: left;">
+                <!-- 4 lựa chọn -->
+              </div>
+            </div>
+          </div>
+
+          <div id="quiz-placeholder" class="empty-placeholder">
+            <div class="empty-icon">📝</div>
+            <h3>Sẵn sàng kiểm tra</h3>
+            <p>Chọn một bộ thẻ phía trên và bấm <b>Bắt đầu kiểm tra</b> để thử thách vốn từ của bạn (yêu cầu tối thiểu 4 từ vựng trong hệ thống).</p>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 8: THỐNG KÊ TIẾN ĐỘ (STATS)
+             ============================================== -->
+        <section class="view-section" id="view-stats">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">🔥</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stats-streak-days">1 ngày</div>
+                <div class="stat-label">Chuỗi học tập liên tục</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">✅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stats-mastered-cards">0</div>
+                <div class="stat-label">Thẻ đã ghi nhớ tốt</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">⏳</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stats-learning-cards">0</div>
+                <div class="stat-label">Thẻ đang trong quá trình học</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(225, 29, 72, 0.12); color: #e11d48;">⭐</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stats-starred-cards">0</div>
+                <div class="stat-label">Thẻ khó / Đã gắn sao</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dict-card" style="margin-top: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Nhật ký các phiên học gần đây</h3>
+            <div id="stats-history-list">
+              <p style="color: var(--text-muted); font-size: 13.5px;">Chưa có phiên học nào. Bắt đầu ôn tập thẻ để ghi lại tiến độ!</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 9: CÀI ĐẶT & SAO LƯU (SETTINGS)
+             ============================================== -->
+        <section class="view-section" id="view-settings">
+          <div class="dict-card" style="max-width: 680px; margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Tùy chọn Học tập & Âm thanh</h3>
+            
+            <div class="form-group">
+              <label class="form-label">Tốc độ phát âm (TTS Speech Rate)</label>
+              <select class="form-select" id="settings-speech-rate">
+                <option value="0.8">Chậm (0.8x)</option>
+                <option value="1.0" selected>Bình thường (1.0x)</option>
+                <option value="1.2">Nhanh (1.2x)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tự động phát âm thanh khi lật thẻ</label>
+              <select class="form-select" id="settings-auto-play-audio">
+                <option value="true">Bật (Tự động phát)</option>
+                <option value="false" selected>Tắt (Bấm loa thủ công)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="dict-card" style="max-width: 680px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Sao lưu & Phục hồi dữ liệu</h3>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 16px;">Xuất toàn bộ bộ thẻ và thẻ flashcard ra file JSON để sao lưu hoặc tạo prompt AI chuyển đổi từ vựng.</p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" id="btn-settings-export">📤 Mở bảng Xuất JSON / Prompt</button>
+              <button class="btn btn-secondary" id="btn-settings-import">📥 Mở bảng Nhập JSON / AI</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==============================================
+       OVERLAY: REDESIGNED QUIZLET-STYLE FLASHCARD REVIEW
+       ============================================== -->
+  <div class="review-fullscreen-wrapper quizlet-theme" id="review-modal" style="display: none;">
+    <!-- Top Bar: Quay lại & Đánh dấu sao -->
+    <div class="quizlet-topbar">
+      <button class="quizlet-back-btn" id="btn-exit-review" title="Quay lại danh sách bộ thẻ (Esc)">
+        <span class="quizlet-back-arrow">←</span> Quay lại
+      </button>
+
+      <div class="quizlet-top-title" id="review-deck-title-display">Bộ thẻ học tập</div>
+
+      <button class="quizlet-star-btn" id="btn-card-star-toggle" title="Đánh dấu sao / Thêm vào từ đã lưu (C)">
+        ☆
+      </button>
+    </div>
+
+    <!-- Sân khấu chính: Mũi tên trái/phải và Thẻ Flashcard ở giữa -->
+    <div class="quizlet-stage-container">
+      <!-- Mũi tên chuyển thẻ trước -->
+      <button class="quizlet-nav-arrow arrow-left" id="btn-prev-card" title="Thẻ trước (←)">
+        ❮
+      </button>
+
+      <!-- Khung Thẻ Flashcard 3D lật mượt mà -->
+      <div class="quizlet-card-viewport">
+        <div class="quizlet-card-3d" id="review-card-box">
+          <!-- MẶT TRƯỚC: Chỉ hiển thị từ vựng/nghĩa theo chiều học + nút TTS -->
+          <div class="quizlet-face face-front">
+            <div class="quizlet-face-content">
+              <div class="quizlet-kanji-huge" id="card-front-word">貿易</div>
+              <button class="quizlet-tts-btn" id="btn-card-audio-front" title="Phát âm (R)">
+                🔊
+              </button>
+            </div>
+          </div>
+
+          <!-- MẶT SAU: Hiển thị đầy đủ thông tin chi tiết -->
+          <div class="quizlet-face face-back">
+            <div class="quizlet-face-content">
+              <div class="quizlet-back-header">
+                <div class="quizlet-back-word" id="card-back-word">貿易</div>
+                <button class="quizlet-tts-btn back-tts" id="btn-card-audio-back" title="Phát âm (R)">
+                  🔊
+                </button>
+              </div>
+
+              <div class="quizlet-back-reading" id="card-back-reading">ぼうえき</div>
+              <div class="quizlet-back-hanviet" id="card-back-hanviet" style="display: none;">MẬU DỊCH</div>
+              <div class="quizlet-back-meaning" id="card-back-meaning">Ngoại thương, thương mại quốc tế</div>
+
+              <div class="quizlet-back-example-box" id="card-back-example-box" style="display: none;">
+                <div class="example-jp-text" id="card-back-example-jp"></div>
+                <div class="example-vi-text" id="card-back-example-vi"></div>
+              </div>
+
+              <div class="quizlet-back-notes" id="card-back-notes-box" style="display: none;">
+                <span id="card-back-notes"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Màn hình hoàn thành (Completion Screen) -->
+        <div class="quizlet-complete-card" id="review-complete-screen" style="display: none;">
+          <div class="complete-icon">🎉</div>
+          <h2 class="complete-title">Tuyệt vời! Bạn đã hoàn thành!</h2>
+          <p class="complete-subtitle">Phiên học kết thúc. Thống kê mức độ ghi nhớ của bạn:</p>
+
+          <div class="complete-stats-row">
+            <div class="stat-box stat-known">
+              <div class="stat-number" id="complete-known-count">0</div>
+              <div class="stat-label">Đã thuộc</div>
+            </div>
+            <div class="stat-box stat-unknown">
+              <div class="stat-number" id="complete-unknown-count">0</div>
+              <div class="stat-label">Cần ôn lại</div>
+            </div>
+            <div class="stat-box stat-rate">
+              <div class="stat-number" id="complete-accuracy-rate">100%</div>
+              <div class="stat-label">Tỷ lệ chính xác</div>
+            </div>
+          </div>
+
+          <div class="complete-actions">
+            <button class="btn btn-primary" id="btn-review-retry-unknown" style="display: none;">
+              🔄 Ôn lại các thẻ chưa thuộc
+            </button>
+            <button class="btn btn-secondary" id="btn-review-restart">
+              🔁 Học lại toàn bộ
+            </button>
+            <button class="btn btn-secondary" id="btn-finish-review-session">
+              ← Quay lại danh sách bộ thẻ
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mũi tên chuyển thẻ kế tiếp -->
+      <button class="quizlet-nav-arrow arrow-right" id="btn-next-card" title="Thẻ tiếp theo (→)">
+        ❯
+      </button>
+    </div>
+
+    <!-- Thanh mỏng hiển thị phím tắt ngay dưới thẻ -->
+    <div class="quizlet-shortcuts-bar">
+      <span>Phím tắt:</span>
+      <span class="quizlet-kbd-pill">Space</span> lật
+      <span class="quizlet-kbd-pill">Z</span> chưa biết
+      <span class="quizlet-kbd-pill">X</span> biết
+      <span class="quizlet-kbd-pill">C</span> lưu sao
+      <span class="quizlet-kbd-pill">R</span> nghe
+    </div>
+
+    <!-- Thanh điều khiển cố định ở đáy -->
+    <div class="quizlet-bottom-bar" id="review-rating-bar">
+      <!-- Nút đánh giá & bộ đếm ở giữa -->
+      <div class="quizlet-bottom-center">
+        <button class="quizlet-action-circle btn-unknown" id="btn-rate-unknown" title="Chưa biết / Chưa thuộc (Z)">
+          ✕
+        </button>
+
+        <div class="quizlet-counter-display" id="review-counter-text">
+          1 / 1
+        </div>
+
+        <button class="quizlet-action-circle btn-known" id="btn-rate-known" title="Đã biết / Đã thuộc (X)">
+          ✓
+        </button>
+      </div>
+
+      <!-- Thanh công cụ bên phải -->
+      <div class="quizlet-bottom-tools">
+        <button class="quizlet-tool-btn" id="btn-toggle-direction" title="Đổi chiều học">
+          ⇄ <span id="label-study-direction">JP→VI</span>
+        </button>
+
+        <button class="quizlet-tool-btn" id="btn-review-undo" title="Hoàn tác thao tác vừa đánh giá">
+          ↺
+        </button>
+
+        <button class="quizlet-tool-btn" id="btn-review-autoplay" title="Tự động phát / Chuyển thẻ">
+          ▷
+        </button>
+
+        <button class="quizlet-tool-btn" id="btn-review-shuffle" title="Xáo trộn thứ tự thẻ">
+          🔀
+        </button>
+
+        <button class="quizlet-tool-btn" id="btn-review-settings" title="Cài đặt phiên học">
+          ⚙
+        </button>
+      </div>
+    </div>
+
+    <!-- Popover Cài đặt phiên học -->
+    <div class="quizlet-settings-popover" id="modal-review-settings" style="display: none;">
+      <div class="popover-header">
+        <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #fff;">⚙ Cài đặt phiên học</h4>
+        <button class="btn btn-ghost btn-sm" id="btn-close-review-settings" style="color: #94a3b8; padding: 2px 6px;">✕</button>
+      </div>
+      <div class="popover-body">
+        <div class="setting-item">
+          <label class="setting-label">Chiều hiển thị:</label>
+          <select class="form-select quizlet-select" id="setting-study-direction">
+            <option value="jp-vi">Tiếng Nhật → Tiếng Việt (JP → VI)</option>
+            <option value="vi-jp">Tiếng Việt → Tiếng Nhật (VI → JP)</option>
+          </select>
+        </div>
+
+        <div class="setting-item-check">
+          <label>
+            <input type="checkbox" id="setting-shuffle"> Xáo trộn ngẫu nhiên thứ tự thẻ
+          </label>
+        </div>
+
+        <div class="setting-item-check">
+          <label>
+            <input type="checkbox" id="setting-autoplay"> Tự động chuyển thẻ liên tục
+          </label>
+        </div>
+
+        <div class="setting-item" id="group-autoplay-delay">
+          <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: #cbd5e1; margin-bottom: 4px;">
+            <span>Thời gian tự chuyển:</span>
+            <span id="label-autoplay-delay" style="font-weight: 700; color: #38bdf8;">4s</span>
+          </div>
+          <input type="range" id="setting-autoplay-delay" min="2" max="10" step="1" value="4" style="width: 100%;">
+        </div>
+
+        <div class="setting-item-check">
+          <label>
+            <input type="checkbox" id="setting-auto-tts"> Tự động phát âm thanh khi hiển thị
+          </label>
+        </div>
+
+        <div class="setting-item-check">
+          <label>
+            <input type="checkbox" id="setting-repeat-unknown" checked> Ôn lại các thẻ chưa thuộc ở cuối phiên
+          </label>
+        </div>
+      </div>
+      <div class="popover-footer">
+        <button class="btn btn-primary btn-sm" id="btn-save-review-settings" style="width: 100%;">Áp dụng cài đặt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       MODAL 1: TẠO / SỬA BỘ THẺ (DECK MODAL)
+       ============================================== -->
+  <div class="modal-overlay" id="modal-deck" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-deck-title">Tạo bộ thẻ mới</h3>
+        <button class="btn btn-ghost btn-sm" id="btn-close-deck-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="deck-form-id">
+        <div class="form-group">
+          <label class="form-label">Tên bộ thẻ *</label>
+          <input type="text" class="form-input" id="deck-form-name" placeholder="Ví dụ: Từ vựng N3 - Mimikara Oboeru" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả bộ thẻ</label>
+          <textarea class="form-textarea" id="deck-form-desc" rows="3" placeholder="Mô tả mục tiêu học tập, sách giáo trình..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Màu nhận diện</label>
+          <select class="form-select" id="deck-form-color">
+            <option value="#0284c7">Xanh Dương (Sky Blue)</option>
+            <option value="#0d9488">Xanh Teal (Mặc định)</option>
+            <option value="#d97706">Cam Hổ Phách (Amber)</option>
+            <option value="#e11d48">Đỏ Hồng (Rose)</option>
+            <option value="#4f46e5">Tím Indigo</option>
+            <option value="#059669">Xanh Lục (Emerald)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-deck-modal">Hủy</button>
+        <button class="btn btn-primary" id="btn-save-deck-modal">Lưu bộ thẻ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       MODAL 2: THÊM / SỬA THẺ FLASHCARD (CARD MODAL)
+       ============================================== -->
+  <div class="modal-overlay" id="modal-card" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-card-title">Thêm thẻ từ vựng mới</h3>
+        <button class="btn btn-ghost btn-sm" id="btn-close-card-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="card-form-id">
+        <input type="hidden" id="card-form-deck-id">
+
+        <div class="form-group">
+          <label class="form-label">Từ vựng (Kanji / Từ tiếng Nhật) *</label>
+          <input type="text" class="form-input" id="card-form-word" placeholder="Ví dụ: 勉強する" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cách đọc (Hiragana / Katakana)</label>
+          <input type="text" class="form-input" id="card-form-reading" placeholder="Ví dụ: べんきょうする">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Âm Hán Việt</label>
+          <input type="text" class="form-input" id="card-form-hanviet" placeholder="Ví dụ: MIỄN CƯỜNG (để trống nếu không có Kanji)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nghĩa tiếng Việt *</label>
+          <textarea class="form-textarea" id="card-form-meaning" rows="2" placeholder="Ví dụ: Học tập, rèn luyện" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Câu ví dụ tiếng Nhật (tùy chọn)</label>
+          <input type="text" class="form-input" id="card-form-example" placeholder="Ví dụ: 毎日日本語を勉強します。">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bản dịch câu ví dụ (tùy chọn)</label>
+          <input type="text" class="form-input" id="card-form-example-meaning" placeholder="Ví dụ: Tôi học tiếng Nhật mỗi ngày.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ghi chú cá nhân</label>
+          <input type="text" class="form-input" id="card-form-notes" placeholder="Mẹo nhớ, liên tưởng...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-card-modal">Hủy</button>
+        <button class="btn btn-primary" id="btn-save-card-modal">Lưu thẻ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       MODAL 3: NHẬP DỮ LIỆU JSON & TẠO PROMPT AI
+       ============================================== -->
+  <div class="modal-overlay" id="modal-import" style="display: none;">
+    <div class="modal-content" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Nhập JSON & Hỗ trợ Chuyển đổi bằng AI</h3>
+        <button class="btn btn-ghost btn-sm" id="btn-close-import-modal">✕</button>
+      </div>
+
+      <!-- Tab chuyển đổi giữa Nhập File và Tạo Prompt AI -->
+      <div style="display: flex; border-bottom: 1px solid var(--border); background: var(--bg-card-subtle);">
+        <button class="modal-tab-btn active" id="tab-btn-import-file" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid var(--primary); font-size: 13.5px; font-weight: 600; color: var(--primary); cursor: pointer;">
+          📥 1. Nhập file / Dán JSON
+        </button>
+        <button class="modal-tab-btn" id="tab-btn-create-prompt" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer;">
+          🤖 2. Tạo Prompt cho AI
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- PANE 1: NHẬP FILE / DÁN JSON (MẶC ĐỊNH) -->
+        <div id="pane-import-file">
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+            Chọn file backup <code>.json</code> hoặc dán chuỗi JSON vào ô bên dưới. Hệ thống sẽ tự động nhận diện và khôi phục bộ thẻ:
+          </p>
+
+          <div class="form-group">
+            <label class="form-label">Chọn file JSON từ máy tính:</label>
+            <input type="file" id="import-file-input" accept=".json">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Hoặc dán trực tiếp chuỗi JSON vào đây:</label>
+            <textarea class="form-textarea" id="import-json-textarea" rows="6" placeholder='Dán chuỗi JSON vào đây...&#10;Hỗ trợ:&#10;1. Bản sao lưu đầy đủ: { "version": 1, "decks": [...] }&#10;2. Một bộ thẻ: { "name": "N3", "cards": [...] }&#10;3. Mảng từ vựng AI: [ { "word": "食べる", "reading": "たべる", ... } ]'></textarea>
+          </div>
+
+          <!-- KHUNG PHÂN TÍCH & XÁC NHẬN DỮ LIỆU TỰ ĐỘNG -->
+          <div id="import-analysis-box" style="display: none; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); background: var(--bg-card-subtle);">
+            <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 4px;" id="import-analysis-title">🔍 Kết quả phân tích file</div>
+            <div style="font-size: 13px; color: var(--text-secondary);" id="import-analysis-desc">Chưa có dữ liệu</div>
+          </div>
+
+          <div class="form-group" id="group-target-deck-container" style="margin-top: 12px;">
+            <label class="form-label" id="label-target-deck">Bộ thẻ đích để lưu từ (nếu là mảng từ vựng):</label>
+            <select class="form-select" id="import-target-deck-select">
+              <option value="__auto__">✨ Tự động theo thông tin trong file</option>
+              <option value="__new__">+ Tạo bộ thẻ mới...</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="group-new-deck-name" style="display: none;">
+            <label class="form-label">Tên bộ thẻ mới *</label>
+            <input type="text" class="form-input" id="import-new-deck-name" placeholder="Ví dụ: Từ vựng N3 bài 1">
+          </div>
+
+          <div id="import-feedback" style="font-size: 13px; font-weight: 600; display: none; padding: 10px; border-radius: 6px; margin-top: 10px;"></div>
+        </div>
+
+        <!-- PANE 2: TẠO PROMPT AI -->
+        <div id="pane-create-prompt" style="display: none;">
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">
+            Dán danh sách từ vựng tiếng Nhật dạng thô (từ giáo trình, sách, tài liệu) vào ô dưới đây. Hệ thống sẽ tự động tạo prompt chuẩn để gửi cho ChatGPT / Claude / Gemini chuyển đổi:
+          </p>
+          <div class="form-group">
+            <textarea class="form-textarea" id="prompt-raw-input" rows="5" placeholder="Dán danh sách từ vựng thô vào đây...&#10;Ví dụ:&#10;食べる - ăn&#10;飲む - uống&#10;日本語 - tiếng Nhật"></textarea>
+          </div>
+          <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+            <button class="btn btn-primary btn-sm" id="btn-generate-ai-prompt">✨ Tạo Prompt chuẩn</button>
+            <button class="btn btn-secondary btn-sm" id="btn-copy-ai-prompt" style="display: none;">📋 Sao chép Prompt vào Clipboard</button>
+          </div>
+          <div class="form-group" id="group-prompt-output" style="display: none;">
+            <label class="form-label">Prompt hoàn chỉnh đã tạo (Copy và gửi cho AI):</label>
+            <textarea class="form-textarea" id="prompt-generated-output" rows="7" readonly style="font-family: monospace; font-size: 12px; background: var(--bg-card-subtle);"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-import-modal">Đóng</button>
+        <button class="btn btn-primary" id="btn-execute-import">🚀 Thực hiện nhập vào bộ thẻ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       MODAL 4: XUẤT JSON & TẠO PROMPT XUẤT DỮ LIỆU
+       ============================================== -->
+  <div class="modal-overlay" id="modal-export" style="display: none;">
+    <div class="modal-content" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Xuất Dữ liệu JSON & Tạo Prompt</h3>
+        <button class="btn btn-ghost btn-sm" id="btn-close-export-modal">✕</button>
+      </div>
+
+      <!-- Tab chuyển đổi giữa Xuất File và Tạo Prompt -->
+      <div style="display: flex; border-bottom: 1px solid var(--border); background: var(--bg-card-subtle);">
+        <button class="modal-tab-btn active" id="tab-btn-export-file" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid var(--primary); font-size: 13.5px; font-weight: 600; color: var(--primary); cursor: pointer;">
+          💾 1. Tải file JSON Backup
+        </button>
+        <button class="modal-tab-btn" id="tab-btn-export-prompt" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid transparent; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer;">
+          🤖 2. Tạo Prompt 6 trường chuẩn
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- PANE 1: XUẤT FILE JSON -->
+        <div id="pane-export-file">
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+            Xuất dữ liệu thực tế đang lưu trong extension ra file JSON hợp lệ có thể nhập trở lại bất kỳ lúc nào:
+          </p>
+          <div class="form-group">
+            <label class="form-label">Chọn phạm vi xuất:</label>
+            <select class="form-select" id="export-deck-scope-select">
+              <option value="__all__">Toàn bộ dữ liệu (Tất cả bộ thẻ & thẻ flashcard)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-do-download-json" style="width: 100%; margin-top: 10px;">
+            📥 Tải xuống file JSON Backup
+          </button>
+        </div>
+
+        <!-- PANE 2: TẠO PROMPT XUẤT DỮ LIỆU -->
+        <div id="pane-export-prompt" style="display: none;">
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+            Tạo chuỗi dữ liệu JSON theo chuẩn 6 trường (word, reading, hanviet, meaning, example, exampleMeaning) để chia sẻ hoặc tiếp tục xử lý với AI:
+          </p>
+          <div class="form-group">
+            <label class="form-label">Chọn bộ thẻ cần trích xuất:</label>
+            <select class="form-select" id="export-prompt-deck-select">
+              <option value="__all__">Tất cả từ vựng trong hệ thống</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dữ liệu JSON 6 trường:</label>
+            <textarea class="form-textarea" id="export-prompt-textarea" rows="8" readonly style="font-family: monospace; font-size: 12px; background: var(--bg-card-subtle);"></textarea>
+          </div>
+          <button class="btn btn-primary" id="btn-copy-export-prompt" style="width: 100%;">
+            📋 Sao chép dữ liệu JSON vào Clipboard
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-export-modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nạp các module theo thứ tự -->
+  <script src="scripts/db.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/workspace.js"></script>
+</body>
+</html>

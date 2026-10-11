@@ -41,7 +41,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupDatabase();
   setupSettingsTab();
   setupFlashcardAndExport();
-  setupOcrButton();
+  setupHeaderButtons();
+
+  // Lắng nghe thay đổi dữ liệu từ các tab/webpage khác để cập nhật realtime
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && (changes.savedWords || changes.jpex_cards || changes.jpex_decks || changes._lastSyncSignal)) {
+        console.log('[Popup] Dữ liệu thay đổi, tự động cập nhật danh sách...');
+        const savedTab = document.getElementById('saved-tab');
+        if (savedTab && savedTab.classList.contains('active')) {
+          initFolderFilter();
+          loadAndRenderSavedWords();
+        }
+      }
+    });
+  }
 });
 
 /**
@@ -417,9 +431,21 @@ async function renderSearchResults(results) {
         <div class="card-meaning-val">${item.meaning}</div>
       </div>
       ${wordsBreakdownHtml}
+      <button class="btn-lookup-detail-ws" style="background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(2, 132, 199, 0.25); color: #0284c7; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: 600; cursor: pointer; margin-top: 8px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Mở Tra cứu chi tiết và quản lý Flashcard trong Workspace">
+        🔍 Tra cứu chi tiết trong Workspace
+      </button>
       <select class="card-folder-select" title="Chọn thư mục lưu từ"></select>
       <button class="card-action-btn ${starClass}" title="${starTitle}">${starText}</button>
     `;
+
+    const detailWsBtn = card.querySelector('.btn-lookup-detail-ws');
+    if (detailWsBtn) {
+      detailWsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chrome.runtime.sendMessage({ action: 'openWorkspace', view: 'dict', query: item.kanji || item.word });
+        window.close();
+      });
+    }
 
     // Lắng nghe sự kiện phát âm thanh (Phát âm theo cách đọc Kana để chính xác 100%)
     const audioBtn = card.querySelector('.card-audio-btn');
@@ -468,14 +494,14 @@ async function renderSearchResults(results) {
         actionBtn.title = 'Lưu vào danh sách';
         folderSelect.style.display = 'none';
       } else {
-        const defaultFolder = "Mặc định";
-        await saveWord(item, defaultFolder);
+        const targetFolder = (typeof getLastSavedFolder === 'function') ? await getLastSavedFolder() : "Mặc định";
+        await saveWord(item, targetFolder);
         actionBtn.classList.add('saved');
         actionBtn.innerHTML = '★';
         actionBtn.title = 'Xóa khỏi danh sách lưu';
         
         folderSelect.style.display = 'block';
-        await populateCardFolderSelect(defaultFolder);
+        await populateCardFolderSelect(targetFolder);
       }
     });
 
@@ -834,26 +860,21 @@ function setupFlashcardAndExport() {
     });
   }
 
-  if (btnPractice) {
-    btnPractice.addEventListener('click', async (e) => {
+  const btnOpenDecks = document.getElementById('btn-open-workspace-decks');
+  if (btnOpenDecks) {
+    btnOpenDecks.addEventListener('click', (e) => {
       e.stopPropagation();
-      const allWords = await getSavedWords();
-      const currentFilter = selectFilter ? selectFilter.value : '__all__';
-      let filtered = (currentFilter === '__all__')
-        ? allWords
-        : allWords.filter(w => (w.folder || 'Mặc định') === currentFilter);
+      chrome.runtime.sendMessage({ action: 'openWorkspace', view: 'decks' });
+      window.close();
+    });
+  }
 
-      if (filtered.length === 0) {
-        alert('Chưa có từ vựng nào trong thư mục này để ôn tập! Hãy tra cứu và bấm dấu Sao (★) để lưu từ.');
-        return;
-      }
-
-      // Xáo trộn ngẫu nhiên bộ thẻ (Shuffle)
-      flashcardDeck = [...filtered].sort(() => Math.random() - 0.5);
-      flashcardIndex = 0;
-      savedWordsList.style.display = 'none';
-      flashcardContainer.style.display = 'block';
-      updateCardView();
+  if (btnPractice) {
+    btnPractice.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Mở chế độ ôn tập toàn màn hình trong tab Workspace riêng biệt (Tab reuse)
+      chrome.runtime.sendMessage({ action: 'openWorkspace', view: 'review' });
+      window.close();
     });
   }
 
@@ -936,6 +957,19 @@ function setupFlashcardAndExport() {
   }
 
 /**
+ * Nút kích hoạt Không gian Từ điển & Thẻ nhớ Toàn màn hình (Workspace) từ Header
+ */
+function setupWorkspaceButton() {
+  const wsBtn = document.getElementById('btn-header-workspace');
+  if (wsBtn) {
+    wsBtn.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ action: 'openWorkspace', view: 'overview' });
+      window.close();
+    });
+  }
+}
+
+/**
  * Nút kích hoạt Chụp vùng màn hình OCR từ Header
  */
 function setupOcrButton() {
@@ -951,3 +985,26 @@ function setupOcrButton() {
     });
   }
 }
+
+/**
+ * Nút kích hoạt Phân tích câu tiếng Nhật từ Header
+ */
+function setupSentenceAnalyzerButton() {
+  const analyzerBtn = document.getElementById('btn-header-analyzer');
+  if (analyzerBtn) {
+    analyzerBtn.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ action: 'openSentenceAnalyzer' });
+      window.close();
+    });
+  }
+}
+
+/**
+ * Nút kích hoạt Workspace, OCR & Phân tích câu từ Header
+ */
+function setupHeaderButtons() {
+  setupWorkspaceButton();
+  setupOcrButton();
+  setupSentenceAnalyzerButton();
+}
+

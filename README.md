@@ -1,38 +1,73 @@
-# 🌸 Nihongo Helper - Japanese Dictionary Chrome Extension
+# 🌸 Nihongo Helper - Japanese Dictionary Chrome Extension (v4.0)
 
-Tiện ích mở rộng tra cứu tiếng Nhật cao cấp, hoạt động **Offline-First**, hỗ trợ tra từ tức thì bằng phím tắt **Hover**, bóc tách **Hán tự - Hán Việt**, chèn **Furigana toàn trang (157.886 từ vựng)**, **Chụp vùng màn hình dịch chữ (Manga / Screen OCR)**, giao diện thuần Việt 100% và tích hợp **Flashcard (SRS)** & xuất file cho **Anki / Excel**.
+Tiện ích mở rộng học tiếng Nhật toàn diện, hoạt động **Offline-First**, cung cấp **Không gian làm việc Toàn màn hình (Full-Screen Workspace)**, hệ thống **Bộ thẻ Flashcard Lặp lại ngắt quãng (Spaced Repetition System - SRS)** theo phong cách Quizlet/Anki, **Sentence Analyzer 2 cột** chuyên sâu, **Chụp vùng màn hình dịch chữ (Manga / Screen OCR)**, bóc tách **Furigana toàn trang (157.886 từ vựng)** và hỗ trợ phát âm tiếng Nhật tự nhiên.
 
 ---
 
-## 🚀 Tính năng nổi bật
+## 🚀 Kiến trúc giao diện mới (Version 4.0)
 
-### 1. 🔍 Tra cứu siêu tốc & Mở khóa bôi đen
-* **Hover tra từ (`Shift` + rê chuột):** Giữ phím `Shift` (hoặc `Alt`) và rê chuột qua từ vựng tiếng Nhật để mở bảng tra cứu tức thì mà không cần bôi đen kéo chuột.
-* **Biểu tượng nổi thông minh:** Tự động nhận diện chữ tiếng Nhật khi quét chọn, hiển thị icon tròn tinh tế ngay cạnh con trỏ chuột.
-* **Tự động mở khóa bôi đen:** Phá bỏ hoàn toàn các cơ chế chống copy/chống chọn chữ (`user-select: none`, `onselectstart`) trên mọi trang web.
-* **Deconjugation & Tách trợ từ:** Tự động nhận diện thể nguyên mẫu khi từ vựng đã bị chia thì (như `食べました` $\rightarrow$ `食べる`, `行かない` $\rightarrow$ `行く`, `近くに` $\rightarrow$ `近い`).
+Hệ thống được tổ chức khoa học thành 3 thành phần trải nghiệm tách biệt:
 
-### 2. 📸 Chụp vùng màn hình dịch chữ (Manga / Screen OCR)
-* **Dịch truyện tranh & Ảnh chụp:** Bấm phím nóng **`Alt + S`** (hoặc nút **📸 Chụp dịch OCR** trên popup) và kéo chuột khoanh vùng bóng thoại truyện tranh, ảnh chụp hoặc phụ đề video để dịch ngay lập tức.
-* **Nhận diện chữ Nhật đa hướng:** Tự động nhận diện cả chữ viết dọc và chữ viết ngang (Asian OCR Engine v2) và mở ngay bảng tra từ chi tiết.
+### 1. ⚡ Quick Popup (Tra cứu nhanh & Cửa ngõ điều hướng)
+* Popup nhỏ gọn trên thanh công cụ dành riêng cho các thao tác tra từ nhanh, xem nghĩa cơ bản và bật/tắt tính năng.
+* Không còn hiển thị các trang chức năng phức tạp trong cửa sổ popup chật hẹp.
+* Tích hợp các nút điều hướng nhanh mở thẳng Không gian làm việc toàn màn hình:
+  * **📚 Từ điển & Thẻ nhớ:** Mở Workspace học tập và quản lý bộ thẻ trong tab riêng.
+  * **🔍 Phân tích câu:** Mở Sentence Analyzer toàn màn hình.
+  * **📸 Chụp dịch OCR:** Kích hoạt khoanh vùng ảnh/manga nhanh bằng phím tắt `Alt + S`.
+  * **🃏 Ôn tập:** Mở thẳng chế độ Review Mode toàn màn hình.
+  * **🔍 Tra cứu chi tiết:** Trên từng thẻ kết quả, nhấp để chuyển ngay sang Workspace tra cứu sâu.
+* Cơ chế **Tái sử dụng Tab thông minh (Tab Reuse)**: Nếu tab Workspace hoặc Sentence Analyzer đã mở, hệ thống sẽ tự động chuyển focus đến tab đó mà không tạo thêm các tab trùng lặp.
 
-### 3. 🈓 Tự động chèn Furigana toàn trang (`Alt + F`)
-* **Kho từ vựng khổng lồ 157.886 từ ghép:** Bao phủ toàn bộ các cấp độ JLPT từ N5 đến N1 và JMDict, tự động gắn phiên âm Hiragana chuẩn xác 100% trên đầu chữ Hán (Kanji).
-* **Phím tắt chuyển đổi tức thì:** Nhấn `Alt + F` để Bật/Tắt Furigana với thông báo Toast nhỏ gọn, bảo tồn 100% layout website.
+### 2. 🧠 Sentence Analyzer — Full-Screen Workspace 2 Cột
+* **Bố cục 2 cột toàn màn hình:**
+  * **Cột trái:** Ô nhập câu với phím tắt `Ctrl + Enter`, các câu ví dụ mẫu và **Lịch sử phân tích gần đây** giúp tra cứu lại ngay với 1 cú click.
+  * **Cột phải:** Khung tổng quan câu gốc, Furigana (có công tắc ẩn/hiện), bản dịch câu tiếng Việt, bảng phân tách token theo đúng thứ tự, giải nghĩa ngữ pháp, thể chia động từ (`baseForm`) và giải thích trợ từ.
+* **Token Inspector (Bảng thanh tra từ):** Nhấp vào từng token để xem số nét Hán tự, âm Hán Việt, phát âm giọng Nhật, sao chép nhanh, tra cứu chi tiết và lưu trực tiếp vào Flashcard.
 
-### 4. 🎴 Giao diện Tooltip Dark Mode với 3 Tab (Thuần Việt 100%)
-* **Tab [Từ vựng]:** Hiển thị Kanji, Hiragana, âm Hán Việt nổi bật, cấp độ JLPT, từ loại và giải nghĩa tiếng Việt chuẩn xác.
-* **Tab [Hán tự]:** Chi tiết từng chữ Kanji trong từ, bao gồm: Âm Hán Việt, cách đọc On/Kun, số nét, bộ thủ và giải nghĩa từ 14.746 chữ Hán ngoại tuyến.
-* **Tab [Dịch]:** Bản dịch câu và phân tích ngữ cảnh tự động.
+### 3. 📚 Dictionary & Flashcards — Full-Screen Workspace
+Không gian trung tâm cho việc học tập, quản lý từ vựng và luyện phản xạ ghi nhớ:
+* **Sidebar cố định & Responsive:**
+  * **📊 Tổng quan (Overview):** Thống kê số lượng bộ thẻ, tổng số từ vựng, số thẻ đến hạn hôm nay (Due today) và chuỗi học tập (Streak).
+  * **🗂️ Bộ thẻ Flashcard (Decks Manager):** Tạo bộ thẻ mới, sửa tên, mô tả, màu sắc nhận diện, nhân bản bộ thẻ, xóa bộ thẻ và xem số lượng thẻ cần ôn.
+  * **📖 Tra cứu từ điển (Dictionary Search):** Tra cứu từ vựng ngoại tuyến kết hợp trực tuyến, hiển thị đầy đủ Hán tự, Furigana, âm Hán Việt, nghĩa tiếng Việt và nút thêm trực tiếp vào bộ thẻ mong muốn.
+  * **⭐ Từ đã lưu (Saved Words):** Quản lý và lọc từ vựng theo thư mục, xuất CSV hỗ trợ Excel và liên thông 100% với Flashcards.
+  * **📝 Kiểm tra trắc nghiệm (Quiz Mode):** Luyện phản xạ từ vựng với các câu hỏi 4 lựa chọn ngẫu nhiên từ bộ thẻ của bạn.
+  * **📈 Thống kê tiến độ (SRS Stats):** Theo dõi số thẻ đã thuộc, số thẻ đang học và nhật ký các phiên ôn tập gần đây.
+  * **⚙️ Cài đặt & Sao lưu:** Điều chỉnh tốc độ phát âm giọng đọc, sao lưu xuất/nhập toàn bộ dữ liệu dưới định dạng JSON an toàn.
 
-### 5. ⭐ Quản lý Thư mục & Ôn tập Flashcard (SRS)
-* **Lưu từ theo Thư mục tùy chỉnh:** Phân loại từ vựng theo chủ đề, cấp độ (N5, N4, N3, Manga, Công việc...).
-* **Trình luyện tập Flashcard:** Lật thẻ thông minh để ghi nhớ mặt chữ, cách đọc và giải nghĩa.
-* **Xuất file CSV cho Anki & Excel:** Xuất danh sách từ vựng chuẩn UTF-8 with BOM, tương thích tuyệt đối với Anki và Excel.
+---
 
-### 6. 🔊 Phát âm tiếng Nhật (Hybrid Audio)
-* Ưu tiên giọng đọc Google TTS tự nhiên bản xứ.
-* Tự động dự phòng sang Web Speech API (`speechSynthesis ja-JP`) khi ngoại tuyến.
+## 🎴 Trải nghiệm Ôn tập Flashcard SRS (Review Mode)
+
+Giao diện học tập tập trung cao độ, ẩn hoàn toàn sidebar và các yếu tố gây mất tập trung:
+* **Sân khấu Flashcard 3D:** Hiệu ứng lật thẻ 3D mượt mà.
+  * **Mặt trước:** Từ vựng / Chữ Kanji khổ lớn, tùy chọn bật/tắt Hiragana, nút phát âm.
+  * **Mặt sau:** Cách đọc Kana, âm Hán Việt, nghĩa tiếng Việt, câu ví dụ có phiên âm, bản dịch và ghi chú cá nhân.
+* **Đánh giá mức độ ghi nhớ 4 mức độ:**
+  * `[1]` **Chưa thuộc** (Again): Đưa thẻ vào ôn lại ngay và reset chu kỳ ngắt quãng.
+  * `[2]` **Khó nhớ** (Hard): Tăng nhẹ khoảng thời gian ngắt quãng.
+  * `[3]` **Đã nhớ** (Good): Nhân hệ số khoảng thời gian chuẩn (Ease Factor).
+  * `[4]` **Dễ nhớ** (Easy): Thưởng thêm thời gian và tăng hệ số dễ.
+* **Điều khiển phím tắt toàn diện:**
+  * Bấm `[Space]` để lật thẻ xem đáp án.
+  * Bấm các phím số `[1]`, `[2]`, `[3]`, `[4]` để đánh giá mức độ nhớ.
+  * Bấm `[Escape]` để tạm dừng và quay lại bộ thẻ.
+* **Đồng bộ dữ liệu an toàn:** Dữ liệu ôn tập được lưu tự động ngay sau mỗi lần đánh giá, không bị mất khi tải lại trang hoặc đóng tab.
+
+---
+
+## ⌨️ Bảng phím tắt nhanh
+
+| Thao tác | Phím tắt | Phạm vi | Mô tả |
+| :--- | :---: | :---: | :--- |
+| **Phân tích câu tiếng Nhật** | `Alt + A` | Mọi trang web | Mở Sentence Analyzer toàn màn hình và nạp câu được chọn |
+| **Chụp dịch Manga / OCR** | `Alt + S` | Mọi trang web | Khoanh vùng chữ trên ảnh hoặc bóng thoại manga để tra từ |
+| **Bật/Tắt Furigana toàn trang** | `Alt + F` | Mọi trang web | Chèn Hiragana trên đầu chữ Hán toàn trang web |
+| **Hover tra nhanh** | `Shift` + Rê chuột | Mọi trang web | Mở bảng tra từ tức thì không cần bôi đen kéo chuột |
+| **Lật thẻ Flashcard** | `Space` | Review Mode | Lật giữa mặt trước (từ vựng) và mặt sau (đáp án) |
+| **Đánh giá thẻ SRS** | `1`, `2`, `3`, `4` | Review Mode | Đánh giá mức độ ghi nhớ từ Chưa thuộc đến Dễ nhớ |
+| **Thoát / Hủy thao tác** | `ESC` | Toàn hệ thống | Hủy khoanh vùng OCR hoặc thoát chế độ ôn tập |
 
 ---
 
@@ -50,17 +85,6 @@ Tiện ích mở rộng tra cứu tiếng Nhật cao cấp, hoạt động **Off
 4. Nhấn nút **Load unpacked (Tải tiện ích đã giải nén)**.
 5. Chọn thư mục `JPEX` bên trong thư mục dự án vừa tải về.
 6. Hoàn tất! Biểu tượng tiện ích sẽ xuất hiện trên thanh công cụ của bạn.
-
----
-
-## ⌨️ Phím tắt nhanh
-
-| Thao tác | Phím tắt | Mô tả |
-| :--- | :---: | :--- |
-| **Bật/Tắt Furigana** | `Alt + F` | Chèn phiên âm Hiragana trên đầu chữ Hán toàn trang |
-| **Chụp dịch Manga / OCR** | `Alt + S` | Khoanh vùng chữ trên ảnh/truyện tranh để nhận diện và tra từ |
-| **Hover tra nhanh** | `Shift` + Rê chuột | Rê chuột qua từ tiếng Nhật để mở bảng dịch tức thì |
-| **Hủy thao tác OCR** | `ESC` | Thoát chế độ khoanh vùng chụp ảnh |
 
 ---
 
