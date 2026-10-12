@@ -561,6 +561,12 @@ rt {
   color: var(--punct-badge-text);
 }
 
+.badge-number {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
 /* Empty State */
 .empty-state-card {
   text-align: center;
@@ -785,3 +791,273 @@ rt {
   height: 16px;
   cursor: pointer;
 }
+
+/* Meaning Edit Textarea & Folder Select */
+.meaning-edit-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 56px;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  resize: vertical;
+  margin-top: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.meaning-edit-textarea:focus {
+  outline: none;
+  border-color: var(--analyzer-accent);
+}
+
+.folder-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
+
+.folder-select:focus {
+  border-color: var(--analyzer-accent);
+}
+
+/* ==========================================================================
+   CHẾ ĐỘ HOẠT ĐỘNG (OFFLINE LOCAL BADGE)
+   ========================================================================== */
+.badge-offline-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   DỊCH SÁT CẤU TRÚC (LITERAL TRANSLATION BOX)
+   ========================================================================== */
+.literal-box {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.literal-label {
+  font-weight: 700;
+  color: var(--analyzer-accent);
+  margin-right: 6px;
+}
+
+/* ==========================================================================
+   PHÂN TÍCH CỤM NGHĨA (SEMANTIC CHUNKS)
+   ========================================================================== */
+.chunks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.chunk-card {
+  background: var(--analyzer-subtle-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.chunk-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--analyzer-accent);
+}
+
+.chunk-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.chunk-surface {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.45;
+  writing-mode: horizontal-tb;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.chunk-role-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: var(--vocab-badge-bg);
+  color: var(--vocab-badge-text);
+  line-height: 1.35;
+  white-space: normal;
+  max-width: 100%;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.chunk-meaning {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.45;
+  margin-bottom: 6px;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.chunk-explanation {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  word-break: normal;
+  overflow-wrap: break-word;
+  margin-top: auto;
+}
+
+/* ==========================================================================
+   TRỌNG TÂM NGỮ PHÁP (KEY GRAMMAR POINTS)
+   ========================================================================== */
+.grammar-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.grammar-card {
+  background: var(--analyzer-subtle-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  border-left: 4px solid #a855f7;
+  min-width: 0;
+}
+
+.grammar-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 6px;
+}
+
+.grammar-pattern {
+  font-size: 16px;
+  font-weight: 700;
+  color: #a855f7;
+  line-height: 1.4;
+  writing-mode: horizontal-tb;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+.grammar-level {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--grammar-badge-bg);
+  color: var(--grammar-badge-text);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.grammar-meaning {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.45;
+  margin-bottom: 4px;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.grammar-explanation {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+/* ==========================================================================
+   MẠCH LOGIC & LIÊN KẾT CÂU (SENTENCE LOGIC & FLOW)
+   ========================================================================== */
+.logic-box {
+  background: var(--analyzer-subtle-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-line;
+}
+
+/* Responsive Cho Chunks & Grammar */
+@media (max-width: 768px) {
+  .chunks-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.highlight-row {
+  background: rgba(99, 102, 241, 0.15) !important;
+  transition: background 0.15s ease;
+}
+
+.grammar-level-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--grammar-badge-bg);
+  color: var(--grammar-badge-text);
+}
+
+

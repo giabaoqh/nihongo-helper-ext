@@ -330,6 +330,98 @@ function getWordCandidates(text) {
 
 // Lắng nghe yêu cầu dịch từ content script hoặc popup
 // Lắng nghe yêu cầu từ content script hoặc popup
+/**
+ * Xử lý tra cứu hàng loạt từ vựng cho Sentence Analyzer
+ * Ưu tiên: Local Core Dict -> LRU Cache -> Background Translation Engine
+ */
+async function handleBatchLookupWords(words) {
+  if (!Array.isArray(words) || words.length === 0) {
+    return { success: true, results: {} };
+  }
+
+  await ensureLocalDataLoaded();
+  const results = {};
+
+  await Promise.all(words.map(async (rawWord) => {
+    const word = (rawWord || '').trim();
+    if (!word) return;
+
+    // TUYỆT ĐỐI không tra cứu ký tự Hiragana/Katakana đơn lẻ (tránh ghép nhầm nghĩa của từ khác)
+    if (/^[\u3040-\u309f\u30a0-\u30ff]$/.test(word)) return;
+
+    // 1. Kiểm tra localDictMap (Khớp chính xác trên Kanji hoặc Kana)
+    if (localDictMap && localDictMap.has(word)) {
+      const item = localDictMap.get(word);
+      results[word] = {
+        query: word,
+        kanji: item.kanji,
+        reading: item.kana,
+        hanviet: (item.hanviet || getLocalHanViet(item.kanji)).toUpperCase(),
+        meaning: item.meaning,
+        meaningVi: item.meaning,
+        pos: item.partOfSpeech || 'Từ vựng'
+      };
+      return;
+    }
+
+    // 2. Kiểm tra TRANSLATION_CACHE
+    const cacheKey = `${word}_vi`;
+    if (TRANSLATION_CACHE.has(cacheKey)) {
+      const cached = TRANSLATION_CACHE.get(cacheKey);
+      if (cached && cached.data) {
+        const d = cached.data;
+        const matchesWord = (d.kanji === word) || 
+                            (d.reading === word) || 
+                            (d.query === word) ||
+                            (localCompoundWords && localCompoundWords[word] === d.reading) ||
+                            (localCompoundWords && localCompoundWords[d.kanji] === word);
+
+        if (matchesWord) {
+          results[word] = {
+            query: word,
+            kanji: d.kanji || word,
+            reading: d.reading || (localCompoundWords && localCompoundWords[word]) || word,
+            hanviet: d.hanviet || getLocalHanViet(word).toUpperCase(),
+            meaning: d.meaningVi || d.meaning,
+            meaningVi: d.meaningVi || d.meaning,
+            pos: (d.results && d.results[0] && d.results[0].pos) || 'Từ vựng'
+          };
+          return;
+        }
+      }
+    }
+
+    // 3. Tra cứu qua handleTranslation(word, 'vi')
+    try {
+      const res = await handleTranslation(word, 'vi');
+      if (res && res.success && res.data) {
+        const d = res.data;
+        const matchesWord = (d.kanji === word) || 
+                            (d.reading === word) || 
+                            (d.query === word) ||
+                            (localCompoundWords && localCompoundWords[word] === d.reading) ||
+                            (localCompoundWords && localCompoundWords[d.kanji] === word);
+
+        if (matchesWord && (d.meaningVi || d.meaning)) {
+          results[word] = {
+            query: word,
+            kanji: d.kanji || word,
+            reading: d.reading || (localCompoundWords && localCompoundWords[word]) || word,
+            hanviet: d.hanviet || getLocalHanViet(word).toUpperCase(),
+            meaning: d.meaningVi || d.meaning,
+            meaningVi: d.meaningVi || d.meaning,
+            pos: (d.results && d.results[0] && d.results[0].pos) || 'Từ vựng'
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('[JPEX Background] Lỗi tra cứu từ theo đợt:', word, e);
+    }
+  }));
+
+  return { success: true, results: results };
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'openExtensionPopup') {
     handleOpenExtensionPopup(sendResponse);
@@ -338,6 +430,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'translate') {
     handleTranslation(request.text, request.targetLang)
+      .then(sendResponse)
+      .catch(err => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  // Tra cứu hàng loạt từ vựng cho Sentence Analyzer
+  if (request.action === 'batchLookupWords') {
+    handleBatchLookupWords(request.words)
       .then(sendResponse)
       .catch(err => sendResponse({ success: false, error: err.message }));
     return true;
@@ -557,7 +657,8 @@ async function handleTranslation(text, explicitTargetLang) {
       localDictList.forEach(item => {
         if (vocabResults.length >= 6) return;
         const matchExact = searchTerms.includes(item.kanji) || searchTerms.includes(item.kana);
-        const matchSub = item.kanji && item.kanji.includes(cleanText) && cleanText.length >= 1;
+        // TUYỆT ĐỐI KHÔNG tìm substring nếu độ dài chuỗi < 2 ký tự (tránh việc ký tự đơn "さ" khớp với "ごめんなさい")
+        const matchSub = cleanText.length >= 2 && item.kanji && item.kanji.includes(cleanText);
         if (matchExact || matchSub) {
           const isDupe = vocabResults.some(r => r.kanji === item.kanji && r.reading === item.kana);
           if (!isDupe) {
@@ -573,6 +674,13 @@ async function handleTranslation(text, explicitTargetLang) {
             });
           }
         }
+      });
+
+      // Ưu tiên đưa kết quả khớp chính xác (Exact match) lên hàng đầu
+      vocabResults.sort((a, b) => {
+        const aExact = (a.kanji === cleanText || a.reading === cleanText) ? 1 : 0;
+        const bExact = (b.kanji === cleanText || b.reading === cleanText) ? 1 : 0;
+        return bExact - aExact;
       });
     }
 
@@ -741,7 +849,19 @@ async function handleTranslation(text, explicitTargetLang) {
       targetLang: 'vi'
     };
 
-    const primary = vocabResults[0] || {};
+    // Chỉ chọn primary từ vocabResults nếu thực sự khớp với cleanText hoặc candidates
+    let primary = vocabResults.find(r => r.kanji === cleanText || r.reading === cleanText);
+    if (!primary && candidates && candidates.length > 0) {
+      primary = vocabResults.find(r => candidates.includes(r.kanji) || candidates.includes(r.reading));
+    }
+    if (!primary) {
+      primary = vocabResults[0] || {};
+    }
+
+    const hasExactPrimary = (primary.kanji === cleanText || primary.reading === cleanText);
+    const readingToUse = hasExactPrimary
+      ? (primary.reading || '')
+      : ((localCompoundWords && localCompoundWords[cleanText]) || '');
 
     const responseObj = {
       success: true,
@@ -751,9 +871,9 @@ async function handleTranslation(text, explicitTargetLang) {
         results: vocabResults,
         kanjis: kanjiDetails,
         translation: translationData,
-        kanji: primary.kanji || cleanText,
-        reading: primary.reading || '',
-        hanviet: primary.hanviet || '',
+        kanji: hasExactPrimary ? (primary.kanji || cleanText) : cleanText,
+        reading: readingToUse,
+        hanviet: primary.hanviet || (getLocalHanViet(cleanText) || '').toUpperCase(),
         meaningVi: primary.meaningVi || meaningVi || '',
         meaning: primary.meaningVi || meaningVi || ''
       }

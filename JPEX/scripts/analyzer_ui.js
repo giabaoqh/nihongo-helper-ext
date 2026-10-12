@@ -30,9 +30,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const meaningDisplay = document.getElementById('meaning-display');
   const toggleFurigana = document.getElementById('toggle-furigana');
   const translationProviderBadge = document.getElementById('translation-provider-badge');
+  const literalBox = document.getElementById('literal-box');
+  const literalDisplay = document.getElementById('literal-display');
   const btnCopySentence = document.getElementById('btn-copy-sentence');
   const btnCopyReading = document.getElementById('btn-copy-reading');
   const btnCopyTranslation = document.getElementById('btn-copy-translation');
+
+  // Semantic Chunks Elements
+  const sectionChunks = document.getElementById('section-chunks');
+  const chunksGrid = document.getElementById('chunks-grid');
+  const chunksCountLabel = document.getElementById('chunks-count-label');
+
+  // Grammar Points Elements
+  const sectionGrammar = document.getElementById('section-grammar');
+  const grammarGrid = document.getElementById('grammar-grid');
+  const grammarCountLabel = document.getElementById('grammar-count-label');
+
+  // Sentence Logic Elements
+  const sectionLogic = document.getElementById('section-logic');
+  const logicBox = document.getElementById('logic-box');
 
   // Tokens Table Elements
   const sectionTokens = document.getElementById('section-tokens');
@@ -44,9 +60,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnCloseModal = document.getElementById('btn-close-modal');
   const modalSurface = document.getElementById('modal-surface');
   const modalReading = document.getElementById('modal-reading');
+  const modalRomaji = document.getElementById('modal-romaji');
   const modalBaseForm = document.getElementById('modal-base-form');
   const modalPosConj = document.getElementById('modal-pos-conj');
+  const modalHanvietSection = document.getElementById('modal-hanviet-section');
+  const modalHanviet = document.getElementById('modal-hanviet');
   const modalMeaning = document.getElementById('modal-meaning');
+  const btnToggleEditMeaning = document.getElementById('btn-toggle-edit-meaning');
+  const modalMeaningEdit = document.getElementById('modal-meaning-edit');
+  const modalFolderSelect = document.getElementById('modal-folder-select');
   const modalKanjiSection = document.getElementById('modal-kanji-section');
   const modalKanjiList = document.getElementById('modal-kanji-list');
   const btnModalTts = document.getElementById('btn-modal-tts');
@@ -54,10 +76,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnModalLookup = document.getElementById('btn-modal-lookup');
   const toastMsg = document.getElementById('toast-msg');
 
-  // State
+  // State Management (100% Local-First Offline Engine)
   let currentAnalysis = null;
   let currentActiveToken = null;
   let currentTranslationText = '';
+  let activeSessionId = 0;
+
+  // Cleanup legacy AI keys from storage (Privacy & Clean state migration)
+  function cleanupLegacyAiSettings() {
+    const AI_STORAGE_KEYS = [
+      'jpex_analyzer_settings',
+      'gemini_api_key',
+      'ai_api_key',
+      'ai_model',
+      'gemini_model',
+      'ai_provider'
+    ];
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.remove(AI_STORAGE_KEYS, () => {
+        // Legacy AI settings removed safely without affecting user data
+      });
+    }
+    try {
+      AI_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
+    } catch (e) {}
+  }
 
   // Khởi tạo Analyzer Engine
   if (typeof SentenceAnalyzer !== 'undefined' && SentenceAnalyzer.init) {
@@ -89,8 +132,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateCharCount();
     emptyStateView.style.display = 'block';
     sectionOverview.style.display = 'none';
+    sectionChunks.style.display = 'none';
+    sectionGrammar.style.display = 'none';
+    sectionLogic.style.display = 'none';
     sectionTokens.style.display = 'none';
-    inputEl.focus();
+        inputEl.focus();
   });
 
   // Mở tab Không gian Từ điển & Thẻ nhớ Toàn màn hình
@@ -117,24 +163,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Nút Phân tích câu chính
-  btnAnalyze.addEventListener('click', startAnalysis);
+  btnAnalyze.addEventListener('click', () => startAnalysis());
 
   /**
-   * Thực hiện phân tích câu
+   * Thực hiện phân tích câu (Local-first + Optional AI)
    */
   async function startAnalysis() {
     const rawText = inputEl.value.trim();
     if (!rawText) return;
 
+    // Ngăn chặn race condition giữa nhiều request phân tích liên tiếp
+    const thisSession = ++activeSessionId;
+
     // Trạng thái Loading
     loadingBar.style.display = 'block';
     btnAnalyze.disabled = true;
     emptyStateView.style.display = 'none';
-    sectionOverview.style.display = 'none';
-    sectionTokens.style.display = 'none';
 
     try {
-      const res = await SentenceAnalyzer.analyze(rawText);
+      const res = await SentenceAnalyzer.analyze(rawText, {
+        mode: 'local'
+      });
+
+      // Kiểm tra race condition: nếu phiên phân tích đã thay đổi, bỏ qua kết quả cũ
+      if (thisSession !== activeSessionId) {
+        return;
+      }
+
       if (!res || !res.success) {
         showToast(res ? res.error : 'Không thể phân tích câu này', 4000);
         emptyStateView.style.display = 'block';
@@ -142,10 +197,35 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       currentAnalysis = res;
+
+      // 1. Render Tổng quan (Sentence Overview & Furigana)
       renderOverview(res);
+
+      // 2. Render Semantic Chunks (Cụm nghĩa Bunsetsu)
+      renderChunks(res.chunks);
+
+      // 3. Render Key Grammar Points (Trọng tâm ngữ pháp)
+      renderGrammarPoints(res.grammarPoints);
+
+      // 4. Render Sentence Logic & Flow (Mạch logic)
+      renderSentenceLogic(res.sentenceLogic);
+
+      // 5. Render Bảng Token 2 cột chi tiết
       renderTokensTable(res.tokens);
 
-      // Kích hoạt hiển thị
+      // 6. Xử lý Dịch nghĩa toàn câu & Dịch sát cấu trúc
+      fetchFullSentenceTranslation(rawText);
+
+      if (literalBox && literalDisplay) {
+        if (res.literalTranslation && res.literalTranslation.trim()) {
+          literalDisplay.textContent = res.literalTranslation;
+          literalBox.style.display = 'block';
+        } else {
+          literalBox.style.display = 'none';
+        }
+      }
+
+      // Hiển thị các khối kết quả
       emptyStateView.style.display = 'none';
       sectionOverview.style.display = 'block';
       sectionTokens.style.display = 'block';
@@ -153,15 +233,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Lưu lịch sử phân tích
       saveToAnalysisHistory(rawText);
 
-      // Gọi dịch nghĩa toàn câu
-      fetchFullSentenceTranslation(rawText);
     } catch (err) {
+      if (thisSession !== activeSessionId) return;
       console.error('[AnalyzerUI] Lỗi phân tích:', err);
       showToast('Đã xảy ra lỗi: ' + err.message, 4000);
       emptyStateView.style.display = 'block';
     } finally {
-      loadingBar.style.display = 'none';
-      btnAnalyze.disabled = false;
+      if (thisSession === activeSessionId) {
+        loadingBar.style.display = 'none';
+        btnAnalyze.disabled = false;
+      }
     }
   }
 
@@ -174,7 +255,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     readingDisplay.textContent = data.reading || '—';
     readingDisplay.style.display = toggleFurigana.checked ? 'none' : 'block';
 
-    meaningDisplay.innerHTML = '<span style="color: var(--text-secondary); font-style: italic;">Đang lấy bản dịch tiếng Việt toàn câu...</span>';
+    if (!data.naturalTranslation) {
+      meaningDisplay.innerHTML = '<span style="color: var(--text-secondary); font-style: italic;">Đang lấy bản dịch tiếng Việt toàn câu...</span>';
+    }
   }
 
   function updateSentenceDisplay(data) {
@@ -188,11 +271,111 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  toggleFurigana.addEventListener('change', () => {
-    if (currentAnalysis) {
-      updateSentenceDisplay(currentAnalysis);
+  if (toggleFurigana) {
+    toggleFurigana.addEventListener('change', () => {
+      if (currentAnalysis) {
+        updateSentenceDisplay(currentAnalysis);
+      }
+    });
+  }
+
+  /**
+   * Render Chunks (Cụm nghĩa Bunsetsu)
+   */
+  function renderChunks(chunks) {
+    if (!sectionChunks || !chunksGrid) return;
+    if (!Array.isArray(chunks) || chunks.length === 0) {
+      sectionChunks.style.display = 'none';
+      return;
     }
-  });
+
+    sectionChunks.style.display = 'block';
+    if (chunksCountLabel) chunksCountLabel.textContent = `${chunks.length} cụm`;
+    chunksGrid.innerHTML = '';
+
+    chunks.forEach((chk, idx) => {
+      const card = document.createElement('div');
+      card.className = 'chunk-card';
+      card.setAttribute('data-chunk-id', chk.id || `chk_${idx}`);
+
+      card.innerHTML = `
+        <div class="chunk-header">
+          <span class="chunk-surface">${escapeHtml(chk.surface)}</span>
+          <span class="chunk-role-badge">${escapeHtml(chk.roleVi || 'Cụm nghĩa')}</span>
+        </div>
+        <div class="chunk-meaning">${escapeHtml(chk.meaningVi || '—')}</div>
+        ${chk.explanationVi ? `<div class="chunk-explanation">${escapeHtml(chk.explanationVi)}</div>` : ''}
+      `;
+
+      card.addEventListener('mouseenter', () => highlightTokens(chk.tokenIds));
+      card.addEventListener('mouseleave', () => clearTokenHighlights());
+
+      chunksGrid.appendChild(card);
+    });
+  }
+
+  /**
+   * Render Key Grammar Points (Ngữ pháp trọng tâm)
+   */
+  function renderGrammarPoints(grammarPoints) {
+    if (!sectionGrammar || !grammarGrid) return;
+    if (!Array.isArray(grammarPoints) || grammarPoints.length === 0) {
+      sectionGrammar.style.display = 'none';
+      return;
+    }
+
+    sectionGrammar.style.display = 'block';
+    if (grammarCountLabel) grammarCountLabel.textContent = `${grammarPoints.length} điểm ngữ pháp`;
+    grammarGrid.innerHTML = '';
+
+    grammarPoints.forEach(gp => {
+      const card = document.createElement('div');
+      card.className = 'grammar-card';
+
+      card.innerHTML = `
+        <div class="grammar-header">
+          <span class="grammar-pattern">${escapeHtml(gp.pattern)}</span>
+          ${gp.level ? `<span class="grammar-level-badge">${escapeHtml(gp.level)}</span>` : ''}
+        </div>
+        <div class="grammar-meaning">${escapeHtml(gp.meaningVi || '')}</div>
+        ${gp.explanationVi ? `<div class="grammar-explanation">${escapeHtml(gp.explanationVi)}</div>` : ''}
+      `;
+
+      card.addEventListener('mouseenter', () => highlightTokens(gp.tokenIds));
+      card.addEventListener('mouseleave', () => clearTokenHighlights());
+
+      grammarGrid.appendChild(card);
+    });
+  }
+
+  /**
+   * Render Sentence Logic & Flow
+   */
+  function renderSentenceLogic(logicText) {
+    if (!sectionLogic || !logicBox) return;
+    if (!logicText || !logicText.trim()) {
+      sectionLogic.style.display = 'none';
+      return;
+    }
+
+    sectionLogic.style.display = 'block';
+    logicBox.innerHTML = escapeHtml(logicText).replace(/\n/g, '<br>');
+  }
+
+  // Token Highlighting Helpers
+  function highlightTokens(tokenIds) {
+    if (!Array.isArray(tokenIds) || tokenIds.length === 0 || !tokensTbody) return;
+    tokenIds.forEach(id => {
+      const row = tokensTbody.querySelector(`tr[data-token-id="${id}"]`);
+      if (row) row.classList.add('highlight-row');
+    });
+  }
+
+  function clearTokenHighlights() {
+    if (!tokensTbody) return;
+    const highlighted = tokensTbody.querySelectorAll('tr.highlight-row');
+    highlighted.forEach(r => r.classList.remove('highlight-row'));
+  }
 
   /**
    * Gọi Sentence Translation Provider để dịch nghĩa toàn câu
@@ -240,9 +423,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     tokens.forEach((token, index) => {
       const tr = document.createElement('tr');
+      if (token.id) {
+        tr.setAttribute('data-token-id', token.id);
+      }
 
       let badgeClass = 'badge-vocab';
       if (token.isPunctuation) badgeClass = 'badge-punct';
+      else if (token.isNumberCounter || token.partOfSpeech === 'Chữ số' || (token.partOfSpeech && (token.partOfSpeech.includes('Lượng từ') || token.partOfSpeech.includes('Chữ số')))) badgeClass = 'badge-number';
       else if (token.isGrammar || token.isParticle || token.isAuxiliary || token.isDemonstrative) badgeClass = 'badge-grammar';
       else if (token.conjugation || (token.partOfSpeech && token.partOfSpeech.includes('Động từ'))) badgeClass = 'badge-verb';
 
@@ -252,7 +439,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       let meaningText = token.meaning || '—';
-      if (token.grammarRole && token.grammarRole !== 'Thành phần từ vựng' && !meaningText.includes(token.grammarRole)) {
+      if (meaningText === 'Chưa có trong từ điển') {
+        meaningText = '<span style="color: var(--text-secondary); font-style: italic;">Chưa có trong từ điển</span>';
+      } else if (token.grammarRole && token.grammarRole !== 'Thành phần từ vựng' && !meaningText.includes(token.grammarRole)) {
         meaningText += ` <span style="font-size: 11px; color: var(--text-secondary);">[${token.grammarRole}]</span>`;
       }
 
@@ -282,7 +471,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentActiveToken = token;
 
     modalSurface.querySelector('span').textContent = token.surface;
-    modalReading.textContent = token.reading !== '—' ? token.reading : (token.baseReading || token.surface);
+    const dispReading = token.reading !== '—' ? token.reading : (token.baseReading || token.surface);
+    modalReading.textContent = dispReading;
+    if (modalRomaji) {
+      modalRomaji.textContent = token.romaji ? `(${token.romaji})` : '';
+    }
     modalBaseForm.textContent = token.baseForm || token.surface;
 
     let posFull = token.partOfSpeech || 'Từ vựng';
@@ -291,11 +484,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     modalPosConj.textContent = posFull;
 
+    // Hiển thị âm Hán Việt nếu có
+    if (token.hanviet && modalHanvietSection && modalHanviet) {
+      modalHanvietSection.style.display = 'block';
+      modalHanviet.textContent = token.hanviet;
+    } else if (modalHanvietSection) {
+      modalHanvietSection.style.display = 'none';
+    }
+
     let meanFull = token.meaning || 'Chưa có thông tin nghĩa chi tiết';
-    if (token.grammarRole && token.grammarRole !== 'Thành phần từ vựng') {
+    if (token.grammarRole && token.grammarRole !== 'Thành phần từ vựng' && !meanFull.includes(token.grammarRole)) {
       meanFull += `\n• Chức năng: ${token.grammarRole}`;
     }
     modalMeaning.textContent = meanFull;
+
+    // Reset ô chỉnh sửa nghĩa
+    if (modalMeaningEdit) {
+      modalMeaningEdit.value = token.meaning && token.meaning !== '—' ? token.meaning : '';
+      modalMeaningEdit.style.display = 'none';
+      modalMeaning.style.display = 'block';
+      if (btnToggleEditMeaning) {
+        btnToggleEditMeaning.textContent = '✏️ Chỉnh sửa nghĩa';
+      }
+    }
+
+    // Nạp danh sách thư mục / bộ thẻ hiện có
+    if (modalFolderSelect && typeof getSavedFolders === 'function') {
+      getSavedFolders().then(async (folders) => {
+        modalFolderSelect.innerHTML = '';
+        const lastFolder = (typeof getLastSavedFolder === 'function') ? await getLastSavedFolder() : 'Mặc định';
+        const folderList = Array.isArray(folders) && folders.length > 0 ? folders : ['Mặc định'];
+        folderList.forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = f;
+          opt.textContent = f;
+          if (f === lastFolder) opt.selected = true;
+          modalFolderSelect.appendChild(opt);
+        });
+      }).catch(err => {
+        console.warn('Lỗi nạp thư mục:', err);
+      });
+    }
 
     // Kanji Breakdown
     const kanjiBreakdown = SentenceAnalyzer.getKanjiBreakdown(token.surface || token.baseForm);
@@ -354,38 +583,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // Chuyển đổi trạng thái chỉnh sửa nghĩa
+  if (btnToggleEditMeaning && modalMeaningEdit && modalMeaning) {
+    btnToggleEditMeaning.addEventListener('click', () => {
+      if (modalMeaningEdit.style.display === 'none') {
+        modalMeaningEdit.style.display = 'block';
+        modalMeaning.style.display = 'none';
+        modalMeaningEdit.focus();
+        btnToggleEditMeaning.textContent = '👁️ Xem nghĩa gốc';
+      } else {
+        modalMeaningEdit.style.display = 'none';
+        modalMeaning.style.display = 'block';
+        btnToggleEditMeaning.textContent = '✏️ Chỉnh sửa nghĩa';
+      }
+    });
+  }
+
   // Lưu vào Flashcard
   btnModalSave.addEventListener('click', async () => {
     if (!currentActiveToken) return;
     const t = currentActiveToken;
+    const selectedFolder = (modalFolderSelect && modalFolderSelect.value) ? modalFolderSelect.value : 'Mặc định';
+    const editedMeaning = (modalMeaningEdit && modalMeaningEdit.value.trim()) ? modalMeaningEdit.value.trim() : '';
+    const finalMeaning = editedMeaning || (t.meaning && t.meaning !== '—' ? t.meaning : 'Từ vựng tiếng Nhật');
+
     const vocabData = {
       kanji: t.surface,
       word: t.surface,
       reading: t.reading !== '—' ? t.reading : (t.baseReading || t.surface),
-      meaningVi: t.meaning || 'Từ vựng tiếng Nhật',
-      meaning: t.meaning || 'Từ vựng tiếng Nhật',
+      meaningVi: finalMeaning,
+      meaning: finalMeaning,
       hanviet: t.hanviet || '',
       pos: t.partOfSpeech || 'Từ vựng',
+      example: (currentAnalysis && currentAnalysis.sentence) ? currentAnalysis.sentence : '',
+      exampleMeaning: currentTranslationText || '',
+      notes: t.conjugation ? `Chia thể: ${t.conjugation}` : '',
       source: 'sentence-analyzer',
       createdAt: new Date().toISOString()
     };
 
-    if (typeof addWordToReview === 'function') {
-      try {
-        await addWordToReview(vocabData, 'deck_default');
+    try {
+      if (typeof saveWord === 'function') {
+        await saveWord(vocabData, selectedFolder);
+        if (typeof setLastSavedFolder === 'function') {
+          await setLastSavedFolder(selectedFolder);
+        }
+        showToast(`⭐ Đã lưu "${t.surface}" vào thư mục "${selectedFolder}"!`, 3000);
+      } else if (typeof addWordToReview === 'function') {
+        await addWordToReview(vocabData, selectedFolder);
         showToast(`⭐ Đã lưu "${t.surface}" vào ôn tập Flashcard!`, 3000);
-      } catch (e) {
-        showToast('Lỗi lưu từ: ' + e.message, 3000);
+      } else {
+        showToast(`⭐ Đã ghi nhận từ "${t.surface}"`, 2500);
       }
-    } else if (typeof saveWord === 'function') {
-      try {
-        await saveWord(vocabData);
-        showToast(`⭐ Đã lưu "${t.surface}" vào Flashcard!`, 3000);
-      } catch (e) {
-        showToast('Lỗi lưu từ: ' + e.message, 3000);
+
+      if (typeof broadcastDataChange === 'function') {
+        broadcastDataChange('WORD_SAVED', { word: t.surface, folder: selectedFolder });
       }
-    } else {
-      showToast(`⭐ Đã ghi nhận từ "${t.surface}"`, 2500);
+    } catch (e) {
+      showToast('Lỗi lưu từ: ' + e.message, 3000);
     }
   });
 
@@ -528,6 +783,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // TỰ ĐỘNG NẠP CÂU TỪ URL PARAM HOẶC STORAGE
   // ========================================================
   async function checkInitialInput() {
+    cleanupLegacyAiSettings();
     loadAnalysisHistory();
 
     const urlParams = new URLSearchParams(window.location.search);
