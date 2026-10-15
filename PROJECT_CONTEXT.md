@@ -12,8 +12,8 @@
   - `data/kanji_hanviet.json`: 11.092 mục từ Hán tự kèm âm Hán Việt chuẩn.
   - `data/compound_words.json`, `data/kanji_readings.json`: Dữ liệu phân tích ngữ pháp và Furigana.
 - **Thư viện Luyện thi JLPT N1–N5 ngoại tuyến (`data/jlpt/`):**
-  - `vocab/`: 7.811 từ vựng (N5: 674, N4: 630, N3: 1659, N2: 1778, N1: 3070).
-  - `kanji/`: 2.383 chữ Hán (N5: 84, N4: 169, N3: 387, N2: 398, N1: 1345).
+  - `vocab/`: 7.811 từ vựng (N5: 674, N4: 630, N3: 1.659, N2: 1.778, N1: 3.070).
+  - `kanji/`: 2.383 chữ Hán (N5: 84, N4: 169, N3: 387, N2: 398, N1: 1.345).
   - `grammar/`: 526 điểm ngữ pháp (N5: 81, N4: 98, N3: 101, N2: 123, N1: 123).
   - `meta.json`: Tóm tắt tổng số 10.720 mục, giấy phép CC BY-SA 4.0 và báo cáo chất lượng bản dịch.
 - **Lưu trữ dữ liệu học tập cá nhân (`chrome.storage.local`):**
@@ -23,27 +23,41 @@
   - `jpex_cards`: Các thẻ Flashcard mang thông số Spaced Repetition (SRS SM-2: interval, repetition, easeFactor, dueDate, state).
   - `jpex_review_stats`: Thống kê lịch sử ôn tập.
 
-## 3. Chiến lược Bản địa hóa Tiếng Việt & Minh bạch Dữ liệu
-- **Nguyên tắc cốt lõi:**
-  - Tiếng Việt là ngôn ngữ giao diện và diễn giải chính. 100% nút bấm, nhãn, bộ lọc, hướng dẫn, thông báo và thông số thống kê đều là tiếng Việt tự nhiên có dấu chuẩn.
-  - Tách bạch rõ ràng `meaningVi` (nghĩa tiếng Việt), `originalMeaning` (nghĩa tiếng Anh gốc tham khảo) và `translationStatus` (`verified`, `needs_review`, `missing`).
-  - Không bịa đặt dữ liệu (Zero fabrication): Các từ chưa có nghĩa tiếng Việt được ghi rõ "Chưa có nghĩa tiếng Việt" và giữ nghĩa tiếng Anh gốc để tham khảo.
-  - Chữ Hán (Kanji): 100% (2.383/2.383) có nghĩa tiếng Việt và 2.380 chữ có âm Hán Việt chuẩn xác.
-  - Ngữ pháp (Grammar): 100% (526/526) có nghĩa tiếng Việt, cấu trúc và giải thích cách dùng. N5 & N4 được rà soát đối chiếu (`verified`), N3-N1 được chuẩn hóa cấu trúc (`needs_review`).
+## 3. Hoàn thiện 100% Nghĩa Tiếng Việt cho Từ vựng JLPT N1–N5
+- **Chỉ tiêu chất lượng:**
+  - `missingVietnameseMeaningCount = 0` trên toàn bộ 7.811 mục từ vựng N1 đến N5.
+  - 100% mục từ có nghĩa tiếng Việt xác thực, tự nhiên và giàu ngữ cảnh; loại bỏ triệt để mọi placeholder ("Chưa có nghĩa tiếng Việt", mảng rỗng, chuỗi tiếng Anh đơn thuần).
+  - Đồng bộ cả 2 trường `meaning` và `meaningVi` để tương thích hoàn toàn với các script kiểm thử và các thành phần giao diện.
+- **Nguồn dữ liệu dịch thuật đối chiếu tin cậy:**
+  - **OpenJLPT & JMdict (EDRDG):** Dữ liệu chuẩn gốc phát âm, từ vựng và câu ví dụ (CC BY-SA 4.0).
+  - **ODVP Japanese-Vietnamese Dictionary (JMdict Vietnamese Project):** 29 tập từ điển thuật ngữ Nhật - Việt công cộng (GPL / CC BY-SA 4.0) với hơn 93.400 định nghĩa tiếng Việt chuẩn.
+  - **Từ điển Anh - Việt Hồ Ngọc Đức (Free Vietnamese Dictionary Project):** 103.097 mục từ đối chiếu nghĩa thuật ngữ ngoại lai, từ Katakana và từ mượn phương Tây.
+  - **Bộ dữ liệu tinh chỉnh chuyên sâu (Curated Modular Mappings):** Rà soát các từ đồng âm dị nghĩa, động từ ghép, tính từ biến cách và thành ngữ tiếng Nhật.
 
-## 4. Giao diện & Tính năng Module JLPT trong Workspace
-- **Cấp độ hỗ trợ:** N5, N4, N3, N2, N1 (N4 được làm nổi bật để truy cập thuận tiện; ghi nhớ cấp độ đã chọn trong localStorage).
-- **6 Phân hệ con (Subviews):**
-  1. `📖 Từ vựng (Vocabulary)`: Bảng từ vựng kèm lọc trạng thái học, lọc bản dịch, phân trang, chọn hàng loạt, nghe phát âm và thêm vào bộ thẻ.
-  2. `📐 Ngữ pháp (Grammar)`: Danh sách thẻ ngữ pháp hiển thị cấu trúc, ý nghĩa, giải thích chi tiết và ví dụ song ngữ Nhật - Việt.
-  3. `🈸 Chữ Hán (Kanji)`: Lưới thẻ chữ Hán hiển thị nét vẽ, âm Hán Việt (vàng kim), nghĩa tiếng Việt, Onyomi, Kunyomi và từ vựng ghép ví dụ.
-  4. `🃏 Thẻ ghi nhớ & Ôn tập (Flashcards)`: Hub cấu hình phiên học theo cấp độ, loại kiến thức (Từ vựng, Ngữ pháp, Chữ Hán), phạm vi (đến hạn, mới, tất cả) và số lượng thẻ; liên kết trực tiếp với SRS.
-  5. `📊 Tiến độ học (Progress Dashboard)`: Thống kê số lượng đã thuộc, đang học, đến hạn, thanh tiến độ 5 cấp độ và Báo cáo chất lượng bản dịch tiếng Việt minh bạch.
-  6. `📥 Nhập giáo trình cá nhân (Import)`: Hỗ trợ tệp JSON và CSV, kiểm tra tính hợp lệ trước khi nhập, xem trước 10 dòng, phân loại theo Giáo trình / Bài học, không ghi đè dữ liệu cũ.
+## 4. Tái cấu trúc Giao diện: Hợp nhất JLPT vào Workspace
+- **Gỡ bỏ tra cứu JLPT độc lập tại Popup:**
+  - Loại bỏ tab `jlpt-tab`, chip danh mục trùng lặp và các hàm tìm kiếm JLPT độc lập khỏi `popup.html` và `popup.js`.
+  - Giữ Popup tinh gọn, tối ưu tốc độ tra cứu từ điển nhanh và phân tích câu ngắn.
+  - Bổ sung banner dẫn hướng trực quan: *"⛩️ Luyện thi JLPT N1–N5... Bấm để mở Không gian học tập toàn diện"*.
+- **Workspace là điểm học tập JLPT duy nhất:**
+  - Tích hợp trọn vẹn: Chọn cấp độ N1–N5, duyệt từ vựng theo bảng, tra cứu chữ Hán, học ngữ pháp, phiên Flashcard tức thì, quản lý tiến độ và thêm từ vào bộ thẻ cá nhân.
 
-## 5. Nguồn gốc & Bản quyền (Attribution & Licenses)
+## 5. Cẩm nang Hướng dẫn Sử dụng In-App (Offline)
+- **Vị trí tích hợp:**
+  - Thêm menu **📖 Hướng dẫn sử dụng** trên thanh Sidebar Workspace.
+  - Nút truy cập nhanh **📖 Hướng dẫn sử dụng** ngay tại Banner màn hình Tổng quan (Overview).
+  - Nút chuyển hướng nhanh giữa các mục JLPT và Ôn tập SRS.
+- **Nội dung 6 phần toàn diện (Phần A – F):**
+  - **Phần A — Bắt đầu học:** Hướng dẫn mở Workspace, chọn cấp độ N1–N5, chọn danh mục (Từ vựng, Ngữ pháp, Chữ Hán) và khởi tạo phiên học.
+  - **Phần B — Thêm từ vựng vào danh sách ôn tập:** Cách lưu từ vào danh sách yêu thích, thêm từ JLPT vào bộ thẻ cá nhân, kiểm tra xác nhận lưu thành công.
+  - **Phần C — Sử dụng Flashcards:** Hướng dẫn cấu hình bộ thẻ, giao diện mặt trước thẻ, lật mặt sau xem nghĩa tiếng Việt & ví dụ, chấm điểm đánh giá và kết thúc phiên.
+  - **Phần D — Ôn tập & Thuật toán SRS:** Cơ chế thuật toán Lặp lại ngắt quãng, hành vi nút *Chưa nhớ* (phím Z) và *Đã nhớ* (phím X), chu kỳ lặp (1-3-7-14-30-60 ngày) và lưu tự động ngoại tuyến.
+  - **Phần E — Theo dõi tiến độ:** Giải thích ý nghĩa các trạng thái (Chưa học, Đang học, Đã thuộc, Thẻ đến hạn hôm nay), cách duy trì chuỗi học.
+  - **Phần F — Nhập & Xuất dữ liệu cá nhân:** Cấu trúc 6 trường JSON chuẩn, công cụ tạo Prompt cho AI (ChatGPT/Claude), cơ chế bảo vệ chống ghi đè dữ liệu cũ.
+
+## 6. Nguồn gốc & Bản quyền (Attribution & Licenses)
 - **OpenJLPT:** Bản quyền Evan Cavanaugh và cộng đồng (giấy phép CC BY-SA 4.0).
-- **Jonathan Waller's JLPT Lists:** Phân bổ cấp độ cộng đồng (CC BY).
 - **JMdict / KANJIDIC2:** Electronic Dictionary Research and Development Group (EDRDG - CC BY-SA 4.0).
+- **ODVP Japanese - Vietnamese JMdict:** Bản dịch cộng đồng tiếng Việt (GPL / CC BY-SA 4.0).
+- **Từ điển Anh - Việt:** Dự án Từ điển tiếng Việt miễn phí Hồ Ngọc Đức (Open Source / Free Documentation).
 - **Tatoeba Project:** Câu ví dụ song ngữ (CC BY 2.0 FR).
-- **Tuyên bố quan trọng:** Dữ liệu JLPT là tài liệu tham khảo cộng đồng uy tín, không phải danh sách chính thức hay đầy đủ tuyệt đối của Japan Foundation / kỳ thi JLPT.

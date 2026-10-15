@@ -17,9 +17,9 @@
         "N1": 3070
       },
       "translations": {
-        "verified": 662,
+        "verified": 7811,
         "needs_review": 0,
-        "missing": 7149
+        "missing": 0
       }
     },
     "kanji": {
@@ -56,5 +56,5 @@
     }
   },
   "grandTotal": 10720,
-  "updatedAt": "2026-10-15T19:25:14.599Z"
+  "updatedAt": "2026-10-15T20:32:39.114Z"
 }

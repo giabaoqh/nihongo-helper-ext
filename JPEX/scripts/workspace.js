@@ -210,6 +210,7 @@ function switchView(viewName) {
     review: 'Trung tâm Ôn tập SRS',
     test: 'Kiểm tra trắc nghiệm',
     stats: 'Thống kê tiến độ ôn tập',
+    guide: 'Hướng dẫn sử dụng toàn diện',
     settings: 'Cài đặt & Sao lưu dữ liệu'
   };
   if (pageTitle) {
@@ -224,6 +225,11 @@ function switchView(viewName) {
   else if (normalizedView === 'review') renderSrsHubView();
   else if (normalizedView === 'stats') renderStatsView();
   else if (normalizedView === 'test') setupQuizView();
+  else if (normalizedView === 'guide') {
+    const mainArea = document.querySelector('.app-main');
+    if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 /**
@@ -1713,6 +1719,9 @@ function setupGlobalActions() {
   const btnBannerNewDeck = document.getElementById('btn-banner-new-deck');
   const btnViewAllDecks = document.getElementById('btn-view-all-decks');
   const btnBannerReview = document.getElementById('btn-banner-review');
+  const btnBannerGuide = document.getElementById('btn-banner-guide');
+  const btnGuideJumpJlpt = document.getElementById('btn-guide-jump-jlpt');
+  const btnGuideJumpReview = document.getElementById('btn-guide-jump-review');
   const btnBackToDecks = document.getElementById('btn-back-to-decks');
   const btnStartReviewThisDeck = document.getElementById('btn-start-review-this-deck');
   const btnEditThisDeck = document.getElementById('btn-edit-this-deck');
@@ -1723,6 +1732,9 @@ function setupGlobalActions() {
   if (btnBannerNewDeck) btnBannerNewDeck.onclick = () => openDeckModal();
   if (btnViewAllDecks) btnViewAllDecks.onclick = () => switchView('decks');
   if (btnBannerReview) btnBannerReview.onclick = () => startReviewMode(null);
+  if (btnBannerGuide) btnBannerGuide.onclick = () => switchView('guide');
+  if (btnGuideJumpJlpt) btnGuideJumpJlpt.onclick = () => switchView('jlpt');
+  if (btnGuideJumpReview) btnGuideJumpReview.onclick = () => switchView('review');
   if (btnBackToDecks) btnBackToDecks.onclick = () => switchView('decks');
   if (btnStartReviewThisDeck) btnStartReviewThisDeck.onclick = () => startReviewMode(AppState.currentDeckId);
 

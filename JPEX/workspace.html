@@ -84,7 +84,15 @@
           </div>
         </a>
 
-        <div class="menu-section-label">Hệ thống</div>
+        <div class="menu-section-label">Hệ thống & Hướng dẫn</div>
+
+        <a class="nav-item" data-view="guide" id="nav-guide">
+          <div class="nav-item-content">
+            <span class="nav-icon">📖</span>
+            <span>Hướng dẫn sử dụng</span>
+          </div>
+          <span class="badge-counter" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700;">A–F</span>
+        </a>
 
         <a class="nav-item" data-view="settings" id="nav-settings">
           <div class="nav-item-content">
@@ -139,6 +147,9 @@
             <div class="banner-actions">
               <button class="btn btn-primary btn-lg" id="btn-banner-review">
                 <span>🃏</span> Bắt đầu ôn tập ngay
+              </button>
+              <button class="btn btn-secondary btn-lg" id="btn-banner-guide">
+                <span>📖</span> Hướng dẫn sử dụng
               </button>
               <button class="btn btn-secondary btn-lg" id="btn-banner-new-deck">
                 <span>➕</span> Tạo bộ thẻ mới
@@ -1071,7 +1082,236 @@
           </div>
         </section>
 
-      </div>
+        <!-- ==============================================
+             VIEW 11: HƯỚNG DẪN SỬ DỤNG TOÀN DIỆN (USER GUIDE)
+             ============================================== -->
+        <section class="view-section" id="view-guide">
+          <!-- Banner đầu trang Hướng dẫn -->
+          <div class="overview-banner" style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.12), rgba(13, 148, 136, 0.1)); border: 1px solid rgba(2, 132, 199, 0.25); margin-bottom: 24px;">
+            <div class="banner-text">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span style="font-size: 26px;">📖</span>
+                <h2 style="margin: 0; font-size: 22px;">Hướng Dẫn Sử Dụng Không Gian Học Tập (Workspace)</h2>
+              </div>
+              <p style="font-size: 13.5px; color: var(--text-secondary); max-width: 820px; line-height: 1.6;">
+                Tài liệu hướng dẫn trực quan, từng bước giúp bạn khai thác trọn vẹn sức mạnh của <b>Nihongo Helper</b>: từ tra cứu từ điển, luyện thi JLPT N1–N5 ngoại tuyến, ghi nhớ sâu bằng Flashcard SRS Anki/Quizlet, cho đến đồng bộ dữ liệu và nhập/xuất thẻ.
+              </p>
+            </div>
+            <div class="banner-actions">
+              <button class="btn btn-primary" id="btn-guide-jump-jlpt">
+                <span>⛩️</span> Đi tới Luyện thi JLPT
+              </button>
+              <button class="btn btn-secondary" id="btn-guide-jump-review">
+                <span>🃏</span> Bắt đầu Ôn tập SRS
+              </button>
+            </div>
+          </div>
+
+          <!-- Menu điều hướng nhanh theo phần (Pill Navigation) -->
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; padding: 4px 0;">
+            <a href="#guide-sec-a" class="btn btn-secondary btn-sm" style="text-decoration: none;">A. Bắt đầu học</a>
+            <a href="#guide-sec-b" class="btn btn-secondary btn-sm" style="text-decoration: none;">B. Thêm từ vào danh sách ôn tập</a>
+            <a href="#guide-sec-c" class="btn btn-secondary btn-sm" style="text-decoration: none;">C. Sử dụng Flashcards</a>
+            <a href="#guide-sec-d" class="btn btn-secondary btn-sm" style="text-decoration: none;">D. Ôn tập & Thuật toán SRS</a>
+            <a href="#guide-sec-e" class="btn btn-secondary btn-sm" style="text-decoration: none;">E. Theo dõi tiến độ</a>
+            <a href="#guide-sec-f" class="btn btn-secondary btn-sm" style="text-decoration: none;">F. Nhập & Xuất dữ liệu</a>
+          </div>
+
+          <!-- Lưới các bài hướng dẫn chi tiết -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- PHẦN A -->
+            <div class="dict-card" id="guide-sec-a" style="border-left: 4px solid #0284c7;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 700; color: #0284c7; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>⛩️</span> Phần A — Bắt đầu học & Chọn cấp độ JLPT N1–N5
+                </h3>
+                <span style="font-size: 11.5px; font-weight: 600; padding: 2px 8px; background: rgba(2, 132, 199, 0.12); color: #0284c7; border-radius: 6px;">Bước 1</span>
+              </div>
+              <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); margin-bottom: 10px;">
+                Tất cả các tính năng học và luyện thi cấp độ JLPT được tích hợp trực tiếp, tập trung duy nhất tại Không gian làm việc (Workspace) để bạn có trải nghiệm màn hình rộng tối ưu:
+              </p>
+              <ol style="font-size: 13.5px; line-height: 1.7; color: var(--text-secondary); margin: 0 0 14px 20px; padding: 0;">
+                <li><b>Mở Không gian học tập:</b> Từ Popup tiện ích, bấm nút <b>📚 Từ điển & Thẻ nhớ</b> ở góc phải phía trên; hoặc click nút <b>Mở Workspace ↗</b> trên thanh thông báo.</li>
+                <li><b>Truy cập mục JLPT:</b> Click mục <b>⛩️ Luyện thi JLPT (N1–N5)</b> ở thanh menu bên trái (Sidebar).</li>
+                <li><b>Chọn cấp độ mong muốn:</b> Bấm chọn 1 trong 5 thẻ cấp độ lớn ở trên cùng:
+                  <ul style="margin: 4px 0 6px 16px;">
+                    <li><b style="color: #10b981;">N5</b>: Sơ cấp 1 (674 từ vựng • 84 chữ Hán • 81 cấu trúc ngữ pháp).</li>
+                    <li><b style="color: #0284c7;">N4</b>: Sơ cấp 2 (630 từ vựng • 169 chữ Hán • 98 cấu trúc ngữ pháp).</li>
+                    <li><b style="color: #7c3aed;">N3</b>: Trung cấp (1.659 từ vựng • 387 chữ Hán • 101 cấu trúc ngữ pháp).</li>
+                    <li><b style="color: #f59e0b;">N2</b>: Trung-Thượng cấp (1.778 từ vựng • 398 chữ Hán • 123 cấu trúc ngữ pháp).</li>
+                    <li><b style="color: #ef4444;">N1</b>: Thượng cấp (3.070 từ vựng • 1.345 chữ Hán • 123 cấu trúc ngữ pháp).</li>
+                  </ul>
+                </li>
+                <li><b>Chọn phân môn học tập:</b> Sử dụng thanh Tabs phụ để chuyển giữa <b>📖 Từ vựng</b>, <b>📐 Ngữ pháp</b> hoặc <b>🈸 Chữ Hán</b>.</li>
+                <li><b>Lựa chọn từ để học:</b> Tích chọn từng ô checkbox ở đầu mỗi từ, hoặc bấm nút <b>"Chọn tất cả trên trang"</b> (50 từ/trang), hoặc bấm <b>"Chọn toàn bộ cấp độ"</b>.</li>
+                <li><b>Bắt đầu ôn tập ngay:</b> Khi đã có từ được chọn, nút <b>🃏 Bắt đầu ôn tập Flashcard ngay</b> sẽ sáng lên. Bấm vào nút này để mở ngay màn hình ôn tập thẻ nhớ toàn màn hình!</li>
+              </ol>
+            </div>
+
+            <!-- PHẦN B -->
+            <div class="dict-card" id="guide-sec-b" style="border-left: 4px solid #10b981;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 700; color: #10b981; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>⭐</span> Phần B — Thêm từ vựng vào danh sách ôn tập & Bộ thẻ
+                </h3>
+                <span style="font-size: 11.5px; font-weight: 600; padding: 2px 8px; background: rgba(16, 185, 129, 0.12); color: #10b981; border-radius: 6px;">Bước 2</span>
+              </div>
+              <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); margin-bottom: 10px;">
+                Hệ thống cung cấp cơ chế lưu trữ linh hoạt. Hãy hiểu rõ sự khác biệt giữa 3 tính năng sau để quản lý hiệu quả:
+              </p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 14px;">
+                <div style="background: var(--bg-card-subtle); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                  <div style="font-weight: 700; color: #fbbf24; margin-bottom: 4px;">1. Đánh dấu sao (☆/★ Bookmark)</div>
+                  <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">Dành cho việc lưu nhanh từ vựng quan trọng khi tra cứu trên web hoặc trong bảng từ. Từ này sẽ xuất hiện ngay tại tab <b>⭐ Từ đã lưu</b>.</div>
+                </div>
+                <div style="background: var(--bg-card-subtle); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                  <div style="font-weight: 700; color: #0284c7; margin-bottom: 4px;">2. Thêm vào Bộ thẻ (Decks)</div>
+                  <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">Gom nhóm từ vựng theo chủ đề riêng (ví dụ: <i>JLPT N3 Mimikara</i>, <i>Từ vựng IT</i>). Quản lý tại mục <b>🗂️ Bộ thẻ Flashcard</b>.</div>
+                </div>
+                <div style="background: var(--bg-card-subtle); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                  <div style="font-weight: 700; color: #10b981; margin-bottom: 4px;">3. Lên lịch ôn tập SRS</div>
+                  <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">Mọi thẻ nằm trong Bộ thẻ sẽ tự động được xếp lịch học ngắt quãng dựa trên mức độ bạn nhớ từ trong từng phiên học.</div>
+                </div>
+              </div>
+              <div style="font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);">
+                <b>Các bước thực hiện lưu từ JLPT:</b>
+                <ul style="margin: 6px 0 0 18px;">
+                  <li><b>Lưu lẻ từng từ:</b> Ở cột "Thao tác" trên bảng từ vựng JLPT, bấm nút <b>➕ Thêm</b>. Một hộp thoại xuất hiện cho phép bạn chọn thêm vào Bộ thẻ có sẵn hoặc nhập tên để tạo ngay Bộ thẻ mới.</li>
+                  <li><b>Lưu hàng loạt:</b> Tích chọn các ô checkbox -> Bấm nút <b>➕ Thêm các từ đã chọn vào Bộ thẻ</b> ở thanh công cụ phía trên.</li>
+                  <li><b>Xác nhận thành công:</b> Sau khi thêm, hệ thống sẽ hiện thông báo màu xanh lá xác nhận số lượng thẻ được thêm, đồng thời biểu tượng sao sẽ chuyển sang màu vàng (★).</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- PHẦN C -->
+            <div class="dict-card" id="guide-sec-c" style="border-left: 4px solid #7c3aed;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 700; color: #7c3aed; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>🎴</span> Phần C — Sử dụng Flashcards & Thiết kế thẻ học
+                </h3>
+                <span style="font-size: 11.5px; font-weight: 600; padding: 2px 8px; background: rgba(124, 58, 237, 0.12); color: #7c3aed; border-radius: 6px;">Bước 3</span>
+              </div>
+              <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); margin-bottom: 10px;">
+                Màn hình ôn tập Flashcard được thiết kế theo chuẩn Anki/Quizlet hiện đại với công nghệ hiệu ứng lật 3D mượt mà:
+              </p>
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
+                <div style="flex: 1; min-width: 260px; background: var(--bg-card-subtle); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                  <div style="font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">MẶT TRƯỚC (Front)</div>
+                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                    • Hiển thị <b>từ vựng Kanji / Kana cỡ lớn</b>.<br>
+                    • <i>Chủ đích ẩn cách đọc</i> và nghĩa để não bộ bạn chủ động vận động trí nhớ kích hoạt nơ-ron.<br>
+                    • Bấm biểu tượng <b>🔊</b> (hoặc phím <b>R</b>) để nghe phát âm tiếng Nhật chuẩn.
+                  </div>
+                </div>
+                <div style="flex: 1; min-width: 260px; background: var(--bg-card-subtle); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                  <div style="font-size: 13px; font-weight: 700; color: #10b981; margin-bottom: 6px;">MẶT SAU (Back - Sau khi lật)</div>
+                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                    • <b>Cách đọc (Furigana / Hiragana)</b>.<br>
+                    • <b>Âm Hán Việt</b> in hoa nổi bật (ví dụ: [MẬU DỊCH]).<br>
+                    • <b>Nghĩa Tiếng Việt chính xác</b> bản địa hóa.<br>
+                    • <b>Câu ví dụ thực tế</b> song ngữ kèm dịch nghĩa.
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);">
+                <b>Cách thao tác lật và chuyển thẻ:</b>
+                <ul style="margin: 6px 0 0 18px;">
+                  <li><b>Lật xem kết quả:</b> Bấm trực tiếp chuột vào giữa tấm thẻ, hoặc nhấn phím cách (<b>Space</b>) / phím <b>Enter</b> / phím <b>↑</b>.</li>
+                  <li><b>Điều hướng:</b> Bấm nút mũi tên <b>❮</b> hoặc <b>❯</b> ở hai bên sườn thẻ (hoặc dùng phím mũi tên <b>← / →</b>).</li>
+                  <li><b>Đổi chiều học:</b> Bấm nút <b>⇄ JP→VI</b> ở thanh công cụ dưới góc phải nếu muốn chuyển sang chế độ nhìn Nghĩa Tiếng Việt đoán từ Tiếng Nhật (VI → JP).</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- PHẦN D -->
+            <div class="dict-card" id="guide-sec-d" style="border-left: 4px solid #f59e0b;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 700; color: #f59e0b; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>🧠</span> Phần D — Ôn tập ghi nhớ & Thuật toán lặp lại ngắt quãng (SRS)
+                </h3>
+                <span style="font-size: 11.5px; font-weight: 600; padding: 2px 8px; background: rgba(245, 158, 11, 0.12); color: #f59e0b; border-radius: 6px;">Cốt lõi</span>
+              </div>
+              <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); margin-bottom: 10px;">
+                Tiện ích sử dụng thuật toán <b>Spaced Repetition System (SRS)</b> tương tự thuật toán SM-2 của Anki. Ở mặt sau của mỗi thẻ nhớ, bạn đánh giá mức độ nhớ của mình bằng 2 nút:
+              </p>
+              <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px;">
+                <div style="flex: 1; min-width: 260px; background: rgba(239, 68, 68, 0.08); padding: 14px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.25);">
+                  <div style="font-size: 14px; font-weight: 700; color: #ef4444; margin-bottom: 4px;">❌ Chưa nhớ (Phím Z)</div>
+                  <div style="font-size: 13px; color: var(--text-primary); line-height: 1.5;">
+                    • <b>Hành vi:</b> Thẻ này bạn chưa thuộc hoặc nhớ sai nghĩa.<br>
+                    • <b>Xử lý thuật toán:</b> Hệ thống đặt lại khoảng cách lặp về <b>1 ngày</b>, giảm số lần lặp liên tiếp.<br>
+                    • Nếu bật tùy chọn <i>"Ôn lại thẻ chưa thuộc ở cuối phiên"</i>, thẻ này sẽ được tự động xếp vào cuối hàng đợi để bạn luyện lại ngay trong phiên học hiện tại!
+                  </div>
+                </div>
+                <div style="flex: 1; min-width: 260px; background: rgba(16, 185, 129, 0.08); padding: 14px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.25);">
+                  <div style="font-size: 14px; font-weight: 700; color: #10b981; margin-bottom: 4px;">✅ Đã nhớ (Phím X)</div>
+                  <div style="font-size: 13px; color: var(--text-primary); line-height: 1.5;">
+                    • <b>Hành vi:</b> Bạn đã nhớ chính xác cách đọc và nghĩa.<br>
+                    • <b>Xử lý thuật toán:</b> Số lần thuộc tăng lên <b>+1</b>. Khoảng cách ngày ôn tập tiếp theo sẽ được nhân lên theo chu kỳ khoa học: <b>1 ngày → 3 ngày → 7 ngày → 14 ngày → 30 ngày → 60 ngày</b>.<br>
+                    • Thẻ sẽ tạm thời ẩn đi và chỉ xuất hiện trở lại đúng ngày đến hạn ôn tập!
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 12.5px; color: var(--text-muted); background: var(--bg-card-subtle); padding: 10px 14px; border-radius: 6px;">
+                💡 <b>Lưu ý quan trọng:</b> Toàn bộ kết quả đánh giá (ngày ôn tập kế tiếp, số lần nhớ đúng, điểm chất lượng) được hệ thống tự động ghi nhận tức thì vào bộ nhớ ngoại tuyến của trình duyệt. Bạn hoàn toàn có thể an tâm tắt trình duyệt bất cứ lúc nào mà không lo mất tiến độ.
+              </div>
+            </div>
+
+            <!-- PHẦN E -->
+            <div class="dict-card" id="guide-sec-e" style="border-left: 4px solid #0d9488;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 700; color: #0d9488; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>📈</span> Phần E — Theo dõi tiến độ & Quản lý hàng đợi ôn tập
+                </h3>
+                <span style="font-size: 11.5px; font-weight: 600; padding: 2px 8px; background: rgba(13, 148, 136, 0.12); color: #0d9488; border-radius: 6px;">Tiến trình</span>
+              </div>
+              <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); margin-bottom: 10px;">
+                Bạn có thể kiểm tra hiệu quả học tập bất kỳ lúc nào tại mục <b>📈 Thống kê tiến độ</b> trên thanh Menu hoặc tab <b>📊 Tiến độ</b> trong mục JLPT.
+              </p>
+              <ul style="font-size: 13.5px; line-height: 1.7; color: var(--text-secondary); margin: 0 0 12px 20px; padding: 0;">
+                <li><b style="color: #64748b;">Chưa học (New):</b> Các từ trong danh sách hoặc bộ thẻ mà bạn chưa từng thực hiện phiên ôn tập nào.</li>
+                <li><b style="color: #0284c7;">Đang học (Learning):</b> Thẻ đã bắt đầu học nhưng chưa đạt mốc thành thạo (dưới 4 lần nhớ đúng liên tục).</li>
+                <li><b style="color: #10b981;">Đã thuộc (Mastered):</b> Thẻ đã được ghi nhớ sâu vào trí nhớ dài hạn (đã đạt từ 4 lần nhớ đúng liên tục hoặc chu kỳ ngắt quãng trên 21 ngày).</li>
+                <li><b style="color: #ef4444;">⏰ Thẻ đến hạn hôm nay (Due Cards):</b> Số lượng thẻ mà thuật toán SRS tính toán cần phải ôn lại ngay hôm nay để tránh bị quên lãng. Huy hiệu màu đỏ trên menu sẽ thông báo con số này cho bạn.</li>
+              </ul>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                Khi mở lại tiện ích sau một khoảng thời gian, bạn chỉ cần bấm nút <b>🃏 Bắt đầu ôn tập ngay</b> tại màn hình Tổng quan để giải quyết các thẻ đến hạn. Nếu không có thẻ nào đến hạn, hệ thống sẽ thông báo bạn đã hoàn thành nhiệm vụ của ngày hôm nay!
+              </p>
+            </div>
+
+            <!-- PHẦN F -->
+            <div class="dict-card" id="guide-sec-f" style="border-left: 4px solid #8b5cf6;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 700; color: #8b5cf6; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>📥</span> Phần F — Nhập & Xuất dữ liệu cá nhân (Hỗ trợ AI Prompt)
+                </h3>
+                <span style="font-size: 11.5px; font-weight: 600; padding: 2px 8px; background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border-radius: 6px;">Nâng cao</span>
+              </div>
+              <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); margin-bottom: 10px;">
+                Bạn có thể sao lưu dữ liệu bộ thẻ ra máy tính, hoặc dùng trí tuệ nhân tạo (ChatGPT, Claude, Gemini) để chuyển đổi danh sách từ vựng bất kỳ thành bộ thẻ flashcard chuẩn định dạng của tiện ích:
+              </p>
+              
+              <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Cấu trúc JSON 6 trường tiêu chuẩn:</div>
+              <pre style="background: var(--bg-card-subtle); padding: 12px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #38bdf8; overflow-x: auto; margin-bottom: 12px; border: 1px solid var(--border);">[
+  {
+    "word": "勉強",
+    "reading": "べんきょう",
+    "hanviet": "MIỄN CƯỜNG",
+    "meaning": "Học tập, rèn luyện kiến thức",
+    "example": "毎日日本語を勉強します。",
+    "exampleMeaning": "Tôi học tiếng Nhật mỗi ngày."
+  }
+]</pre>
+              <ul style="font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin: 0 0 10px 18px;">
+                <li><b>Cách nhập dữ liệu:</b> Bấm nút <b>📥 Nhập JSON / AI</b> ở thanh Topbar -> Chọn file <code>.json</code> từ máy hoặc dán trực tiếp đoạn mã JSON vào ô -> Bấm <b>Phân tích dữ liệu</b> để hệ thống kiểm tra tính hợp lệ -> Chọn Bộ thẻ đích và bấm <b>Xác nhận nhập</b>.</li>
+                <li><b>Cơ chế an toàn:</b> Hệ thống tự động so khớp để bỏ qua các từ đã trùng lặp, không bao giờ ghi đè làm mất thẻ từ vựng cũ của bạn.</li>
+                <li><b>Tạo Prompt cho AI:</b> Tại hộp thoại Nhập, chuyển sang tab <b>🤖 Tạo Prompt cho AI</b> -> Dán danh sách từ thô -> Bấm copy prompt gửi cho ChatGPT/Claude để nhận về chuỗi JSON chuẩn chỉ trong vài giây!</li>
+              </ul>
+            </div>
+
+          </div>
+        </section>
     </main>
   </div>
 
