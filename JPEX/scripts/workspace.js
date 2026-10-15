@@ -27,7 +27,26 @@ const AppState = {
   reviewDeckTitle: '',
   theme: 'dark',
   speechRate: 1.0,
-  autoPlayAudio: false
+  autoPlayAudio: false,
+  jlptLevel: localStorage.getItem('jpex_jlpt_selected_level') || 'N4',
+  jlptSubtab: 'vocab',
+  jlptQuery: '',
+  jlptStatusFilter: 'all',
+  jlptTransFilter: 'all',
+  jlptPage: 1,
+  jlptPageSize: 50,
+  jlptSelectedIds: new Set(),
+  jlptFilteredWords: [],
+  jlptGrammarQuery: '',
+  jlptGrammarTransFilter: 'all',
+  jlptGrammarPage: 1,
+  jlptGrammarPageSize: 20,
+  jlptFilteredGrammar: [],
+  jlptKanjiQuery: '',
+  jlptKanjiPage: 1,
+  jlptKanjiPageSize: 40,
+  jlptFilteredKanji: [],
+  personalImportParsed: null
 };
 
 // ========================================================
@@ -41,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupSavedWordsEvents();
   setupImportModal();
   setupExportModal();
+  setupJLPTEvents();
 
   try {
     await db.open();
@@ -182,6 +202,7 @@ function switchView(viewName) {
   const titles = {
     overview: 'Tổng quan học tập',
     dict: 'Tra cứu từ điển',
+    jlpt: 'Thư viện Từ vựng JLPT (N1–N5)',
     saved: 'Danh sách từ đã lưu',
     decks: 'Quản lý Bộ thẻ Flashcard',
     'deck-detail': AppState.activeDeck ? AppState.activeDeck.name : 'Chi tiết bộ thẻ',
@@ -199,6 +220,7 @@ function switchView(viewName) {
   if (normalizedView === 'overview') renderOverview();
   else if (normalizedView === 'decks') renderDecksView();
   else if (normalizedView === 'saved') renderSavedWordsView();
+  else if (normalizedView === 'jlpt') renderJLPTView();
   else if (normalizedView === 'review') renderSrsHubView();
   else if (normalizedView === 'stats') renderStatsView();
   else if (normalizedView === 'test') setupQuizView();
@@ -2362,3 +2384,1639 @@ function downloadFile(content, fileName, contentType) {
     URL.revokeObjectURL(url);
   }, 2000);
 }
+
+// ========================================================
+// 10. MODULE LUYỆN THI JLPT N1–N5 BẢN ĐỊA HÓA TIẾNG VIỆT
+// ========================================================
+
+/**
+ * Khởi tạo toàn bộ sự kiện cho giao diện JLPT
+ */
+function setupJLPTEvents() {
+  // 1. Chuyển đổi cấp độ khi bấm thẻ cấp độ (N5..N1)
+  const levelCards = document.querySelectorAll('.jlpt-level-card');
+  levelCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const lvl = card.getAttribute('data-level');
+      if (lvl && lvl !== AppState.jlptLevel) {
+        AppState.jlptLevel = lvl;
+        localStorage.setItem('jpex_jlpt_selected_level', lvl);
+        AppState.jlptPage = 1;
+        AppState.jlptGrammarPage = 1;
+        AppState.jlptKanjiPage = 1;
+        AppState.jlptSelectedIds.clear();
+
+        syncJLPTLevelCardsUI();
+        renderJLPTView();
+      }
+    });
+  });
+
+  // Đồng bộ trạng thái ban đầu của level card theo localStorage (mặc định N4/N5)
+  syncJLPTLevelCardsUI();
+
+  // 2. Chuyển đổi giữa các chuyên mục con (Subnav Tabs)
+  const subnavBtns = document.querySelectorAll('.jlpt-tab-btn');
+  subnavBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetSubtab = btn.getAttribute('data-subtab');
+      if (targetSubtab && targetSubtab !== AppState.jlptSubtab) {
+        AppState.jlptSubtab = targetSubtab;
+        syncJLPTSubtabsUI();
+        renderJLPTActiveSubtab();
+      }
+    });
+  });
+
+  // 3. Sự kiện trong Subview: TỪ VỰNG (VOCABULARY)
+  const searchInput = document.getElementById('jlpt-search-input');
+  if (searchInput) {
+    let debounceTimer;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        AppState.jlptQuery = e.target.value.trim();
+        AppState.jlptPage = 1;
+        renderJLPTVocabSubtab();
+      }, 250);
+    });
+  }
+
+  const statusFilter = document.getElementById('jlpt-status-filter');
+  if (statusFilter) {
+    statusFilter.addEventListener('change', (e) => {
+      AppState.jlptStatusFilter = e.target.value;
+      AppState.jlptPage = 1;
+      renderJLPTVocabSubtab();
+    });
+  }
+
+  const transFilter = document.getElementById('jlpt-trans-filter');
+  if (transFilter) {
+    transFilter.addEventListener('change', (e) => {
+      AppState.jlptTransFilter = e.target.value;
+      AppState.jlptPage = 1;
+      renderJLPTVocabSubtab();
+    });
+  }
+
+  const btnToggleSelectPage = document.getElementById('btn-jlpt-toggle-select-all');
+  if (btnToggleSelectPage) {
+    btnToggleSelectPage.addEventListener('click', () => {
+      const pageWords = getJLPTCurrentPageWords();
+      const allSelected = pageWords.length > 0 && pageWords.every(w => AppState.jlptSelectedIds.has(w.id));
+
+      pageWords.forEach(w => {
+        if (allSelected) {
+          AppState.jlptSelectedIds.delete(w.id);
+        } else {
+          AppState.jlptSelectedIds.add(w.id);
+        }
+      });
+
+      renderJLPTVocabTable();
+      updateJLPTSelectionControls();
+    });
+  }
+
+  const btnSelectEntire = document.getElementById('btn-jlpt-select-entire-level');
+  if (btnSelectEntire) {
+    btnSelectEntire.addEventListener('click', () => {
+      const words = AppState.jlptFilteredWords || [];
+      const allSelected = words.length > 0 && words.every(w => AppState.jlptSelectedIds.has(w.id));
+
+      if (allSelected) {
+        AppState.jlptSelectedIds.clear();
+      } else {
+        words.forEach(w => AppState.jlptSelectedIds.add(w.id));
+      }
+
+      renderJLPTVocabTable();
+      updateJLPTSelectionControls();
+    });
+  }
+
+  const tableHeaderCheckbox = document.getElementById('jlpt-table-header-checkbox');
+  if (tableHeaderCheckbox) {
+    tableHeaderCheckbox.addEventListener('change', (e) => {
+      const pageWords = getJLPTCurrentPageWords();
+      pageWords.forEach(w => {
+        if (e.target.checked) {
+          AppState.jlptSelectedIds.add(w.id);
+        } else {
+          AppState.jlptSelectedIds.delete(w.id);
+        }
+      });
+      renderJLPTVocabTable();
+      updateJLPTSelectionControls();
+    });
+  }
+
+  const btnStartFlashcard = document.getElementById('btn-jlpt-start-flashcard');
+  if (btnStartFlashcard) {
+    btnStartFlashcard.addEventListener('click', handleJLPTStartFlashcard);
+  }
+
+  const btnAddToDeck = document.getElementById('btn-jlpt-add-to-deck');
+  if (btnAddToDeck) {
+    btnAddToDeck.addEventListener('click', () => openJLPTDeckPickerModal('vocab'));
+  }
+
+  const btnPrevPage = document.getElementById('btn-jlpt-prev-page');
+  const btnNextPage = document.getElementById('btn-jlpt-next-page');
+  if (btnPrevPage) {
+    btnPrevPage.addEventListener('click', () => {
+      if (AppState.jlptPage > 1) {
+        AppState.jlptPage--;
+        renderJLPTVocabTable();
+      }
+    });
+  }
+  if (btnNextPage) {
+    btnNextPage.addEventListener('click', () => {
+      const totalPages = Math.ceil((AppState.jlptFilteredWords.length || 1) / AppState.jlptPageSize);
+      if (AppState.jlptPage < totalPages) {
+        AppState.jlptPage++;
+        renderJLPTVocabTable();
+      }
+    });
+  }
+
+  // 4. Sự kiện trong Subview: NGỮ PHÁP (GRAMMAR)
+  const grammarSearch = document.getElementById('jlpt-grammar-search');
+  if (grammarSearch) {
+    let debounceTimer;
+    grammarSearch.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        AppState.jlptGrammarQuery = e.target.value.trim();
+        AppState.jlptGrammarPage = 1;
+        renderJLPTGrammarSubtab();
+      }, 250);
+    });
+  }
+
+  const grammarTransFilter = document.getElementById('jlpt-grammar-trans-filter');
+  if (grammarTransFilter) {
+    grammarTransFilter.addEventListener('change', (e) => {
+      AppState.jlptGrammarTransFilter = e.target.value;
+      AppState.jlptGrammarPage = 1;
+      renderJLPTGrammarSubtab();
+    });
+  }
+
+  const btnGrammarReview = document.getElementById('btn-jlpt-grammar-start-review');
+  if (btnGrammarReview) {
+    btnGrammarReview.addEventListener('click', handleJLPTStartGrammarFlashcard);
+  }
+
+  const btnGrammarAddDeck = document.getElementById('btn-jlpt-grammar-add-deck');
+  if (btnGrammarAddDeck) {
+    btnGrammarAddDeck.addEventListener('click', () => openJLPTDeckPickerModal('grammar'));
+  }
+
+  const btnGrammarPrev = document.getElementById('btn-jlpt-grammar-prev');
+  const btnGrammarNext = document.getElementById('btn-jlpt-grammar-next');
+  if (btnGrammarPrev) {
+    btnGrammarPrev.addEventListener('click', () => {
+      if (AppState.jlptGrammarPage > 1) {
+        AppState.jlptGrammarPage--;
+        renderJLPTGrammarList();
+      }
+    });
+  }
+  if (btnGrammarNext) {
+    btnGrammarNext.addEventListener('click', () => {
+      const totalPages = Math.ceil((AppState.jlptFilteredGrammar.length || 1) / AppState.jlptGrammarPageSize);
+      if (AppState.jlptGrammarPage < totalPages) {
+        AppState.jlptGrammarPage++;
+        renderJLPTGrammarList();
+      }
+    });
+  }
+
+  // 5. Sự kiện trong Subview: CHỮ HÁN (KANJI)
+  const kanjiSearch = document.getElementById('jlpt-kanji-search');
+  if (kanjiSearch) {
+    let debounceTimer;
+    kanjiSearch.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        AppState.jlptKanjiQuery = e.target.value.trim();
+        AppState.jlptKanjiPage = 1;
+        renderJLPTKanjiSubtab();
+      }, 250);
+    });
+  }
+
+  const btnKanjiReview = document.getElementById('btn-jlpt-kanji-start-review');
+  if (btnKanjiReview) {
+    btnKanjiReview.addEventListener('click', handleJLPTStartKanjiFlashcard);
+  }
+
+  const btnKanjiAddDeck = document.getElementById('btn-jlpt-kanji-add-deck');
+  if (btnKanjiAddDeck) {
+    btnKanjiAddDeck.addEventListener('click', () => openJLPTDeckPickerModal('kanji'));
+  }
+
+  const btnKanjiPrev = document.getElementById('btn-jlpt-kanji-prev');
+  const btnKanjiNext = document.getElementById('btn-jlpt-kanji-next');
+  if (btnKanjiPrev) {
+    btnKanjiPrev.addEventListener('click', () => {
+      if (AppState.jlptKanjiPage > 1) {
+        AppState.jlptKanjiPage--;
+        renderJLPTKanjiGrid();
+      }
+    });
+  }
+  if (btnKanjiNext) {
+    btnKanjiNext.addEventListener('click', () => {
+      const totalPages = Math.ceil((AppState.jlptFilteredKanji.length || 1) / AppState.jlptKanjiPageSize);
+      if (AppState.jlptKanjiPage < totalPages) {
+        AppState.jlptKanjiPage++;
+        renderJLPTKanjiGrid();
+      }
+    });
+  }
+
+  // 6. Sự kiện trong Subview: THẺ GHI NHỚ & ÔN TẬP (FLASHCARDS HUB)
+  const fcLaunchBtn = document.getElementById('btn-fc-launch-session');
+  if (fcLaunchBtn) {
+    fcLaunchBtn.addEventListener('click', handleJLPTLaunchSession);
+  }
+  ['fc-config-level', 'fc-config-category', 'fc-config-scope', 'fc-config-limit'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', updateJLPTFlashcardHubSummary);
+  });
+
+  // 7. Sự kiện trong Subview: TIẾN ĐỘ HỌC (PROGRESS DASHBOARD)
+  const btnContinueStudy = document.getElementById('btn-prog-continue-study');
+  if (btnContinueStudy) {
+    btnContinueStudy.addEventListener('click', () => {
+      AppState.jlptSubtab = 'flashcard';
+      syncJLPTSubtabsUI();
+      renderJLPTActiveSubtab();
+    });
+  }
+
+  // 8. Sự kiện trong Subview: NHẬP GIÁO TRÌNH CÁ NHÂN (IMPORT)
+  setupPersonalImportEvents();
+
+  // 9. Sự kiện trong Modal chọn Bộ thẻ đích
+  const modalDeck = document.getElementById('modal-jlpt-deck-picker');
+  const btnCloseModal = document.getElementById('btn-close-jlpt-deck-modal');
+  const btnCancelModal = document.getElementById('btn-cancel-jlpt-deck-modal');
+  const selectTargetDeck = document.getElementById('select-jlpt-target-deck');
+  const groupNewDeckName = document.getElementById('group-jlpt-new-deck-name');
+  const btnConfirmAddDeck = document.getElementById('btn-confirm-jlpt-add-deck');
+
+  const closeDeckModal = () => {
+    if (modalDeck) modalDeck.style.display = 'none';
+  };
+  if (btnCloseModal) btnCloseModal.addEventListener('click', closeDeckModal);
+  if (btnCancelModal) btnCancelModal.addEventListener('click', closeDeckModal);
+
+  if (selectTargetDeck) {
+    selectTargetDeck.addEventListener('change', (e) => {
+      if (groupNewDeckName) {
+        groupNewDeckName.style.display = e.target.value === '__new__' ? 'block' : 'none';
+      }
+    });
+  }
+
+  if (btnConfirmAddDeck) {
+    btnConfirmAddDeck.addEventListener('click', handleJLPTConfirmAddToDeck);
+  }
+}
+
+/**
+ * Đồng bộ trạng thái giao diện cấp độ được chọn
+ */
+function syncJLPTLevelCardsUI() {
+  const cards = document.querySelectorAll('.jlpt-level-card');
+  cards.forEach(card => {
+    if (card.getAttribute('data-level') === AppState.jlptLevel) {
+      card.classList.add('active');
+    } else {
+      card.classList.remove('active');
+    }
+  });
+
+  const fcCurrLvlEl = document.getElementById('fc-config-curr-lvl');
+  if (fcCurrLvlEl) fcCurrLvlEl.innerText = AppState.jlptLevel;
+}
+
+/**
+ * Đồng bộ trạng thái các tab chuyên mục JLPT
+ */
+function syncJLPTSubtabsUI() {
+  const buttons = document.querySelectorAll('.jlpt-tab-btn');
+  buttons.forEach(btn => {
+    if (btn.getAttribute('data-subtab') === AppState.jlptSubtab) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  const subviews = document.querySelectorAll('.jlpt-subview');
+  subviews.forEach(view => {
+    if (view.id === `jlpt-subview-${AppState.jlptSubtab}`) {
+      view.classList.add('active');
+    } else {
+      view.classList.remove('active');
+    }
+  });
+}
+
+/**
+ * Điều phối render cho Subtab hiện tại
+ */
+async function renderJLPTActiveSubtab() {
+  if (AppState.jlptSubtab === 'vocab') {
+    await renderJLPTVocabSubtab();
+  } else if (AppState.jlptSubtab === 'grammar') {
+    await renderJLPTGrammarSubtab();
+  } else if (AppState.jlptSubtab === 'kanji') {
+    await renderJLPTKanjiSubtab();
+  } else if (AppState.jlptSubtab === 'flashcard') {
+    await renderJLPTFlashcardSubtab();
+  } else if (AppState.jlptSubtab === 'progress') {
+    await renderJLPTProgressSubtab();
+  } else if (AppState.jlptSubtab === 'import') {
+    await renderJLPTImportSubtab();
+  }
+}
+
+/**
+ * Nạp dữ liệu và hiển thị giao diện JLPT tổng thể
+ */
+async function renderJLPTView(reloadStats = true) {
+  syncJLPTLevelCardsUI();
+  syncJLPTSubtabsUI();
+
+  // Cập nhật số liệu thống kê cấp độ
+  if (reloadStats && typeof getJLPTStudyStats === 'function') {
+    try {
+      const statsObj = await getJLPTStudyStats();
+      if (statsObj && statsObj.levels) {
+        const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+        levels.forEach(lvl => {
+          const lStat = statsObj.levels[lvl];
+          const countEl = document.getElementById(`jlpt-stat-count-${lvl.toLowerCase()}`);
+          const progEl = document.getElementById(`jlpt-stat-prog-${lvl.toLowerCase()}`);
+          if (countEl && lStat) {
+            countEl.innerText = `${lStat.total.toLocaleString()} từ`;
+          }
+          if (progEl && lStat) {
+            progEl.innerText = `${lStat.saved} đã lưu • ${lStat.percentMastered}% đã thuộc`;
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('[Workspace] Lỗi nạp JLPT stats:', e);
+    }
+  }
+
+  // Cập nhật badges trên các subtab
+  try {
+    const vWords = await getJLPTWords(AppState.jlptLevel);
+    const gList = await getJLPTGrammar(AppState.jlptLevel);
+    const kList = await getJLPTKanji(AppState.jlptLevel);
+
+    const bV = document.getElementById('badge-subtab-vocab');
+    const bG = document.getElementById('badge-subtab-grammar');
+    const bK = document.getElementById('badge-subtab-kanji');
+
+    if (bV) bV.innerText = vWords.length.toLocaleString();
+    if (bG) bG.innerText = gList.length.toLocaleString();
+    if (bK) bK.innerText = kList.length.toLocaleString();
+  } catch (err) {
+    console.warn('[Workspace] Cập nhật badge subtabs warning:', err);
+  }
+
+  await renderJLPTActiveSubtab();
+}
+
+// ========================================================
+// 10.1 SUBVIEW: TỪ VỰNG (VOCABULARY) CONTROLLER
+// ========================================================
+
+async function renderJLPTVocabSubtab() {
+  let rawWords = [];
+  if (typeof getJLPTWords === 'function') {
+    rawWords = await getJLPTWords(AppState.jlptLevel);
+  }
+
+  const cardMap = new Map();
+  (AppState.allCards || []).forEach(c => {
+    const key = (c.word || c.kanji || '').trim();
+    if (key) cardMap.set(key, c);
+  });
+
+  const q = (AppState.jlptQuery || '').toLowerCase();
+  const statusFilter = AppState.jlptStatusFilter;
+  const transFilter = AppState.jlptTransFilter;
+
+  AppState.jlptFilteredWords = rawWords.filter(item => {
+    // 1. Tìm kiếm chuỗi
+    if (q) {
+      const matchWord = item.word && item.word.toLowerCase().includes(q);
+      const matchReading = item.reading && item.reading.toLowerCase().includes(q);
+      const matchHanviet = item.hanviet && item.hanviet.toLowerCase().includes(q);
+      const matchMeaningVi = item.meaningVi && item.meaningVi.toLowerCase().includes(q);
+      const matchMeaningOrig = item.originalMeaning && item.originalMeaning.toLowerCase().includes(q);
+      if (!matchWord && !matchReading && !matchHanviet && !matchMeaningVi && !matchMeaningOrig) {
+        return false;
+      }
+    }
+
+    // 2. Lọc theo trạng thái SRS
+    if (statusFilter && statusFilter !== 'all') {
+      const card = cardMap.get(item.word);
+      let status = 'new';
+      if (card) {
+        const srs = card.srs || {};
+        if ((srs.repetition && srs.repetition >= 4) || (srs.interval && srs.interval >= 21)) {
+          status = 'mastered';
+        } else {
+          status = 'learning';
+        }
+      }
+      if (status !== statusFilter) return false;
+    }
+
+    // 3. Lọc theo trạng thái dịch
+    if (transFilter && transFilter !== 'all') {
+      if (transFilter === 'verified' && item.translationStatus !== 'verified') return false;
+      if (transFilter === 'missing' && item.translationStatus !== 'missing') return false;
+    }
+
+    return true;
+  });
+
+  renderJLPTVocabTable();
+  updateJLPTSelectionControls();
+}
+
+function getJLPTCurrentPageWords() {
+  const words = AppState.jlptFilteredWords || [];
+  const start = (AppState.jlptPage - 1) * AppState.jlptPageSize;
+  const end = start + AppState.jlptPageSize;
+  return words.slice(start, end);
+}
+
+function renderJLPTVocabTable() {
+  const tbody = document.getElementById('jlpt-words-tbody');
+  if (!tbody) return;
+
+  const words = AppState.jlptFilteredWords || [];
+  const total = words.length;
+  const pageSize = AppState.jlptPageSize;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  if (AppState.jlptPage > totalPages) AppState.jlptPage = totalPages;
+  if (AppState.jlptPage < 1) AppState.jlptPage = 1;
+
+  const pageWords = getJLPTCurrentPageWords();
+
+  const cardMap = new Map();
+  (AppState.allCards || []).forEach(c => {
+    const key = (c.word || c.kanji || '').trim();
+    if (key) cardMap.set(key, c);
+  });
+
+  if (pageWords.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+          <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+          <div style="font-size: 15px; font-weight: 600;">Không tìm thấy từ vựng phù hợp</div>
+          <p style="font-size: 13px; margin-top: 4px;">Hãy thử đổi từ khóa tìm kiếm hoặc chọn bộ lọc khác.</p>
+        </td>
+      </tr>
+    `;
+  } else {
+    const levelColors = {
+      'N5': '#10b981',
+      'N4': '#0284c7',
+      'N3': '#7c3aed',
+      'N2': '#f59e0b',
+      'N1': '#ef4444'
+    };
+
+    tbody.innerHTML = pageWords.map(item => {
+      const isChecked = AppState.jlptSelectedIds.has(item.id);
+      const card = cardMap.get(item.word);
+      let statusLabel = '<span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; background: rgba(148, 163, 184, 0.15); color: var(--text-secondary);">Chưa học</span>';
+      
+      if (card) {
+        const srs = card.srs || {};
+        if ((srs.repetition && srs.repetition >= 4) || (srs.interval && srs.interval >= 21)) {
+          statusLabel = '<span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 600;">✅ Đã thuộc</span>';
+        } else {
+          statusLabel = '<span style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; background: rgba(2, 132, 199, 0.15); color: #0284c7; font-weight: 600;">⏳ Đang học</span>';
+        }
+      }
+
+      const lvlColor = levelColors[item.level] || '#0284c7';
+      const exampleHtml = item.example ? `
+        <div style="font-size: 12.5px; font-family: var(--font-jp); line-height: 1.4; color: var(--text-primary);">${escapeHtml(item.example)}</div>
+        ${item.exampleMeaning ? `<div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">${escapeHtml(item.exampleMeaning)}</div>` : (item.exampleEn ? `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px; font-style: italic;">[Gốc] ${escapeHtml(item.exampleEn)}</div>` : '')}
+      ` : '<span style="color: var(--text-muted); font-size: 12px;">--</span>';
+
+      const hanvietHtml = item.hanviet 
+        ? `<span style="font-weight: 700; color: #f59e0b; font-size: 12px; letter-spacing: 0.04em;">${escapeHtml(item.hanviet)}</span>`
+        : '<span style="color: var(--text-muted); font-size: 12px;">--</span>';
+
+      let meaningHtml = '';
+      if (item.translationStatus === 'verified' && item.meaningVi && item.meaningVi !== 'Chưa có nghĩa tiếng Việt') {
+        meaningHtml = `<div style="font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.4;">${escapeHtml(item.meaningVi)}</div>`;
+        if (item.originalMeaning) {
+          meaningHtml += `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">[Gốc] ${escapeHtml(item.originalMeaning)}</div>`;
+        }
+      } else {
+        meaningHtml = `
+          <div style="font-size: 12.5px; color: var(--text-muted); font-style: italic;">Chưa có nghĩa tiếng Việt</div>
+          ${item.originalMeaning ? `<div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">[Gốc] ${escapeHtml(item.originalMeaning)}</div>` : ''}
+        `;
+      }
+
+      return `
+        <tr data-word-id="${item.id}" class="${isChecked ? 'row-selected' : ''}">
+          <td style="text-align: center;">
+            <input type="checkbox" class="jlpt-row-checkbox" data-id="${item.id}" ${isChecked ? 'checked' : ''}>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 17px; font-weight: 700; font-family: var(--font-jp); color: var(--text-primary);">${escapeHtml(item.word)}</span>
+              <button class="btn-tts-row" data-word="${escapeHtml(item.word)}" title="Phát âm tiếng Nhật" style="background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.75; transition: opacity 0.1s;">🔊</button>
+            </div>
+          </td>
+          <td>
+            <span style="font-size: 14px; color: var(--primary); font-family: var(--font-jp);">${escapeHtml(item.reading)}</span>
+          </td>
+          <td>${hanvietHtml}</td>
+          <td>
+            <div style="max-width: 280px;">${meaningHtml}</div>
+          </td>
+          <td>${exampleHtml}</td>
+          <td style="text-align: center;">
+            <span style="display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; color: #fff; background: ${lvlColor};">${item.level}</span>
+          </td>
+          <td style="text-align: center;">${statusLabel}</td>
+          <td style="text-align: center;">
+            <button class="btn btn-secondary btn-sm btn-quick-add-jlpt" data-id="${item.id}" title="Thêm nhanh vào Bộ thẻ Flashcard" style="padding: 4px 8px; font-size: 12px;">
+              ➕ Thêm
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    tbody.querySelectorAll('.jlpt-row-checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (e.target.checked) {
+          AppState.jlptSelectedIds.add(id);
+        } else {
+          AppState.jlptSelectedIds.delete(id);
+        }
+        updateJLPTSelectionControls();
+      });
+    });
+
+    tbody.querySelectorAll('.btn-tts-row').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const word = btn.getAttribute('data-word');
+        playPronunciation(word);
+      });
+    });
+
+    tbody.querySelectorAll('.btn-quick-add-jlpt').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        const targetWord = (AppState.jlptFilteredWords || []).find(w => w.id === id);
+        if (targetWord) {
+          AppState.jlptSelectedIds.clear();
+          AppState.jlptSelectedIds.add(id);
+          openJLPTDeckPickerModal('vocab');
+        }
+      });
+    });
+  }
+
+  const startItem = total === 0 ? 0 : (AppState.jlptPage - 1) * pageSize + 1;
+  const endItem = Math.min(total, AppState.jlptPage * pageSize);
+  const infoEl = document.getElementById('jlpt-pagination-info');
+  const pageDisplayEl = document.getElementById('jlpt-page-number-display');
+  const prevBtn = document.getElementById('btn-jlpt-prev-page');
+  const nextBtn = document.getElementById('btn-jlpt-next-page');
+
+  if (infoEl) infoEl.innerText = `Hiển thị ${startItem} - ${endItem} trong số ${total.toLocaleString()} từ`;
+  if (pageDisplayEl) pageDisplayEl.innerText = `${AppState.jlptPage} / ${totalPages}`;
+  if (prevBtn) prevBtn.disabled = AppState.jlptPage <= 1;
+  if (nextBtn) nextBtn.disabled = AppState.jlptPage >= totalPages;
+
+  const headerCheckbox = document.getElementById('jlpt-table-header-checkbox');
+  if (headerCheckbox && pageWords.length > 0) {
+    headerCheckbox.checked = pageWords.every(w => AppState.jlptSelectedIds.has(w.id));
+  } else if (headerCheckbox) {
+    headerCheckbox.checked = false;
+  }
+}
+
+function updateJLPTSelectionControls() {
+  const count = AppState.jlptSelectedIds.size;
+  const badge = document.getElementById('jlpt-selection-count-badge');
+  const btnStart = document.getElementById('btn-jlpt-start-flashcard');
+  const btnAdd = document.getElementById('btn-jlpt-add-to-deck');
+
+  if (badge) badge.innerText = `Đã chọn: ${count.toLocaleString()} từ`;
+  if (btnStart) btnStart.disabled = count === 0;
+  if (btnAdd) btnAdd.disabled = count === 0;
+}
+
+// ========================================================
+// 10.2 SUBVIEW: NGỮ PHÁP (GRAMMAR) CONTROLLER
+// ========================================================
+
+async function renderJLPTGrammarSubtab() {
+  let rawGrammar = [];
+  if (typeof getJLPTGrammar === 'function') {
+    rawGrammar = await getJLPTGrammar(AppState.jlptLevel);
+  }
+
+  const q = (AppState.jlptGrammarQuery || '').toLowerCase();
+  const transFilter = AppState.jlptGrammarTransFilter;
+
+  AppState.jlptFilteredGrammar = rawGrammar.filter(item => {
+    if (q) {
+      const matchPattern = item.pattern && item.pattern.toLowerCase().includes(q);
+      const matchRomaji = item.romaji && item.romaji.toLowerCase().includes(q);
+      const matchMeaningVi = item.meaningVi && item.meaningVi.toLowerCase().includes(q);
+      const matchFormation = item.formationVi && item.formationVi.toLowerCase().includes(q);
+      const matchExplanation = item.explanationVi && item.explanationVi.toLowerCase().includes(q);
+      if (!matchPattern && !matchRomaji && !matchMeaningVi && !matchFormation && !matchExplanation) {
+        return false;
+      }
+    }
+
+    if (transFilter && transFilter !== 'all') {
+      if (transFilter === 'verified' && item.translationStatus !== 'verified') return false;
+      if (transFilter === 'needs_review' && item.translationStatus !== 'needs_review') return false;
+    }
+
+    return true;
+  });
+
+  renderJLPTGrammarList();
+}
+
+function renderJLPTGrammarList() {
+  const container = document.getElementById('jlpt-grammar-container');
+  if (!container) return;
+
+  const grammarList = AppState.jlptFilteredGrammar || [];
+  const total = grammarList.length;
+  const pageSize = AppState.jlptGrammarPageSize;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  if (AppState.jlptGrammarPage > totalPages) AppState.jlptGrammarPage = totalPages;
+  if (AppState.jlptGrammarPage < 1) AppState.jlptGrammarPage = 1;
+
+  const start = (AppState.jlptGrammarPage - 1) * pageSize;
+  const pageItems = grammarList.slice(start, start + pageSize);
+
+  if (pageItems.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <div style="font-size: 32px; margin-bottom: 8px;">📐</div>
+        <div style="font-size: 15px; font-weight: 600;">Không có điểm ngữ pháp phù hợp</div>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Hãy thử tìm kiếm với từ khóa khác.</p>
+      </div>
+    `;
+  } else {
+    container.innerHTML = pageItems.map(item => {
+      const isVerified = item.translationStatus === 'verified';
+      const badgeHtml = isVerified 
+        ? `<span class="trans-badge-verified">Đã duyệt tiếng Việt</span>`
+        : `<span class="trans-badge-review">Chờ rà soát</span>`;
+
+      const formationText = item.formationVi || item.formation || 'Đang cập nhật cấu trúc';
+      const explanationText = item.explanationVi || item.explanation || item.notes || '';
+
+      const exampleHtml = item.example ? `
+        <div style="margin-top: 10px; padding: 10px 12px; background: var(--bg-card-subtle); border-radius: 6px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="font-family: var(--font-jp); font-weight: 500; color: var(--text-primary); line-height: 1.4;">
+              ${escapeHtml(item.example)}
+            </div>
+            <button class="btn-tts-grammar" data-text="${escapeHtml(item.example)}" title="Phát âm ví dụ" style="background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.8; margin-left: 8px;">🔊</button>
+          </div>
+          ${item.exampleVi ? `<div style="color: var(--text-secondary); font-size: 12px; margin-top: 3px;">${escapeHtml(item.exampleVi)}</div>` : (item.exampleMeaning ? `<div style="color: var(--text-secondary); font-size: 12px; margin-top: 3px;">${escapeHtml(item.exampleMeaning)}</div>` : '')}
+        </div>
+      ` : '';
+
+      return `
+        <div class="jlpt-grammar-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <span style="font-size: 18px; font-weight: 700; font-family: var(--font-jp); color: var(--text-primary);">${escapeHtml(item.pattern)}</span>
+              ${item.romaji ? `<span style="font-size: 13px; color: var(--primary); margin-left: 8px;">[${escapeHtml(item.romaji)}]</span>` : ''}
+              <span style="display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; color: #fff; background: #7c3aed; margin-left: 8px;">${item.level}</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              ${badgeHtml}
+              <button class="btn btn-secondary btn-sm btn-quick-add-grammar" data-id="${item.id}" style="padding: 3px 8px; font-size: 12px;">
+                ➕ Thêm vào Bộ thẻ
+              </button>
+            </div>
+          </div>
+
+          <div style="font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 6px;">
+            Ý nghĩa: ${escapeHtml(item.meaningVi || 'Chưa có nghĩa tiếng Việt')}
+          </div>
+
+          <div style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px;">
+            <b>Cấu trúc:</b> <code style="background: var(--bg-card-subtle); padding: 2px 6px; border-radius: 4px; font-family: var(--font-jp); font-size: 12px;">${escapeHtml(formationText)}</code>
+          </div>
+
+          ${explanationText ? `
+            <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px;">
+              <b>Giải thích:</b> ${escapeHtml(explanationText)}
+            </div>
+          ` : ''}
+
+          ${exampleHtml}
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.btn-tts-grammar').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.getAttribute('data-text');
+        playPronunciation(text);
+      });
+    });
+
+    container.querySelectorAll('.btn-quick-add-grammar').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const item = grammarList.find(g => g.id === id);
+        if (item) {
+          openJLPTDeckPickerModal('grammar', [item]);
+        }
+      });
+    });
+  }
+
+  const startItem = total === 0 ? 0 : start + 1;
+  const endItem = Math.min(total, start + pageSize);
+  const infoEl = document.getElementById('jlpt-grammar-pagination-info');
+  const pageDisplayEl = document.getElementById('jlpt-grammar-page-display');
+  const prevBtn = document.getElementById('btn-jlpt-grammar-prev');
+  const nextBtn = document.getElementById('btn-jlpt-grammar-next');
+
+  if (infoEl) infoEl.innerText = `Hiển thị ${startItem} - ${endItem} trong số ${total.toLocaleString()} điểm ngữ pháp`;
+  if (pageDisplayEl) pageDisplayEl.innerText = `${AppState.jlptGrammarPage} / ${totalPages}`;
+  if (prevBtn) prevBtn.disabled = AppState.jlptGrammarPage <= 1;
+  if (nextBtn) nextBtn.disabled = AppState.jlptGrammarPage >= totalPages;
+}
+
+// ========================================================
+// 10.3 SUBVIEW: CHỮ HÁN (KANJI) CONTROLLER
+// ========================================================
+
+async function renderJLPTKanjiSubtab() {
+  let rawKanji = [];
+  if (typeof getJLPTKanji === 'function') {
+    rawKanji = await getJLPTKanji(AppState.jlptLevel);
+  }
+
+  const q = (AppState.jlptKanjiQuery || '').toLowerCase();
+
+  AppState.jlptFilteredKanji = rawKanji.filter(item => {
+    if (!q) return true;
+    const matchChar = item.character && item.character.toLowerCase().includes(q);
+    const matchHanviet = item.hanviet && item.hanviet.toLowerCase().includes(q);
+    const matchMeaningVi = item.meaningVi && item.meaningVi.toLowerCase().includes(q);
+    const matchOn = item.onyomi && item.onyomi.some(on => on.toLowerCase().includes(q));
+    const matchKun = item.kunyomi && item.kunyomi.some(kun => kun.toLowerCase().includes(q));
+    return matchChar || matchHanviet || matchMeaningVi || matchOn || matchKun;
+  });
+
+  renderJLPTKanjiGrid();
+}
+
+function renderJLPTKanjiGrid() {
+  const container = document.getElementById('jlpt-kanji-container');
+  if (!container) return;
+
+  const kanjiList = AppState.jlptFilteredKanji || [];
+  const total = kanjiList.length;
+  const pageSize = AppState.jlptKanjiPageSize;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  if (AppState.jlptKanjiPage > totalPages) AppState.jlptKanjiPage = totalPages;
+  if (AppState.jlptKanjiPage < 1) AppState.jlptKanjiPage = 1;
+
+  const start = (AppState.jlptKanjiPage - 1) * pageSize;
+  const pageItems = kanjiList.slice(start, start + pageSize);
+
+  if (pageItems.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <div style="font-size: 32px; margin-bottom: 8px;">🈸</div>
+        <div style="font-size: 15px; font-weight: 600;">Không tìm thấy Chữ Hán phù hợp</div>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Hãy thử tìm kiếm theo âm Hán Việt hoặc bộ thủ khác.</p>
+      </div>
+    `;
+  } else {
+    container.innerHTML = pageItems.map(item => {
+      const onyomiText = (item.onyomi && item.onyomi.length > 0) ? item.onyomi.join(', ') : '--';
+      const kunyomiText = (item.kunyomi && item.kunyomi.length > 0) ? item.kunyomi.join(', ') : '--';
+      
+      const examplesHtml = (item.examples && item.examples.length > 0) ? `
+        <div style="margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 6px; font-size: 11.5px;">
+          <div style="font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">Từ ví dụ:</div>
+          ${item.examples.slice(0, 2).map(ex => `
+            <div style="color: var(--text-secondary); line-height: 1.3;">
+              <span style="font-family: var(--font-jp); font-weight: 700; color: var(--text-primary);">${escapeHtml(ex.word)}</span> 
+              <span style="color: var(--primary);">(${escapeHtml(ex.reading)})</span>: ${escapeHtml(ex.meaningVi || ex.meaning || '')}
+            </div>
+          `).join('')}
+        </div>
+      ` : '';
+
+      return `
+        <div class="jlpt-kanji-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+            <div style="font-size: 42px; font-weight: 700; font-family: var(--font-jp); color: var(--text-primary); line-height: 1;">
+              ${escapeHtml(item.character)}
+            </div>
+            <div style="text-align: right;">
+              <span style="display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #fff; background: #0284c7;">${item.level}</span>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">${item.strokes || '?'} nét</div>
+            </div>
+          </div>
+
+          <div style="font-size: 14px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+            ${escapeHtml(item.hanviet || '--')}
+          </div>
+
+          <div style="font-size: 12.5px; font-weight: 500; color: var(--text-primary); line-height: 1.3; margin-bottom: 6px;">
+            ${escapeHtml(item.meaningVi || item.originalMeaning || 'Chưa rõ nghĩa')}
+          </div>
+
+          <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4;">
+            <div><b>On:</b> <span style="color: #ef4444; font-family: var(--font-jp);">${escapeHtml(onyomiText)}</span></div>
+            <div><b>Kun:</b> <span style="color: #10b981; font-family: var(--font-jp);">${escapeHtml(kunyomiText)}</span></div>
+          </div>
+
+          ${examplesHtml}
+
+          <div style="margin-top: 10px; display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm btn-quick-add-kanji" data-id="${item.id}" style="width: 100%; justify-content: center; font-size: 11.5px; padding: 4px;">
+              ➕ Thêm vào Thẻ nhớ
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.btn-quick-add-kanji').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const item = kanjiList.find(k => k.id === id);
+        if (item) {
+          openJLPTDeckPickerModal('kanji', [item]);
+        }
+      });
+    });
+  }
+
+  const startItem = total === 0 ? 0 : start + 1;
+  const endItem = Math.min(total, start + pageSize);
+  const infoEl = document.getElementById('jlpt-kanji-pagination-info');
+  const pageDisplayEl = document.getElementById('jlpt-kanji-page-display');
+  const prevBtn = document.getElementById('btn-jlpt-kanji-prev');
+  const nextBtn = document.getElementById('btn-jlpt-kanji-next');
+
+  if (infoEl) infoEl.innerText = `Hiển thị ${startItem} - ${endItem} trong số ${total.toLocaleString()} Chữ Hán`;
+  if (pageDisplayEl) pageDisplayEl.innerText = `${AppState.jlptKanjiPage} / ${totalPages}`;
+  if (prevBtn) prevBtn.disabled = AppState.jlptKanjiPage <= 1;
+  if (nextBtn) nextBtn.disabled = AppState.jlptKanjiPage >= totalPages;
+}
+
+// ========================================================
+// 10.4 SUBVIEW: THẺ GHI NHỚ & ÔN TẬP (FLASHCARDS HUB)
+// ========================================================
+
+async function renderJLPTFlashcardSubtab() {
+  await updateJLPTFlashcardHubSummary();
+}
+
+async function updateJLPTFlashcardHubSummary() {
+  const levelSelect = document.getElementById('fc-config-level');
+  const catSelect = document.getElementById('fc-config-category');
+  const targetLevel = (levelSelect && levelSelect.value !== 'current') ? levelSelect.value : AppState.jlptLevel;
+  const category = catSelect ? catSelect.value : 'vocab';
+
+  let items = [];
+  if (category === 'vocab') items = await getJLPTWords(targetLevel);
+  else if (category === 'grammar') items = await getJLPTGrammar(targetLevel);
+  else if (category === 'kanji') items = await getJLPTKanji(targetLevel);
+
+  const cardMap = new Map();
+  (AppState.allCards || []).forEach(c => {
+    const key = (c.word || c.kanji || '').trim();
+    if (key) cardMap.set(key, c);
+  });
+
+  const now = Date.now();
+  let dueCount = 0;
+  let learningCount = 0;
+  let masteredCount = 0;
+
+  items.forEach(item => {
+    const key = (item.word || item.character || item.pattern || '').trim();
+    const card = cardMap.get(key);
+    if (card) {
+      const srs = card.srs || {};
+      if ((srs.repetition && srs.repetition >= 4) || (srs.interval && srs.interval >= 21)) {
+        masteredCount++;
+      } else {
+        learningCount++;
+      }
+      if (!srs.dueDate || srs.dueDate <= now) {
+        dueCount++;
+      }
+    }
+  });
+
+  const dueEl = document.getElementById('fc-summary-due-count');
+  const learnEl = document.getElementById('fc-summary-learning-count');
+  const mastEl = document.getElementById('fc-summary-mastered-count');
+  const totalEl = document.getElementById('fc-summary-total-level');
+
+  if (dueEl) dueEl.innerText = dueCount.toLocaleString();
+  if (learnEl) learnEl.innerText = learningCount.toLocaleString();
+  if (mastEl) mastEl.innerText = masteredCount.toLocaleString();
+  if (totalEl) totalEl.innerText = `${items.length.toLocaleString()} (${category.toUpperCase()} ${targetLevel})`;
+}
+
+async function handleJLPTLaunchSession() {
+  const levelSelect = document.getElementById('fc-config-level');
+  const catSelect = document.getElementById('fc-config-category');
+  const scopeSelect = document.getElementById('fc-config-scope');
+  const limitSelect = document.getElementById('fc-config-limit');
+
+  const targetLevel = (levelSelect && levelSelect.value !== 'current') ? levelSelect.value : AppState.jlptLevel;
+  const category = catSelect ? catSelect.value : 'vocab';
+  const scope = scopeSelect ? scopeSelect.value : 'due';
+  const limit = limitSelect ? limitSelect.value : '30';
+
+  let rawItems = [];
+  if (category === 'vocab') rawItems = await getJLPTWords(targetLevel);
+  else if (category === 'grammar') rawItems = await getJLPTGrammar(targetLevel);
+  else if (category === 'kanji') rawItems = await getJLPTKanji(targetLevel);
+
+  if (rawItems.length === 0) {
+    alert(`Không tìm thấy dữ liệu cho cấp độ ${targetLevel}.`);
+    return;
+  }
+
+  const cardMap = new Map();
+  (AppState.allCards || []).forEach(c => {
+    const key = (c.word || c.kanji || '').trim();
+    if (key) cardMap.set(key, c);
+  });
+
+  const now = Date.now();
+  let candidateItems = rawItems.filter(item => {
+    const key = (item.word || item.character || item.pattern || '').trim();
+    const card = cardMap.get(key);
+
+    if (scope === 'due') {
+      return card && (!card.srs || !card.srs.dueDate || card.srs.dueDate <= now);
+    } else if (scope === 'new') {
+      return !card;
+    }
+    return true; // scope === 'all'
+  });
+
+  if (candidateItems.length === 0) {
+    if (scope === 'due') {
+      alert(`Tuyệt vời! Hiện tại không có thẻ ${category.toUpperCase()} ${targetLevel} nào đến hạn ôn tập hôm nay.`);
+      return;
+    } else {
+      alert(`Không có thẻ nào phù hợp với bộ lọc đã chọn.`);
+      return;
+    }
+  }
+
+  // Giới hạn số lượng thẻ
+  if (limit !== 'all') {
+    const limitNum = parseInt(limit, 10);
+    if (!isNaN(limitNum)) {
+      candidateItems = candidateItems.slice(0, limitNum);
+    }
+  }
+
+  // Tự động bảo lưu vào bộ thẻ chuẩn tương ứng để lưu tiến độ SRS bền vững
+  const deckTitle = `JLPT ${targetLevel} - ${category === 'vocab' ? 'Từ vựng' : (category === 'grammar' ? 'Ngữ pháp' : 'Chữ Hán')}`;
+  try {
+    if (typeof addJLPTItemsToDeck === 'function') {
+      await addJLPTItemsToDeck(candidateItems, deckTitle, category);
+      await reloadAllData(false);
+    }
+  } catch (e) {
+    console.warn('[Workspace] Lưu items vào deck trước khi học warning:', e);
+  }
+
+  // Chuyển đổi sang format card SRS của workspace
+  const cardsQueue = candidateItems.map(item => {
+    const wordKey = item.word || item.character || item.pattern;
+    const existingCard = (AppState.allCards || []).find(c => (c.word === wordKey || c.kanji === wordKey));
+
+    if (category === 'kanji') {
+      const onyomiText = (item.onyomi && item.onyomi.length > 0) ? `On: ${item.onyomi.join(', ')}` : '';
+      const kunyomiText = (item.kunyomi && item.kunyomi.length > 0) ? `Kun: ${item.kunyomi.join(', ')}` : '';
+      const readingCombined = [onyomiText, kunyomiText].filter(Boolean).join(' | ');
+
+      const examplesText = (item.examples && item.examples.length > 0)
+        ? item.examples.map(ex => `${ex.word} (${ex.reading}): ${ex.meaningVi || ex.meaning}`).join('\n')
+        : '';
+
+      return {
+        id: (existingCard && existingCard.id) || item.id,
+        word: item.character,
+        reading: readingCombined,
+        hanviet: item.hanviet || '',
+        meaning: item.meaningVi || item.originalMeaning || 'Chưa có nghĩa tiếng Việt',
+        meaningVi: item.meaningVi || item.originalMeaning,
+        example: examplesText,
+        exampleMeaning: '',
+        level: item.level,
+        notes: `Chữ Hán JLPT ${item.level} • Số nét: ${item.strokes || '?'}`,
+        srs: existingCard ? existingCard.srs : { interval: 0, repetition: 0, easeFactor: 2.5, dueDate: Date.now(), state: 'new' }
+      };
+    } else if (category === 'grammar') {
+      const notesFormatted = [
+        item.formationVi ? `Cấu trúc: ${item.formationVi}` : (item.formation ? `Cấu trúc: ${item.formation}` : ''),
+        item.explanationVi ? `Giải thích: ${item.explanationVi}` : (item.notes ? `Giải thích: ${item.notes}` : '')
+      ].filter(Boolean).join('\n\n');
+
+      return {
+        id: (existingCard && existingCard.id) || item.id,
+        word: item.pattern,
+        reading: item.romaji || '',
+        hanviet: '',
+        meaning: item.meaningVi || item.originalMeaning || 'Chưa có nghĩa tiếng Việt',
+        meaningVi: item.meaningVi || item.originalMeaning,
+        example: item.example || '',
+        exampleMeaning: item.exampleVi || item.exampleMeaning || '',
+        level: item.level,
+        notes: notesFormatted || `Ngữ pháp JLPT ${item.level}`,
+        srs: existingCard ? existingCard.srs : { interval: 0, repetition: 0, easeFactor: 2.5, dueDate: Date.now(), state: 'new' }
+      };
+    } else {
+      // category === 'vocab'
+      return {
+        id: (existingCard && existingCard.id) || item.id,
+        word: item.word,
+        reading: item.reading,
+        hanviet: item.hanviet || '',
+        meaning: item.meaningVi || item.meaning || 'Chưa có nghĩa tiếng Việt',
+        meaningVi: item.meaningVi || item.meaning,
+        example: item.example || '',
+        exampleMeaning: item.exampleMeaning || item.exampleEn || '',
+        level: item.level,
+        notes: `Từ vựng JLPT ${item.level}`,
+        srs: existingCard ? existingCard.srs : { interval: 0, repetition: 0, easeFactor: 2.5, dueDate: Date.now(), state: 'new' }
+      };
+    }
+  });
+
+  startReviewModeWithCustomQueue(cardsQueue, `${deckTitle} (${cardsQueue.length} thẻ)`);
+}
+
+async function handleJLPTStartGrammarFlashcard() {
+  const grammarList = AppState.jlptFilteredGrammar || [];
+  if (grammarList.length === 0) {
+    alert('Không có ngữ pháp khả dụng để ôn tập.');
+    return;
+  }
+  openJLPTDeckPickerModal('grammar', grammarList);
+}
+
+async function handleJLPTStartKanjiFlashcard() {
+  const kanjiList = AppState.jlptFilteredKanji || [];
+  if (kanjiList.length === 0) {
+    alert('Không có Chữ Hán khả dụng để ôn tập.');
+    return;
+  }
+  openJLPTDeckPickerModal('kanji', kanjiList);
+}
+
+// ========================================================
+// 10.5 SUBVIEW: TIẾN ĐỘ HỌC (PROGRESS DASHBOARD)
+// ========================================================
+
+async function renderJLPTProgressSubtab() {
+  if (typeof getJLPTStudyStats !== 'function') return;
+
+  const stats = await getJLPTStudyStats();
+  if (!stats) return;
+
+  const totalEl = document.getElementById('prog-stat-total-items');
+  const mastEl = document.getElementById('prog-stat-mastered');
+  const learnEl = document.getElementById('prog-stat-learning');
+  const dueEl = document.getElementById('prog-stat-due');
+
+  if (totalEl) totalEl.innerText = stats.totalItems ? stats.totalItems.toLocaleString() : '10.720';
+  if (mastEl) mastEl.innerText = stats.overallMastered.toLocaleString();
+  if (learnEl) learnEl.innerText = stats.overallLearning.toLocaleString();
+  if (dueEl) dueEl.innerText = stats.overallDue.toLocaleString();
+
+  // Render bảng tiến độ 5 cấp độ
+  const progContainer = document.getElementById('prog-levels-breakdown');
+  if (progContainer && stats.levels) {
+    const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+    const levelColors = {
+      'N5': '#10b981',
+      'N4': '#0284c7',
+      'N3': '#7c3aed',
+      'N2': '#f59e0b',
+      'N1': '#ef4444'
+    };
+
+    progContainer.innerHTML = levels.map(lvl => {
+      const lStat = stats.levels[lvl] || { total: 0, saved: 0, mastered: 0, percentMastered: 0 };
+      const color = levelColors[lvl] || '#0284c7';
+
+      return `
+        <div style="background: var(--bg-card-subtle); padding: 14px 16px; border-radius: 8px; border-left: 4px solid ${color};">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="font-weight: 700; font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>Cấp độ ${lvl}</span>
+              <span style="font-size: 11.5px; font-weight: normal; color: var(--text-secondary);">(${lStat.total.toLocaleString()} từ vựng)</span>
+            </div>
+            <div style="font-size: 12.5px; font-weight: 600; color: ${color};">
+              ${lStat.mastered.toLocaleString()} / ${lStat.total.toLocaleString()} (${lStat.percentMastered}% đã thuộc)
+            </div>
+          </div>
+          <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden;">
+            <div style="width: ${lStat.percentMastered}%; height: 100%; background: ${color}; border-radius: 4px; transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render bảng báo cáo chất lượng dịch
+  const transTbody = document.getElementById('prog-translation-tbody');
+  if (transTbody) {
+    const reportData = [
+      { cat: '📖 Từ vựng', lvl: 'N5', total: 674, verified: 268, review: 0, missing: 406, pct: '39.8%' },
+      { cat: '📖 Từ vựng', lvl: 'N4', total: 630, verified: 125, review: 0, missing: 505, pct: '19.8%' },
+      { cat: '📖 Từ vựng', lvl: 'N3', total: 1659, verified: 139, review: 0, missing: 1520, pct: '8.4%' },
+      { cat: '📖 Từ vựng', lvl: 'N2', total: 1778, verified: 78, review: 0, missing: 1700, pct: '4.4%' },
+      { cat: '📖 Từ vựng', lvl: 'N1', total: 3070, verified: 52, review: 0, missing: 3018, pct: '1.7%' },
+      { cat: '🈸 Chữ Hán (Kanji)', lvl: 'N5', total: 84, verified: 84, review: 0, missing: 0, pct: '100%' },
+      { cat: '🈸 Chữ Hán (Kanji)', lvl: 'N4', total: 169, verified: 169, review: 0, missing: 0, pct: '100%' },
+      { cat: '🈸 Chữ Hán (Kanji)', lvl: 'N3', total: 387, verified: 387, review: 0, missing: 0, pct: '100%' },
+      { cat: '🈸 Chữ Hán (Kanji)', lvl: 'N2', total: 398, verified: 398, review: 0, missing: 0, pct: '100%' },
+      { cat: '🈸 Chữ Hán (Kanji)', lvl: 'N1', total: 1345, verified: 1345, review: 0, missing: 0, pct: '100%' },
+      { cat: '📐 Ngữ pháp', lvl: 'N5', total: 81, verified: 81, review: 0, missing: 0, pct: '100%' },
+      { cat: '📐 Ngữ pháp', lvl: 'N4', total: 98, verified: 44, review: 54, missing: 0, pct: '100%' },
+      { cat: '📐 Ngữ pháp', lvl: 'N3', total: 101, verified: 0, review: 101, missing: 0, pct: '100%' },
+      { cat: '📐 Ngữ pháp', lvl: 'N2', total: 123, verified: 0, review: 123, missing: 0, pct: '100%' },
+      { cat: '📐 Ngữ pháp', lvl: 'N1', total: 123, verified: 0, review: 123, missing: 0, pct: '100%' }
+    ];
+
+    transTbody.innerHTML = reportData.map(row => `
+      <tr>
+        <td style="font-weight: 600;">${row.cat}</td>
+        <td style="font-weight: 700; color: var(--primary);">${row.lvl}</td>
+        <td style="text-align: center; font-weight: 600;">${row.total.toLocaleString()}</td>
+        <td style="text-align: center;"><span class="trans-badge-verified">${row.verified.toLocaleString()}</span></td>
+        <td style="text-align: center;"><span class="trans-badge-review">${row.review.toLocaleString()}</span></td>
+        <td style="text-align: center;"><span class="trans-badge-missing">${row.missing.toLocaleString()}</span></td>
+        <td style="text-align: center; font-weight: 700; color: #10b981;">${row.pct}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+// ========================================================
+// 10.6 SUBVIEW: NHẬP GIÁO TRÌNH CÁ NHÂN (IMPORT)
+// ========================================================
+
+function setupPersonalImportEvents() {
+  const dropzone = document.getElementById('personal-import-dropzone');
+  const fileInput = document.getElementById('input-personal-import-file');
+  const browseBtn = document.getElementById('btn-browse-personal-file');
+  const clearFileBtn = document.getElementById('btn-clear-personal-file');
+  const confirmBtn = document.getElementById('btn-confirm-personal-import');
+  const cancelBtn = document.getElementById('btn-cancel-personal-import');
+
+  if (browseBtn && fileInput) {
+    browseBtn.addEventListener('click', () => fileInput.click());
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handlePersonalImportFile(e.target.files[0]);
+      }
+    });
+  }
+
+  if (dropzone) {
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handlePersonalImportFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  if (clearFileBtn) {
+    clearFileBtn.addEventListener('click', resetPersonalImportUI);
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', resetPersonalImportUI);
+  }
+
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', handlePersonalImportConfirm);
+  }
+}
+
+async function renderJLPTImportSubtab() {
+  const selectDeck = document.getElementById('select-import-target-deck');
+  if (!selectDeck) return;
+
+  const decks = await getDecks();
+  let optionsHtml = `<option value="__new__">✨ Tạo Bộ thẻ mới theo tên Giáo trình</option>`;
+  optionsHtml += `<option disabled>──────────</option>`;
+  decks.forEach(d => {
+    optionsHtml += `<option value="${d.id}">${escapeHtml(d.name)}</option>`;
+  });
+
+  selectDeck.innerHTML = optionsHtml;
+}
+
+function handlePersonalImportFile(file) {
+  const fileNameDisplay = document.getElementById('personal-file-name-display');
+  const fileInfoBadge = document.getElementById('personal-file-info-badge');
+  const dropzone = document.getElementById('personal-import-dropzone');
+
+  if (fileNameDisplay) fileNameDisplay.innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+  if (fileInfoBadge) fileInfoBadge.style.display = 'flex';
+  if (dropzone) dropzone.style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const rawContent = e.target.result;
+    const format = file.name.endsWith('.csv') ? 'csv' : 'json';
+    
+    if (typeof parseAndValidatePersonalImport === 'function') {
+      const parsed = parseAndValidatePersonalImport(rawContent, format);
+      AppState.personalImportParsed = parsed;
+      renderPersonalImportPreview(parsed);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function renderPersonalImportPreview(parsed) {
+  const previewBox = document.getElementById('personal-import-preview-box');
+  const totalCountEl = document.getElementById('preview-total-count');
+  const validCountEl = document.getElementById('preview-valid-count');
+  const duplicateCountEl = document.getElementById('preview-duplicate-count');
+  const errorCountEl = document.getElementById('preview-error-count');
+  const tbody = document.getElementById('personal-import-preview-tbody');
+  const confirmBtn = document.getElementById('btn-confirm-personal-import');
+
+  if (!previewBox) return;
+  previewBox.style.display = 'block';
+
+  if (totalCountEl) totalCountEl.innerText = parsed.totalCount.toLocaleString();
+  if (validCountEl) validCountEl.innerText = parsed.validCount.toLocaleString();
+  if (duplicateCountEl) duplicateCountEl.innerText = parsed.duplicateCount.toLocaleString();
+  if (errorCountEl) errorCountEl.innerText = parsed.errorCount.toLocaleString();
+
+  if (confirmBtn) {
+    confirmBtn.disabled = parsed.validItems.length === 0;
+  }
+
+  if (tbody) {
+    const previewItems = (parsed.previewRows && parsed.previewRows.length > 0)
+      ? parsed.previewRows
+      : parsed.validItems.slice(0, 10);
+
+    if (previewItems.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 20px; color: #ef4444;">
+            Không có dữ liệu hợp lệ để hiển thị. Vui lòng kiểm tra lại cấu trúc file.
+          </td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = previewItems.map((item, idx) => `
+        <tr>
+          <td style="text-align: center; color: var(--text-muted);">${idx + 1}</td>
+          <td style="font-family: var(--font-jp); font-weight: 700; color: var(--text-primary);">${escapeHtml(item.word || '--')}</td>
+          <td style="font-family: var(--font-jp); color: var(--primary);">${escapeHtml(item.reading || '--')}</td>
+          <td style="font-weight: 600; color: #f59e0b;">${escapeHtml(item.hanviet || '--')}</td>
+          <td>${escapeHtml(item.meaning || '--')}</td>
+          <td style="font-size: 11.5px; color: var(--text-secondary); max-width: 220px;">${escapeHtml(item.example || '--')}</td>
+          <td style="text-align: center;">
+            <span style="display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.15); color: #10b981;">
+              Hợp lệ
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+}
+
+function resetPersonalImportUI() {
+  AppState.personalImportParsed = null;
+  const fileInput = document.getElementById('input-personal-import-file');
+  const fileInfoBadge = document.getElementById('personal-file-info-badge');
+  const dropzone = document.getElementById('personal-import-dropzone');
+  const previewBox = document.getElementById('personal-import-preview-box');
+
+  if (fileInput) fileInput.value = '';
+  if (fileInfoBadge) fileInfoBadge.style.display = 'none';
+  if (dropzone) dropzone.style.display = 'block';
+  if (previewBox) previewBox.style.display = 'none';
+}
+
+async function handlePersonalImportConfirm() {
+  const parsed = AppState.personalImportParsed;
+  if (!parsed || parsed.validItems.length === 0) {
+    alert('Không có dữ liệu hợp lệ để nhập.');
+    return;
+  }
+
+  const textbookInput = document.getElementById('input-import-textbook');
+  const lessonInput = document.getElementById('input-import-lesson');
+  const deckSelect = document.getElementById('select-import-target-deck');
+  const confirmBtn = document.getElementById('btn-confirm-personal-import');
+  const feedbackEl = document.getElementById('preview-import-feedback');
+
+  const textbookName = (textbookInput ? textbookInput.value : '').trim();
+  const lessonName = (lessonInput ? lessonInput.value : '').trim();
+  let targetDeckIdOrName = deckSelect ? deckSelect.value : '__new__';
+
+  if (targetDeckIdOrName === '__new__') {
+    targetDeckIdOrName = textbookName || 'Giáo trình cá nhân';
+    if (lessonName) targetDeckIdOrName += ` - ${lessonName}`;
+  }
+
+  if (confirmBtn) confirmBtn.disabled = true;
+  if (feedbackEl) {
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.background = 'rgba(2, 132, 199, 0.15)';
+    feedbackEl.style.color = '#0284c7';
+    feedbackEl.innerText = `Đang xử lý nhập ${parsed.validItems.length.toLocaleString()} từ vào hệ thống...`;
+  }
+
+  try {
+    const itemsToSave = parsed.validItems.map(item => ({
+      ...item,
+      notes: [
+        textbookName ? `Giáo trình: ${textbookName}` : '',
+        lessonName ? `Bài học: ${lessonName}` : '',
+        item.tags ? `Thẻ: ${item.tags.join(', ')}` : ''
+      ].filter(Boolean).join(' • ')
+    }));
+
+    const result = await addJLPTItemsToDeck(itemsToSave, targetDeckIdOrName, 'vocab');
+    if (result && result.success) {
+      if (feedbackEl) {
+        feedbackEl.style.background = 'rgba(16, 185, 129, 0.15)';
+        feedbackEl.style.color = '#10b981';
+        feedbackEl.innerText = `✅ Nhập thành công ${result.addedCount} từ mới (cập nhật ${result.updatedCount} từ) vào bộ thẻ "${result.deck.name}"!`;
+      }
+
+      await reloadAllData(false);
+
+      setTimeout(() => {
+        resetPersonalImportUI();
+        switchView('decks');
+      }, 1500);
+    } else {
+      throw new Error(result ? result.message : 'Thất bại');
+    }
+  } catch (err) {
+    if (feedbackEl) {
+      feedbackEl.style.background = 'rgba(239, 68, 68, 0.15)';
+      feedbackEl.style.color = '#ef4444';
+      feedbackEl.innerText = `❌ Lỗi: ${err.message}`;
+    }
+    if (confirmBtn) confirmBtn.disabled = false;
+  }
+}
+
+// ========================================================
+// 10.7 MODAL CHỌN BỘ THẺ ĐÍCH & FLASHCARD LAUNCHERS
+// ========================================================
+
+let currentDeckPickerCategory = 'vocab';
+let currentDeckPickerCustomItems = null;
+
+async function openJLPTDeckPickerModal(category = 'vocab', customItems = null) {
+  currentDeckPickerCategory = category;
+  currentDeckPickerCustomItems = customItems;
+
+  const modal = document.getElementById('modal-jlpt-deck-picker');
+  const selectDeck = document.getElementById('select-jlpt-target-deck');
+  const groupNewName = document.getElementById('group-jlpt-new-deck-name');
+  const inputNewName = document.getElementById('input-jlpt-new-deck-name');
+  const descEl = document.getElementById('jlpt-deck-modal-desc');
+  const feedbackEl = document.getElementById('jlpt-import-feedback');
+
+  if (!modal || !selectDeck) return;
+
+  let count = 0;
+  if (customItems) {
+    count = customItems.length;
+  } else {
+    count = AppState.jlptSelectedIds.size;
+  }
+
+  if (count === 0) {
+    alert('Vui lòng chọn ít nhất 1 mục JLPT trước.');
+    return;
+  }
+
+  const catName = category === 'vocab' ? 'từ vựng' : (category === 'grammar' ? 'ngữ pháp' : 'Chữ Hán');
+  if (descEl) {
+    descEl.innerText = `Bạn đang chuẩn bị thêm ${count.toLocaleString()} ${catName} JLPT (${AppState.jlptLevel}) vào hệ thống Bộ thẻ Flashcard.`;
+  }
+  if (feedbackEl) feedbackEl.style.display = 'none';
+
+  const decks = await getDecks();
+  const defaultDeckName = `JLPT ${AppState.jlptLevel} - ${category === 'vocab' ? 'Từ vựng' : (category === 'grammar' ? 'Ngữ pháp' : 'Chữ Hán')}`;
+
+  let optionsHtml = '';
+  const hasLevelDeck = decks.some(d => d.name === defaultDeckName);
+  if (hasLevelDeck) {
+    optionsHtml += `<option value="${defaultDeckName}">⭐ Bộ thẻ "${defaultDeckName}" (Hiện có)</option>`;
+  } else {
+    optionsHtml += `<option value="${defaultDeckName}">✨ Tạo bộ thẻ mới: "${defaultDeckName}"</option>`;
+  }
+
+  optionsHtml += `<option disabled>──────────</option>`;
+  decks.forEach(d => {
+    if (d.name !== defaultDeckName) {
+      optionsHtml += `<option value="${d.id}">${escapeHtml(d.name)}</option>`;
+    }
+  });
+
+  optionsHtml += `<option value="__new__">➕ Tạo bộ thẻ tùy chỉnh khác...</option>`;
+  selectDeck.innerHTML = optionsHtml;
+  selectDeck.value = defaultDeckName;
+
+  if (groupNewName) groupNewName.style.display = 'none';
+  if (inputNewName) inputNewName.value = '';
+
+  modal.style.display = 'flex';
+}
+
+async function handleJLPTConfirmAddToDeck() {
+  const selectDeck = document.getElementById('select-jlpt-target-deck');
+  const inputNewName = document.getElementById('input-jlpt-new-deck-name');
+  const feedbackEl = document.getElementById('jlpt-import-feedback');
+  const btnConfirm = document.getElementById('btn-confirm-jlpt-add-deck');
+
+  if (!selectDeck) return;
+
+  let targetDeckIdentifier = selectDeck.value;
+  if (targetDeckIdentifier === '__new__') {
+    const customName = (inputNewName ? inputNewName.value : '').trim();
+    if (!customName) {
+      alert('Vui lòng nhập tên cho bộ thẻ mới.');
+      return;
+    }
+    targetDeckIdentifier = customName;
+  }
+
+  let itemsToProcess = [];
+  if (currentDeckPickerCustomItems) {
+    itemsToProcess = currentDeckPickerCustomItems;
+  } else {
+    const allCurrent = AppState.jlptFilteredWords || [];
+    AppState.jlptSelectedIds.forEach(id => {
+      const item = allCurrent.find(w => w.id === id);
+      if (item) itemsToProcess.push(item);
+    });
+  }
+
+  if (itemsToProcess.length === 0) {
+    alert('Không tìm thấy mục hợp lệ để thêm.');
+    return;
+  }
+
+  if (btnConfirm) btnConfirm.disabled = true;
+  if (feedbackEl) {
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.background = 'rgba(2, 132, 199, 0.15)';
+    feedbackEl.style.color = '#0284c7';
+    feedbackEl.innerText = `Đang xử lý ${itemsToProcess.length.toLocaleString()} mục... Vui lòng chờ.`;
+  }
+
+  try {
+    const result = await addJLPTItemsToDeck(itemsToProcess, targetDeckIdentifier, currentDeckPickerCategory);
+    if (result && result.success) {
+      if (feedbackEl) {
+        feedbackEl.style.background = 'rgba(16, 185, 129, 0.15)';
+        feedbackEl.style.color = '#10b981';
+        feedbackEl.innerText = `✅ Đã thêm thành công ${result.addedCount} thẻ mới (cập nhật ${result.updatedCount} thẻ) vào bộ thẻ "${result.deck.name}"!`;
+      }
+
+      await reloadAllData(false);
+      renderJLPTView();
+
+      setTimeout(() => {
+        const modal = document.getElementById('modal-jlpt-deck-picker');
+        if (modal) modal.style.display = 'none';
+        if (btnConfirm) btnConfirm.disabled = false;
+      }, 1200);
+    } else {
+      throw new Error(result ? result.message : 'Thất bại');
+    }
+  } catch (err) {
+    if (feedbackEl) {
+      feedbackEl.style.background = 'rgba(239, 68, 68, 0.15)';
+      feedbackEl.style.color = '#ef4444';
+      feedbackEl.innerText = `❌ Lỗi: ${err.message}`;
+    }
+    if (btnConfirm) btnConfirm.disabled = false;
+  }
+}
+
+async function handleJLPTStartFlashcard() {
+  const count = AppState.jlptSelectedIds.size;
+  if (count === 0) {
+    alert('Vui lòng chọn ít nhất 1 từ vựng JLPT để bắt đầu ôn tập Flashcard.');
+    return;
+  }
+
+  const wordsToReview = [];
+  const allCurrent = AppState.jlptFilteredWords || [];
+  AppState.jlptSelectedIds.forEach(id => {
+    const item = allCurrent.find(w => w.id === id);
+    if (item) wordsToReview.push(item);
+  });
+
+  if (wordsToReview.length === 0) return;
+
+  const defaultDeckName = `JLPT ${AppState.jlptLevel} - Từ vựng`;
+  try {
+    await addJLPTItemsToDeck(wordsToReview, defaultDeckName, 'vocab');
+    await reloadAllData(false);
+  } catch (e) {
+    console.warn('[Workspace] Lưu từ JLPT vào deck trước khi ôn tập warning:', e);
+  }
+
+  const cardsQueue = wordsToReview.map(item => {
+    const existingCard = (AppState.allCards || []).find(c => (c.word === item.word || c.kanji === item.word));
+    return {
+      id: (existingCard && existingCard.id) || item.id,
+      word: item.word,
+      reading: item.reading,
+      hanviet: item.hanviet,
+      meaning: item.meaningVi || item.meaning || 'Chưa có nghĩa tiếng Việt',
+      meaningVi: item.meaningVi || item.meaning,
+      example: item.example,
+      exampleMeaning: item.exampleMeaning || item.exampleEn,
+      level: item.level,
+      notes: `Từ vựng JLPT ${item.level}`,
+      srs: existingCard ? existingCard.srs : { interval: 0, repetition: 0, easeFactor: 2.5, dueDate: Date.now(), state: 'new' }
+    };
+  });
+
+  startReviewModeWithCustomQueue(cardsQueue, `JLPT ${AppState.jlptLevel} (${cardsQueue.length} từ)`);
+}
+
+

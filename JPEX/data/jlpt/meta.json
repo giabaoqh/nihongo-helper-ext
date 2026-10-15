@@ -1,0 +1,60 @@
+{
+  "title": "Thư viện Dữ liệu Luyện thi JLPT N1–N5 Tiếng Việt (Nihongo Helper)",
+  "version": "2.0",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "attribution": "Contains data from OpenJLPT (CC BY-SA 4.0), which uses JMdict and KANJIDIC2 (EDRDG), Jonathan Waller JLPT lists, and Tatoeba, combined with JPEX Kanji & Core Dictionary.",
+  "disclaimer": "Tổ chức kỳ thi JLPT không phát hành danh sách chính thức. Dữ liệu là tài liệu học tập tham khảo từ cộng đồng uy tín, không phải danh sách chính thức tuyệt đối.",
+  "categories": {
+    "vocab": {
+      "title": "Từ vựng (Vocabulary)",
+      "total": 7811,
+      "byLevel": {
+        "N5": 674,
+        "N4": 630,
+        "N3": 1659,
+        "N2": 1778,
+        "N1": 3070
+      },
+      "translations": {
+        "verified": 662,
+        "needs_review": 0,
+        "missing": 7149
+      }
+    },
+    "kanji": {
+      "title": "Chữ Hán (Kanji)",
+      "total": 2383,
+      "byLevel": {
+        "N5": 84,
+        "N4": 169,
+        "N3": 387,
+        "N2": 398,
+        "N1": 1345
+      },
+      "translations": {
+        "verified": 2383,
+        "needs_review": 0,
+        "missing": 0
+      }
+    },
+    "grammar": {
+      "title": "Ngữ pháp (Grammar)",
+      "total": 526,
+      "byLevel": {
+        "N5": 81,
+        "N4": 98,
+        "N3": 101,
+        "N2": 123,
+        "N1": 123
+      },
+      "translations": {
+        "verified": 125,
+        "needs_review": 401,
+        "missing": 0
+      }
+    }
+  },
+  "grandTotal": 10720,
+  "updatedAt": "2026-10-15T19:25:14.599Z"
+}

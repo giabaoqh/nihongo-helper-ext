@@ -1,0 +1,3042 @@
+[
+  {
+    "id": "wa",
+    "pattern": "〜は",
+    "romaji": "wa",
+    "meaningVi": "Thì, là (Trợ từ biểu thị chủ đề của câu)",
+    "originalMeaning": "as for; marks the topic of the sentence",
+    "formation": "Noun + は",
+    "formationVi": "Danh từ + は",
+    "explanationVi": "Được viết là は nhưng phát âm là \"wa\". Dùng để đưa ra chủ đề người nói muốn nhắc đến; thông tin quan trọng hoặc mới mẻ sẽ nằm ở phía sau.",
+    "originalNotes": "Written は but pronounced 'wa'. It sets up what the sentence is about; the key information comes after it.",
+    "examples": [
+      {
+        "ja": "私は学生です。",
+        "furigana": "{私|わたし}は{学生|がくせい}です。",
+        "vi": "",
+        "en": "I am a student."
+      },
+      {
+        "ja": "今日は天気がいいです。",
+        "furigana": "{今日|きょう}は{天気|てんき}がいいです。",
+        "vi": "",
+        "en": "The weather is nice today."
+      },
+      {
+        "ja": "この本はおもしろいです。",
+        "furigana": "この{本|ほん}はおもしろいです。",
+        "vi": "",
+        "en": "This book is interesting."
+      }
+    ],
+    "tags": [
+      "particle",
+      "topic"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ga-subject",
+    "pattern": "〜が（subject）",
+    "romaji": "ga (subject)",
+    "meaningVi": "Trợ từ biểu thị chủ ngữ (Nhấn mạnh đối tượng thực hiện hoặc thông tin mới)",
+    "originalMeaning": "marks the subject; points out new or focused information",
+    "formation": "Noun + が",
+    "formationVi": "Danh từ + が",
+    "explanationVi": "Dùng để nhấn mạnh chủ ngữ thực hiện hành động. Từ để hỏi như だれ, 何 luôn đi với が khi làm chủ ngữ. Cũng đi với 好き, ほしい, 上手, わかる.",
+    "originalNotes": "Question words such as だれ and 何 take が, never は, when they are the subject. が is also used with 好き, ほしい, 上手 and わかる for the thing liked, wanted or understood.",
+    "examples": [
+      {
+        "ja": "雨が降っています。",
+        "furigana": "{雨|あめ}が{降|ふ}っています。",
+        "vi": "",
+        "en": "It is raining."
+      },
+      {
+        "ja": "だれが窓を開けましたか。",
+        "furigana": "だれが{窓|まど}を{開|あ}けましたか。",
+        "vi": "",
+        "en": "Who opened the window?"
+      },
+      {
+        "ja": "私が行きます。",
+        "furigana": "{私|わたし}が{行|い}きます。",
+        "vi": "",
+        "en": "I'll be the one to go."
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "o",
+    "pattern": "〜を",
+    "romaji": "o",
+    "meaningVi": "Trợ từ tân ngữ (Chỉ đối tượng trực tiếp chịu tác động của hành động)",
+    "originalMeaning": "marks the direct object of a verb; marks a place moved through or left",
+    "formation": "Noun + を",
+    "formationVi": "Danh từ + を + Động từ tha động từ",
+    "explanationVi": "Chỉ đối tượng trực tiếp của hành động. Cũng dùng để chỉ không gian mà người/vật đi qua hoặc rời khỏi (vd: công viên, cây cầu).",
+    "originalNotes": "Written を but pronounced 'o'. With movement verbs such as 歩く, 散歩する and 出る it marks the route or the place being left.",
+    "examples": [
+      {
+        "ja": "毎朝パンを食べます。",
+        "furigana": "{毎朝|まいあさ}パンを{食|た}べます。",
+        "vi": "",
+        "en": "I eat bread every morning."
+      },
+      {
+        "ja": "姉は新しいかばんを買いました。",
+        "furigana": "{姉|あね}は{新|あたら}しいかばんを{買|か}いました。",
+        "vi": "",
+        "en": "My older sister bought a new bag."
+      },
+      {
+        "ja": "公園を散歩しました。",
+        "furigana": "{公園|こうえん}を{散歩|さんぽ}しました。",
+        "vi": "",
+        "en": "I took a walk in the park."
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ni-time",
+    "pattern": "〜に（time）",
+    "romaji": "ni (time)",
+    "meaningVi": "Vào lúc, vào ngày (Chỉ mốc thời gian cụ thể)",
+    "originalMeaning": "at; on; in (a specific point in time)",
+    "formation": "Noun + に",
+    "formationVi": "Danh từ thời gian có số cụ thể + に",
+    "explanationVi": "Dùng sau các mốc thời gian có con số cụ thể (7 giờ, ngày 5, tháng 4...). Không dùng với thời gian tương đối như hôm nay, ngày mai, mỗi ngày.",
+    "originalNotes": "Used with clock times, dates, days of the week and months. Relative words such as 今日, 明日, 毎日 and 来週 take no に.",
+    "examples": [
+      {
+        "ja": "毎朝7時に起きます。",
+        "furigana": "{毎朝|まいあさ}7{時|じ}に{起|お}きます。",
+        "vi": "",
+        "en": "I get up at seven every morning."
+      },
+      {
+        "ja": "日曜日に友達と会います。",
+        "furigana": "{日曜日|にちようび}に{友達|ともだち}と{会|あ}います。",
+        "vi": "",
+        "en": "I'm meeting a friend on Sunday."
+      },
+      {
+        "ja": "8月に国へ帰ります。",
+        "furigana": "8{月|がつ}に{国|くに}へ{帰|かえ}ります。",
+        "vi": "",
+        "en": "I'm going back to my country in August."
+      }
+    ],
+    "tags": [
+      "particle",
+      "time"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ni-destination",
+    "pattern": "〜に（destination）",
+    "romaji": "ni (destination)",
+    "meaningVi": "Đến, tới (Chỉ đích đến của chuyển động)",
+    "originalMeaning": "to; into (the destination of movement)",
+    "formation": "Noun + に + 行く / 来る / 帰る",
+    "formationVi": "Danh từ địa điểm + に + 行く / 来る / 帰る",
+    "explanationVi": "Chỉ điểm đích mà hành động hướng tới khi di chuyển (tương tự như へ).",
+    "originalNotes": "Close in meaning to へ. に puts the focus on the arrival point, へ on the direction.",
+    "examples": [
+      {
+        "ja": "毎日バスで学校に行きます。",
+        "furigana": "{毎日|まいにち}バスで{学校|がっこう}に{行|い}きます。",
+        "vi": "",
+        "en": "I go to school by bus every day."
+      },
+      {
+        "ja": "夜10時に家に帰りました。",
+        "furigana": "{夜|よる}10{時|じ}に{家|いえ}に{帰|かえ}りました。",
+        "vi": "",
+        "en": "I got home at 10 p.m."
+      },
+      {
+        "ja": "来月、姉が日本に来ます。",
+        "furigana": "{来月|らいげつ}、{姉|あね}が{日本|にほん}に{来|き}ます。",
+        "vi": "",
+        "en": "My older sister is coming to Japan next month."
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ni-location",
+    "pattern": "〜に（place of existence）",
+    "romaji": "ni (location)",
+    "meaningVi": "Ở, tại (Chỉ nơi tồn tại của người hoặc vật)",
+    "originalMeaning": "in; at; on (where someone or something is)",
+    "formation": "Noun + に + ある / いる",
+    "formationVi": "Danh từ địa điểm + に + あります / います",
+    "explanationVi": "Chỉ vị trí tồn tại của người/động vật (います) hoặc đồ vật/thực vật (あります).",
+    "originalNotes": "Used with ある, いる and 住む. For the place where an action happens (eat, study, play), use で instead.",
+    "examples": [
+      {
+        "ja": "机の上に辞書があります。",
+        "furigana": "{机|つくえ}の{上|うえ}に{辞書|じしょ}があります。",
+        "vi": "",
+        "en": "There is a dictionary on the desk."
+      },
+      {
+        "ja": "姉は東京に住んでいます。",
+        "furigana": "{姉|あね}は{東京|とうきょう}に{住|す}んでいます。",
+        "vi": "",
+        "en": "My older sister lives in Tokyo."
+      },
+      {
+        "ja": "猫は今どこにいますか。",
+        "furigana": "{猫|ねこ}は{今|いま}どこにいますか。",
+        "vi": "",
+        "en": "Where is the cat now?"
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ni-indirect-object",
+    "pattern": "〜に（indirect object）",
+    "romaji": "ni (indirect object)",
+    "meaningVi": "Cho, với, tới (Chỉ đối tượng tiếp nhận hành động)",
+    "originalMeaning": "to (the person who receives or is the target of an action)",
+    "formation": "Noun + に",
+    "formationVi": "Danh từ (người tiếp nhận) + に + Động từ",
+    "explanationVi": "Chỉ người hoặc đối tượng nhận lấy hành động (tặng quà cho bạn, gọi điện cho mẹ, hỏi thầy giáo...).",
+    "originalNotes": "Common with あげる, 貸す, 教える, 見せる, 電話をかける and 会う. With もらう and 借りる, に marks the person you get something from.",
+    "examples": [
+      {
+        "ja": "母に手紙を書きます。",
+        "furigana": "{母|はは}に{手紙|てがみ}を{書|か}きます。",
+        "vi": "",
+        "en": "I'm going to write a letter to my mother."
+      },
+      {
+        "ja": "妹に本を貸しました。",
+        "furigana": "{妹|いもうと}に{本|ほん}を{貸|か}しました。",
+        "vi": "",
+        "en": "I lent a book to my younger sister."
+      },
+      {
+        "ja": "友達に電話をかけました。",
+        "furigana": "{友達|ともだち}に{電話|でんわ}をかけました。",
+        "vi": "",
+        "en": "I called my friend."
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ni-frequency",
+    "pattern": "〜に（frequency）",
+    "romaji": "ni (frequency)",
+    "meaningVi": "Trong... (Chỉ tần suất trong một khoảng thời gian)",
+    "originalMeaning": "per; in (how many times within a period)",
+    "formation": "Noun + に + Noun",
+    "formationVi": "Khoảng thời gian + に + Số lần",
+    "explanationVi": "Chỉ tần suất lặp lại của hành động (vd: 1 tuần 2 lần, 1 ngày 3 lần).",
+    "originalNotes": "The period comes first, then に, then the number of times: 月に一回 (once a month).",
+    "examples": [
+      {
+        "ja": "一週間に二回、プールで泳ぎます。",
+        "furigana": "{一週間|いっしゅうかん}に{二|に}{回|かい}、プールで{泳|およ}ぎます。",
+        "vi": "",
+        "en": "I swim in the pool twice a week."
+      },
+      {
+        "ja": "母は一日に二回、犬の散歩をします。",
+        "furigana": "{母|はは}は{一|いち}{日|にち}に{二|に}{回|かい}、{犬|いぬ}の{散歩|さんぽ}をします。",
+        "vi": "",
+        "en": "My mother walks the dog twice a day."
+      },
+      {
+        "ja": "一年に一度、家族で旅行します。",
+        "furigana": "{一|いち}{年|ねん}に{一|いち}{度|ど}、{家族|かぞく}で{旅行|りょこう}します。",
+        "vi": "",
+        "en": "Once a year, my family goes on a trip."
+      }
+    ],
+    "tags": [
+      "particle",
+      "quantity"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "e",
+    "pattern": "〜へ",
+    "romaji": "e",
+    "meaningVi": "Hướng về, tới (Chỉ phương hướng chuyển động)",
+    "originalMeaning": "to; toward (the direction of movement)",
+    "formation": "Noun + へ",
+    "formationVi": "Danh từ địa điểm / phương hướng + へ",
+    "explanationVi": "Viết là へ nhưng phát âm là \"e\". Nhấn mạnh vào phương hướng di chuyển.",
+    "originalNotes": "Written へ but pronounced 'e'. Usually interchangeable with に for destinations; へ stresses the direction a little more.",
+    "examples": [
+      {
+        "ja": "夏休みに北海道へ行きます。",
+        "furigana": "{夏休|なつやす}みに{北海道|ほっかいどう}へ{行|い}きます。",
+        "vi": "",
+        "en": "I'm going to Hokkaido during summer vacation."
+      },
+      {
+        "ja": "来週、国へ帰ります。",
+        "furigana": "{来週|らいしゅう}、{国|くに}へ{帰|かえ}ります。",
+        "vi": "",
+        "en": "I'm going back to my home country next week."
+      },
+      {
+        "ja": "どこへ行きますか。",
+        "furigana": "どこへ{行|い}きますか。",
+        "vi": "",
+        "en": "Where are you going?"
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "de-place",
+    "pattern": "〜で（place of action）",
+    "romaji": "de (place)",
+    "meaningVi": "Tại, ở (Chỉ địa điểm diễn ra hành động)",
+    "originalMeaning": "at; in (the place where an action happens)",
+    "formation": "Noun + で",
+    "formationVi": "Danh từ địa điểm + で + Động từ hành động",
+    "explanationVi": "Chỉ nơi chốn mà một hành động cụ thể diễn ra (ăn cơm ở nhà hàng, học bài ở thư viện...).",
+    "originalNotes": "Compare 教室にいます (being somewhere: に) with 教室で勉強します (doing something there: で).",
+    "examples": [
+      {
+        "ja": "図書館で本を読みます。",
+        "furigana": "{図書館|としょかん}で{本|ほん}を{読|よ}みます。",
+        "vi": "",
+        "en": "I read books at the library."
+      },
+      {
+        "ja": "きのう、デパートでくつを買いました。",
+        "furigana": "きのう、デパートでくつを{買|か}いました。",
+        "vi": "",
+        "en": "Yesterday I bought shoes at the department store."
+      },
+      {
+        "ja": "駅の前で友達を待ちました。",
+        "furigana": "{駅|えき}の{前|まえ}で{友達|ともだち}を{待|ま}ちました。",
+        "vi": "",
+        "en": "I waited for my friend in front of the station."
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "de-means",
+    "pattern": "〜で（means）",
+    "romaji": "de (means)",
+    "meaningVi": "Bằng, bằng cách (Chỉ phương tiện, công cụ, vật liệu, ngôn ngữ)",
+    "originalMeaning": "by; with; in (means, tool, method or language)",
+    "formation": "Noun + で",
+    "formationVi": "Danh từ công cụ/phương tiện + で",
+    "explanationVi": "Chỉ phương tiện đi lại (bằng xe buýt), công cụ (bằng đũa), ngôn ngữ (bằng tiếng Nhật).",
+    "originalNotes": "To say 'on foot', use 歩いて行きます rather than で.",
+    "examples": [
+      {
+        "ja": "毎日電車で会社へ行きます。",
+        "furigana": "{毎日|まいにち}{電車|でんしゃ}で{会社|かいしゃ}へ{行|い}きます。",
+        "vi": "",
+        "en": "I go to work by train every day."
+      },
+      {
+        "ja": "はしでご飯を食べます。",
+        "furigana": "はしでご{飯|はん}を{食|た}べます。",
+        "vi": "",
+        "en": "I eat my meals with chopsticks."
+      },
+      {
+        "ja": "日本語で手紙を書きました。",
+        "furigana": "{日本語|にほんご}で{手紙|てがみ}を{書|か}きました。",
+        "vi": "",
+        "en": "I wrote a letter in Japanese."
+      }
+    ],
+    "tags": [
+      "particle",
+      "means"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "to-and",
+    "pattern": "〜と（and）",
+    "romaji": "to (and)",
+    "meaningVi": "Và, với (Liệt kê toàn bộ các danh từ)",
+    "originalMeaning": "and (joining nouns in a complete list)",
+    "formation": "Noun + と + Noun",
+    "formationVi": "Danh từ 1 + と + Danh từ 2",
+    "explanationVi": "Dùng để nối các danh từ với nhau theo cách liệt kê đầy đủ tất cả các thành phần.",
+    "originalNotes": "と lists every item; to give just some examples, use や. It joins nouns only, not verbs or adjectives.",
+    "examples": [
+      {
+        "ja": "かばんの中にペンとノートがあります。",
+        "furigana": "かばんの{中|なか}にペンとノートがあります。",
+        "vi": "",
+        "en": "There is a pen and a notebook in my bag."
+      },
+      {
+        "ja": "朝ご飯にパンとたまごを食べました。",
+        "furigana": "{朝|あさ}ご{飯|はん}にパンとたまごを{食|た}べました。",
+        "vi": "",
+        "en": "I had bread and eggs for breakfast."
+      },
+      {
+        "ja": "父と母は銀行で働いています。",
+        "furigana": "{父|ちち}と{母|はは}は{銀行|ぎんこう}で{働|はたら}いています。",
+        "vi": "",
+        "en": "My father and mother work at a bank."
+      }
+    ],
+    "tags": [
+      "particle",
+      "addition"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "to-with",
+    "pattern": "〜と（with）",
+    "romaji": "to (with)",
+    "meaningVi": "Cùng với (Chỉ đối tượng cùng thực hiện hành động)",
+    "originalMeaning": "with; together with (a partner in an action)",
+    "formation": "Noun + と",
+    "formationVi": "Danh từ (người/động vật) + と + Động từ",
+    "explanationVi": "Chỉ người hoặc bạn đồng hành cùng thực hiện một hành động (đi chơi cùng bạn, ăn cơm với gia đình).",
+    "originalNotes": "Often followed by いっしょに. With verbs like 話す, 会う and 結婚する, と marks the other person.",
+    "examples": [
+      {
+        "ja": "週末、友達と映画を見ました。",
+        "furigana": "{週末|しゅうまつ}、{友達|ともだち}と{映画|えいが}を{見|み}ました。",
+        "vi": "",
+        "en": "I saw a movie with a friend on the weekend."
+      },
+      {
+        "ja": "妹といっしょに買い物に行きます。",
+        "furigana": "{妹|いもうと}といっしょに{買|か}い{物|もの}に{行|い}きます。",
+        "vi": "",
+        "en": "I'm going shopping with my younger sister."
+      },
+      {
+        "ja": "だれと昼ご飯を食べましたか。",
+        "furigana": "だれと{昼|ひる}ご{飯|はん}を{食|た}べましたか。",
+        "vi": "",
+        "en": "Who did you have lunch with?"
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ya",
+    "pattern": "〜や",
+    "romaji": "ya",
+    "meaningVi": "Và, như là (Liệt kê tiêu biểu, không đầy đủ)",
+    "originalMeaning": "and (giving some examples out of more); ... and so on",
+    "formation": "Noun + や + Noun",
+    "formationVi": "Danh từ 1 + や + Danh từ 2 (+ など)",
+    "explanationVi": "Dùng để liệt kê một vài đại diện tiêu biểu trong số nhiều thứ khác.",
+    "originalNotes": "Suggests the list is not complete. Often ends with など: 本や雑誌など.",
+    "examples": [
+      {
+        "ja": "机の上に本や雑誌があります。",
+        "furigana": "{机|つくえ}の{上|うえ}に{本|ほん}や{雑誌|ざっし}があります。",
+        "vi": "",
+        "en": "On the desk there are books, magazines and so on."
+      },
+      {
+        "ja": "スーパーで肉や野菜を買いました。",
+        "furigana": "スーパーで{肉|にく}や{野菜|やさい}を{買|か}いました。",
+        "vi": "",
+        "en": "I bought meat, vegetables and other things at the supermarket."
+      }
+    ],
+    "tags": [
+      "particle",
+      "example"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ka-or",
+    "pattern": "〜か（or）",
+    "romaji": "ka (or)",
+    "meaningVi": "Hoặc, hay là (Lựa chọn giữa các danh từ hoặc vế câu)",
+    "originalMeaning": "or (a choice between nouns)",
+    "formation": "Noun + か + Noun",
+    "formationVi": "Danh từ 1 + か + Danh từ 2",
+    "explanationVi": "Dùng để nối hai hay nhiều danh từ thể hiện sự lựa chọn một trong số đó.",
+    "originalNotes": "Means one of the items is chosen. To list items together, use と or や.",
+    "examples": [
+      {
+        "ja": "飲み物はコーヒーか紅茶がいいです。",
+        "furigana": "{飲|の}み{物|もの}はコーヒーか{紅茶|こうちゃ}がいいです。",
+        "vi": "",
+        "en": "For a drink, coffee or tea would be good."
+      },
+      {
+        "ja": "土曜日か日曜日に買い物に行きます。",
+        "furigana": "{土曜日|どようび}か{日曜日|にちようび}に{買|か}い{物|もの}に{行|い}きます。",
+        "vi": "",
+        "en": "I'll go shopping on Saturday or Sunday."
+      },
+      {
+        "ja": "駅までバスかタクシーで行きます。",
+        "furigana": "{駅|えき}までバスかタクシーで{行|い}きます。",
+        "vi": "",
+        "en": "I'll go to the station by bus or taxi."
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "mo",
+    "pattern": "〜も",
+    "romaji": "mo",
+    "meaningVi": "Cũng (Biểu thị sự đồng nhất hoặc tương tự)",
+    "originalMeaning": "also; too; (with a negative) not ... either; neither ... nor",
+    "formation": "Noun + も",
+    "formationVi": "Danh từ + も",
+    "explanationVi": "Thay thế cho は, が, を để chỉ sự đồng nhất với điều đã nói trước đó (\"Tôi cũng là sinh viên\").",
+    "originalNotes": "も replaces は, が and を, but comes after other particles: 京都にも行きました.",
+    "examples": [
+      {
+        "ja": "私も学生です。",
+        "furigana": "{私|わたし}も{学生|がくせい}です。",
+        "vi": "",
+        "en": "I'm a student too."
+      },
+      {
+        "ja": "兄はサッカーも好きです。",
+        "furigana": "{兄|あに}はサッカーも{好|す}きです。",
+        "vi": "",
+        "en": "My older brother likes soccer too."
+      },
+      {
+        "ja": "肉も魚も食べません。",
+        "furigana": "{肉|にく}も{魚|さかな}も{食|た}べません。",
+        "vi": "",
+        "en": "I eat neither meat nor fish."
+      }
+    ],
+    "tags": [
+      "particle",
+      "addition"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "no",
+    "pattern": "〜の（possessive）",
+    "romaji": "no",
+    "meaningVi": "Của, thuộc về (Trợ từ sở hữu, quan hệ hoặc bổ nghĩa danh từ)",
+    "originalMeaning": "'s; of (possession, belonging or description)",
+    "formation": "Noun + の + Noun",
+    "formationVi": "Danh từ 1 + の + Danh từ 2",
+    "explanationVi": "Kết nối hai danh từ, thể hiện quan hệ sở hữu, nguồn gốc, vị trí hoặc chủng loại.",
+    "originalNotes": "The first noun describes the second: 日本の車 (a Japanese car). The second noun can be dropped when clear: それは私のです.",
+    "examples": [
+      {
+        "ja": "これは私のかさです。",
+        "furigana": "これは{私|わたし}のかさです。",
+        "vi": "",
+        "en": "This is my umbrella."
+      },
+      {
+        "ja": "日本語の先生はとてもやさしいです。",
+        "furigana": "{日本語|にほんご}の{先生|せんせい}はとてもやさしいです。",
+        "vi": "",
+        "en": "The Japanese teacher is very kind."
+      },
+      {
+        "ja": "駅の近くに新しい店があります。",
+        "furigana": "{駅|えき}の{近|ちか}くに{新|あたら}しい{店|みせ}があります。",
+        "vi": "",
+        "en": "There is a new shop near the station."
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "kara-from",
+    "pattern": "〜から（from）",
+    "romaji": "kara (from)",
+    "meaningVi": "Từ (Chỉ điểm xuất phát trong không gian hoặc thời gian)",
+    "originalMeaning": "from (a starting point in time or place)",
+    "formation": "Noun + から",
+    "formationVi": "Danh từ thời gian / địa điểm + から",
+    "explanationVi": "Chỉ mốc thời gian bắt đầu (từ 9 giờ) hoặc điểm xuất phát (từ Hà Nội).",
+    "originalNotes": "Often paired with まで: 月曜日から金曜日まで (from Monday to Friday).",
+    "examples": [
+      {
+        "ja": "授業は9時からです。",
+        "furigana": "{授業|じゅぎょう}は9{時|じ}からです。",
+        "vi": "",
+        "en": "Class starts at nine."
+      },
+      {
+        "ja": "学校から駅まで歩きます。",
+        "furigana": "{学校|がっこう}から{駅|えき}まで{歩|ある}きます。",
+        "vi": "",
+        "en": "I walk from school to the station."
+      },
+      {
+        "ja": "私はブラジルから来ました。",
+        "furigana": "{私|わたし}はブラジルから{来|き}ました。",
+        "vi": "",
+        "en": "I'm from Brazil."
+      }
+    ],
+    "tags": [
+      "particle",
+      "time",
+      "range"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "made",
+    "pattern": "〜まで（until）",
+    "romaji": "made",
+    "meaningVi": "Đến, cho đến (Chỉ điểm kết thúc trong không gian hoặc thời gian)",
+    "originalMeaning": "until; up to; as far as",
+    "formation": "Noun + まで",
+    "formationVi": "Danh từ thời gian / địa điểm + まで",
+    "explanationVi": "Chỉ mốc thời gian kết thúc hoặc điểm đến cuối cùng của hành trình.",
+    "originalNotes": "Marks the end point of something that continues. For a deadline ('by'), use までに (N4).",
+    "examples": [
+      {
+        "ja": "昼休みは1時までです。",
+        "furigana": "{昼休|ひるやす}みは1{時|じ}までです。",
+        "vi": "",
+        "en": "Lunch break is until one o'clock."
+      },
+      {
+        "ja": "駅までいっしょに行きましょう。",
+        "furigana": "{駅|えき}までいっしょに{行|い}きましょう。",
+        "vi": "",
+        "en": "Let's go together as far as the station."
+      },
+      {
+        "ja": "きのうは夜11時まで勉強しました。",
+        "furigana": "きのうは{夜|よる}11{時|じ}まで{勉強|べんきょう}しました。",
+        "vi": "",
+        "en": "Yesterday I studied until 11 p.m."
+      }
+    ],
+    "tags": [
+      "particle",
+      "time",
+      "range"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ka-question",
+    "pattern": "〜か（question）",
+    "romaji": "ka (question)",
+    "meaningVi": "Phải không? Có... không? (Trợ từ nghi vấn cuối câu)",
+    "originalMeaning": "(question marker) turns a sentence into a question",
+    "formation": "Sentence + か",
+    "formationVi": "Câu khẳng định + か",
+    "explanationVi": "Đặt ở cuối câu để biến câu khẳng định thành câu hỏi.",
+    "originalNotes": "Polite questions end in か and are usually written with 。. In casual speech か is normally dropped and rising intonation is used instead.",
+    "examples": [
+      {
+        "ja": "これはあなたのかばんですか。",
+        "furigana": "",
+        "vi": "",
+        "en": "Is this your bag?"
+      },
+      {
+        "ja": "朝ご飯を食べましたか。",
+        "furigana": "{朝|あさ}ご{飯|はん}を{食|た}べましたか。",
+        "vi": "",
+        "en": "Did you eat breakfast?"
+      },
+      {
+        "ja": "トイレはどこですか。",
+        "furigana": "",
+        "vi": "",
+        "en": "Where is the restroom?"
+      }
+    ],
+    "tags": [
+      "particle",
+      "question"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ne",
+    "pattern": "〜ね",
+    "romaji": "ne",
+    "meaningVi": "Nhỉ, nhé (Tìm kiếm sự đồng tình hoặc xác nhận nhẹ nhàng)",
+    "originalMeaning": "isn't it?; right? (seeking agreement or sharing a feeling)",
+    "formation": "Sentence + ね",
+    "formationVi": "Cuối câu + ね",
+    "explanationVi": "Dùng khi người nói nghĩ người nghe cũng có cùng quan điểm hoặc muốn xác nhận thân thiện.",
+    "originalNotes": "Used when the speaker expects the listener to share the same view or knowledge. Compare よ, which tells the listener something new.",
+    "examples": [
+      {
+        "ja": "今日は暑いですね。",
+        "furigana": "{今日|きょう}は{暑|あつ}いですね。",
+        "vi": "",
+        "en": "It's hot today, isn't it?"
+      },
+      {
+        "ja": "このケーキ、おいしいですね。",
+        "furigana": "",
+        "vi": "",
+        "en": "This cake is delicious, isn't it?"
+      },
+      {
+        "ja": "明日のテストは10時からですね。",
+        "furigana": "{明日|あした}のテストは10{時|じ}からですね。",
+        "vi": "",
+        "en": "Tomorrow's test starts at ten, right?"
+      }
+    ],
+    "tags": [
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "yo",
+    "pattern": "〜よ",
+    "romaji": "yo",
+    "meaningVi": "Đấy, nhé (Cung cấp thông tin mới hoặc quả quyết)",
+    "originalMeaning": "you know; I tell you (giving new information or emphasis)",
+    "formation": "Sentence + よ",
+    "formationVi": "Cuối câu + よ",
+    "explanationVi": "Dùng khi người nói cung cấp thông tin mà người nghe có thể chưa biết hoặc để nhắc nhở.",
+    "originalNotes": "Tells the listener something they may not know. Overusing it with superiors can sound pushy.",
+    "examples": [
+      {
+        "ja": "このラーメンはとてもおいしいですよ。",
+        "furigana": "",
+        "vi": "",
+        "en": "This ramen is really good, you know."
+      },
+      {
+        "ja": "かさを忘れていますよ。",
+        "furigana": "かさを{忘|わす}れていますよ。",
+        "vi": "",
+        "en": "You're forgetting your umbrella."
+      },
+      {
+        "ja": "明日はテストがありますよ。",
+        "furigana": "{明日|あした}はテストがありますよ。",
+        "vi": "",
+        "en": "There's a test tomorrow, you know."
+      }
+    ],
+    "tags": [
+      "particle",
+      "emphasis"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "yori",
+    "pattern": "〜より",
+    "romaji": "yori",
+    "meaningVi": "Hơn (Dùng trong câu so sánh)",
+    "originalMeaning": "than (the standard of comparison)",
+    "formation": "Noun + より",
+    "formationVi": "Danh từ + より",
+    "explanationVi": "Chỉ đối tượng làm mốc so sánh (A hơn B).",
+    "originalNotes": "In X は Y より + adjective, Y is the standard. Japanese adjectives have no '-er' form; より does that job.",
+    "examples": [
+      {
+        "ja": "今日はきのうより寒いです。",
+        "furigana": "{今日|きょう}はきのうより{寒|さむ}いです。",
+        "vi": "",
+        "en": "Today is colder than yesterday."
+      },
+      {
+        "ja": "電車はバスより速いです。",
+        "furigana": "{電車|でんしゃ}はバスより{速|はや}いです。",
+        "vi": "",
+        "en": "Trains are faster than buses."
+      },
+      {
+        "ja": "兄は父より背が高いです。",
+        "furigana": "{兄|あに}は{父|ちち}より{背|せ}が{高|たか}いです。",
+        "vi": "",
+        "en": "My older brother is taller than my father."
+      }
+    ],
+    "tags": [
+      "particle",
+      "comparison"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "no-hou-ga-yori",
+    "pattern": "〜の方が〜より",
+    "romaji": "no hou ga ... yori",
+    "meaningVi": "... thì hơn ... (Cấu trúc so sánh hơn)",
+    "originalMeaning": "X is more ... than Y",
+    "formation": "Noun + の方が + Noun + より",
+    "formationVi": "A の ほうが B より + Tính từ です",
+    "explanationVi": "Cấu trúc so sánh hơn giữa hai đối tượng A và B.",
+    "originalNotes": "The two parts can come in either order. Often used to answer a どちら question.",
+    "examples": [
+      {
+        "ja": "犬の方が猫より好きです。",
+        "furigana": "{犬|いぬ}の{方|ほう}が{猫|ねこ}より{好|す}きです。",
+        "vi": "",
+        "en": "I like dogs more than cats."
+      },
+      {
+        "ja": "東京の方が大阪より人が多いです。",
+        "furigana": "{東京|とうきょう}の{方|ほう}が{大阪|おおさか}より{人|ひと}が{多|おお}いです。",
+        "vi": "",
+        "en": "Tokyo has more people than Osaka."
+      },
+      {
+        "ja": "夏より冬の方が好きです。",
+        "furigana": "{夏|なつ}より{冬|ふゆ}の{方|ほう}が{好|す}きです。",
+        "vi": "",
+        "en": "I like winter better than summer."
+      }
+    ],
+    "tags": [
+      "comparison"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "to-to-dochira-ga",
+    "pattern": "〜と〜とどちらが",
+    "romaji": "to ... to dochira ga",
+    "meaningVi": "Giữa A và B thì cái nào... hơn? (Hỏi so sánh giữa 2 vật)",
+    "originalMeaning": "which is more ..., X or Y?",
+    "formation": "Noun + と + Noun + とどちらが",
+    "formationVi": "A と B と どちらが + Tính từ ですか",
+    "explanationVi": "Dùng để hỏi người nghe lựa chọn so sánh giữa hai đối tượng cụ thể.",
+    "originalNotes": "Compares exactly two things. どっち is the casual form of どちら. Answer with 〜の方が.",
+    "examples": [
+      {
+        "ja": "コーヒーと紅茶とどちらが好きですか。",
+        "furigana": "コーヒーと{紅茶|こうちゃ}とどちらが{好|す}きですか。",
+        "vi": "",
+        "en": "Which do you like better, coffee or tea?"
+      },
+      {
+        "ja": "電車とバスとどちらが安いですか。",
+        "furigana": "{電車|でんしゃ}とバスとどちらが{安|やす}いですか。",
+        "vi": "",
+        "en": "Which is cheaper, the train or the bus?"
+      },
+      {
+        "ja": "「山と海とどちらがいいですか。」「海の方がいいです。」",
+        "furigana": "「{山|やま}と{海|うみ}とどちらがいいですか。」「{海|うみ}の{方|ほう}がいいです。」",
+        "vi": "",
+        "en": "\"Which is better, the mountains or the sea?\" \"The sea is better.\""
+      }
+    ],
+    "tags": [
+      "comparison",
+      "question"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "no-naka-de-ga-ichiban",
+    "pattern": "〜の中で〜が一番",
+    "romaji": "no naka de ... ga ichiban",
+    "meaningVi": "Trong số... thì... là nhất (So sánh nhất)",
+    "originalMeaning": "... is the most ... among/of",
+    "formation": "Noun + の中で + Noun + が一番",
+    "formationVi": "Nhóm danh từ + の中で [đối tượng] が一番 + Tính từ です",
+    "explanationVi": "Dùng để diễn tả đối tượng đứng vị trí số một trong một tập hợp.",
+    "originalNotes": "Used for three or more items. In questions use 何, だれ, どこ or いつ before が一番.",
+    "examples": [
+      {
+        "ja": "果物の中でりんごが一番好きです。",
+        "furigana": "{果物|くだもの}の{中|なか}でりんごが{一番|いちばん}{好|す}きです。",
+        "vi": "",
+        "en": "Of all fruits, I like apples the most."
+      },
+      {
+        "ja": "クラスの中でだれが一番背が高いですか。",
+        "furigana": "クラスの{中|なか}でだれが{一番|いちばん}{背|せ}が{高|たか}いですか。",
+        "vi": "",
+        "en": "Who is the tallest in the class?"
+      },
+      {
+        "ja": "家族の中で父が一番早く起きます。",
+        "furigana": "{家族|かぞく}の{中|なか}で{父|ちち}が{一番|いちばん}{早|はや}く{起|お}きます。",
+        "vi": "",
+        "en": "In my family, my father gets up the earliest."
+      }
+    ],
+    "tags": [
+      "comparison",
+      "range"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "desu",
+    "pattern": "〜です",
+    "romaji": "desu",
+    "meaningVi": "Là, thì (Trợ động từ khẳng định lịch sự)",
+    "originalMeaning": "is; am; are (polite copula)",
+    "formation": "Noun + です / na-Adj + です / i-Adj + です",
+    "formationVi": "Danh từ / Tính từ + です",
+    "explanationVi": "Đứng sau danh từ hoặc tính từ để tạo thành câu khẳng định lịch sự ở hiện tại/tương lai.",
+    "originalNotes": "Forms: です, ではありません, でした, ではありませんでした. After an い-adjective, です only adds politeness: 高いです.",
+    "examples": [
+      {
+        "ja": "私はマリアです。",
+        "furigana": "{私|わたし}はマリアです。",
+        "vi": "",
+        "en": "I'm Maria."
+      },
+      {
+        "ja": "今日は月曜日です。",
+        "furigana": "{今日|きょう}は{月曜日|げつようび}です。",
+        "vi": "",
+        "en": "Today is Monday."
+      },
+      {
+        "ja": "この部屋はとても静かです。",
+        "furigana": "この{部屋|へや}はとても{静|しず}かです。",
+        "vi": "",
+        "en": "This room is very quiet."
+      }
+    ],
+    "tags": [
+      "copula",
+      "politeness"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "da",
+    "pattern": "〜だ",
+    "romaji": "da",
+    "meaningVi": "Là (Thể thông thường / suồng sã của です)",
+    "originalMeaning": "is; am; are (plain copula)",
+    "formation": "Noun + だ / na-Adj + だ",
+    "formationVi": "Danh từ / Tính từ đuôi な + だ",
+    "explanationVi": "Dùng trong văn nói thân mật hoặc suy nghĩ cá nhân, bổ nghĩa cho danh từ.",
+    "originalNotes": "Forms: だ, じゃない, だった, じゃなかった. Never used right after an い-adjective (高いだ is wrong). Often dropped in casual questions: 学生？",
+    "examples": [
+      {
+        "ja": "今日は日曜日だ。",
+        "furigana": "{今日|きょう}は{日曜日|にちようび}だ。",
+        "vi": "",
+        "en": "Today is Sunday."
+      },
+      {
+        "ja": "あの人は私の兄だ。",
+        "furigana": "あの{人|ひと}は{私|わたし}の{兄|あに}だ。",
+        "vi": "",
+        "en": "That person is my older brother."
+      },
+      {
+        "ja": "明日は休みだから、ゆっくり寝る。",
+        "furigana": "{明日|あした}は{休|やす}みだから、ゆっくり{寝|ね}る。",
+        "vi": "",
+        "en": "Tomorrow is a day off, so I'll sleep in."
+      }
+    ],
+    "tags": [
+      "copula",
+      "casual"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "de-wa-arimasen-ja-nai",
+    "pattern": "〜ではありません / 〜じゃない",
+    "romaji": "de wa arimasen / ja nai",
+    "meaningVi": "Không phải là... (Phủ định của です / だ)",
+    "originalMeaning": "is not; am not; are not",
+    "formation": "Noun + ではありません / na-Adj + ではありません / Noun + じゃない / na-Adj + じゃない",
+    "formationVi": "Danh từ / Tính từ đuôi な + ではありません / じゃないです",
+    "explanationVi": "Thể phủ định lịch sự hoặc thông thường của danh từ và tính từ đuôi な.",
+    "originalNotes": "じゃありません and じゃないです are more conversational polite forms. Past: ではありませんでした / じゃなかった. い-adjectives use 〜くない instead.",
+    "examples": [
+      {
+        "ja": "私は先生ではありません。学生です。",
+        "furigana": "{私|わたし}は{先生|せんせい}ではありません。{学生|がくせい}です。",
+        "vi": "",
+        "en": "I'm not a teacher. I'm a student."
+      },
+      {
+        "ja": "今日は休みじゃない。",
+        "furigana": "{今日|きょう}は{休|やす}みじゃない。",
+        "vi": "",
+        "en": "Today isn't a day off."
+      },
+      {
+        "ja": "この町はあまりにぎやかではありません。",
+        "furigana": "この{町|まち}はあまりにぎやかではありません。",
+        "vi": "",
+        "en": "This town isn't very lively."
+      }
+    ],
+    "tags": [
+      "copula",
+      "negation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "deshita",
+    "pattern": "〜でした",
+    "romaji": "deshita",
+    "meaningVi": "Đã là... (Quá khứ khẳng định lịch sự của です)",
+    "originalMeaning": "was; were (polite past copula)",
+    "formation": "Noun + でした / na-Adj + でした",
+    "formationVi": "Danh từ / Tính từ đuôi な + でした",
+    "explanationVi": "Biểu thị sự việc trong quá khứ đối với danh từ hoặc tính từ đuôi な.",
+    "originalNotes": "Past negative: ではありませんでした. い-adjectives do not take でした: say 高かったです, not 高いでした.",
+    "examples": [
+      {
+        "ja": "きのうは私の誕生日でした。",
+        "furigana": "きのうは{私|わたし}の{誕生|たんじょう}{日|び}でした。",
+        "vi": "",
+        "en": "Yesterday was my birthday."
+      },
+      {
+        "ja": "子どものころ、野菜がきらいでした。",
+        "furigana": "{子|こ}どものころ、{野菜|やさい}がきらいでした。",
+        "vi": "",
+        "en": "When I was a child, I didn't like vegetables."
+      },
+      {
+        "ja": "テストはかんたんでした。",
+        "furigana": "",
+        "vi": "",
+        "en": "The test was easy."
+      }
+    ],
+    "tags": [
+      "copula",
+      "tense",
+      "politeness"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "masu",
+    "pattern": "〜ます",
+    "romaji": "masu",
+    "meaningVi": "Làm... (Đuôi động từ khẳng định lịch sự hiện tại/tương lai)",
+    "originalMeaning": "polite non-past verb ending (do; will do)",
+    "formation": "Verb-stem + ます",
+    "formationVi": "Động từ thể ます (V-masu)",
+    "explanationVi": "Cách nói lịch sự phổ biến diễn tả thói quen, chân lý hoặc hành động tương lai.",
+    "originalNotes": "Covers habits and future actions. 飲む→飲みます, 食べる→食べます, する→します, 来る→来ます.",
+    "examples": [
+      {
+        "ja": "毎朝コーヒーを飲みます。",
+        "furigana": "{毎朝|まいあさ}コーヒーを{飲|の}みます。",
+        "vi": "",
+        "en": "I drink coffee every morning."
+      },
+      {
+        "ja": "明日、京都へ行きます。",
+        "furigana": "{明日|あした}、{京都|きょうと}へ{行|い}きます。",
+        "vi": "",
+        "en": "I'm going to Kyoto tomorrow."
+      },
+      {
+        "ja": "弟は毎晩9時に寝ます。",
+        "furigana": "{弟|おとうと}は{毎晩|まいばん}9{時|じ}に{寝|ね}ます。",
+        "vi": "",
+        "en": "My younger brother goes to bed at nine every night."
+      }
+    ],
+    "tags": [
+      "conjugation",
+      "politeness"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "masen",
+    "pattern": "〜ません",
+    "romaji": "masen",
+    "meaningVi": "Không làm... (Phủ định lịch sự của động từ)",
+    "originalMeaning": "do not; will not (polite negative)",
+    "formation": "Verb-stem + ません",
+    "formationVi": "Động từ thể ません (V-masen)",
+    "explanationVi": "Biểu thị hành động không thực hiện ở hiện tại hoặc tương lai.",
+    "originalNotes": "The plain equivalent is the ない-form: 飲みません = 飲まない.",
+    "examples": [
+      {
+        "ja": "私はお酒を飲みません。",
+        "furigana": "{私|わたし}はお{酒|さけ}を{飲|の}みません。",
+        "vi": "",
+        "en": "I don't drink alcohol."
+      },
+      {
+        "ja": "日曜日は学校へ行きません。",
+        "furigana": "{日曜日|にちようび}は{学校|がっこう}へ{行|い}きません。",
+        "vi": "",
+        "en": "I don't go to school on Sundays."
+      },
+      {
+        "ja": "今晩はテレビを見ません。",
+        "furigana": "{今晩|こんばん}はテレビを{見|み}ません。",
+        "vi": "",
+        "en": "I won't watch TV tonight."
+      }
+    ],
+    "tags": [
+      "conjugation",
+      "negation",
+      "politeness"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "mashita",
+    "pattern": "〜ました",
+    "romaji": "mashita",
+    "meaningVi": "Đã làm... (Quá khứ khẳng định lịch sự của động từ)",
+    "originalMeaning": "did (polite past)",
+    "formation": "Verb-stem + ました",
+    "formationVi": "Động từ thể ました (V-mashita)",
+    "explanationVi": "Diễn tả hành động đã hoàn tất trong quá khứ.",
+    "originalNotes": "The plain equivalent is the た-form: 会いました = 会った.",
+    "examples": [
+      {
+        "ja": "きのう、友達に会いました。",
+        "furigana": "きのう、{友達|ともだち}に{会|あ}いました。",
+        "vi": "",
+        "en": "I met a friend yesterday."
+      },
+      {
+        "ja": "先週、新しいくつを買いました。",
+        "furigana": "{先週|せんしゅう}、{新|あたら}しいくつを{買|か}いました。",
+        "vi": "",
+        "en": "I bought new shoes last week."
+      },
+      {
+        "ja": "けさ、6時に起きました。",
+        "furigana": "けさ、6{時|じ}に{起|お}きました。",
+        "vi": "",
+        "en": "I got up at six this morning."
+      }
+    ],
+    "tags": [
+      "conjugation",
+      "tense",
+      "politeness"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "masen-deshita",
+    "pattern": "〜ませんでした",
+    "romaji": "masen deshita",
+    "meaningVi": "Đã không làm... (Quá khứ phủ định lịch sự của động từ)",
+    "originalMeaning": "did not (polite past negative)",
+    "formation": "Verb-stem + ませんでした",
+    "formationVi": "Động từ thể ませんでした",
+    "explanationVi": "Diễn tả hành động đã không xảy ra trong quá khứ.",
+    "originalNotes": "The plain equivalent is 〜なかった: 食べませんでした = 食べなかった.",
+    "examples": [
+      {
+        "ja": "けさは朝ご飯を食べませんでした。",
+        "furigana": "けさは{朝|あさ}ご{飯|はん}を{食|た}べませんでした。",
+        "vi": "",
+        "en": "I didn't eat breakfast this morning."
+      },
+      {
+        "ja": "週末は宿題をしませんでした。",
+        "furigana": "{週末|しゅうまつ}は{宿題|しゅくだい}をしませんでした。",
+        "vi": "",
+        "en": "I didn't do my homework over the weekend."
+      },
+      {
+        "ja": "きのうは雨でしたから、出かけませんでした。",
+        "furigana": "きのうは{雨|あめ}でしたから、{出|で}かけませんでした。",
+        "vi": "",
+        "en": "It rained yesterday, so I didn't go out."
+      }
+    ],
+    "tags": [
+      "conjugation",
+      "tense",
+      "negation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "nai",
+    "pattern": "〜ない",
+    "romaji": "nai",
+    "meaningVi": "Không làm... (Thể phủ định ngắn / thông thường của động từ)",
+    "originalMeaning": "do not; will not (plain negative of verbs)",
+    "formation": "Verb-nai stem + ない",
+    "formationVi": "Động từ thể ない (V-nai)",
+    "explanationVi": "Thể ngắn của ません, dùng trong câu thân mật hoặc làm thành phần câu phụ.",
+    "originalNotes": "う-verbs change the last -u sound to -a: 書く→書かない, 買う→買わない. る-verbs drop る: 食べない. する→しない, 来る→こない, ある→ない. Past: 〜なかった.",
+    "examples": [
+      {
+        "ja": "今日は学校へ行かない。",
+        "furigana": "{今日|きょう}は{学校|がっこう}へ{行|い}かない。",
+        "vi": "",
+        "en": "I'm not going to school today."
+      },
+      {
+        "ja": "兄は肉を食べない。",
+        "furigana": "{兄|あに}は{肉|にく}を{食|た}べない。",
+        "vi": "",
+        "en": "My older brother doesn't eat meat."
+      },
+      {
+        "ja": "「コーヒー、飲む？」「ううん、飲まない。」",
+        "furigana": "「コーヒー、{飲|の}む？」「ううん、{飲|の}まない。」",
+        "vi": "",
+        "en": "\"Are you having coffee?\" \"No, I'm not.\""
+      }
+    ],
+    "tags": [
+      "conjugation",
+      "negation",
+      "casual"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ta",
+    "pattern": "〜た",
+    "romaji": "ta",
+    "meaningVi": "Đã làm... (Thể quá khứ ngắn / thông thường của động từ)",
+    "originalMeaning": "did (plain past of verbs)",
+    "formation": "Verb-ta",
+    "formationVi": "Động từ thể た (V-ta)",
+    "explanationVi": "Thể ngắn của ました, dùng trong giao tiếp thân mật hoặc bổ nghĩa danh từ.",
+    "originalNotes": "Made exactly like the て-form, with て→た and で→だ: 書いて→書いた, 飲んで→飲んだ, 行って→行った. Polite equivalent: 〜ました.",
+    "examples": [
+      {
+        "ja": "週末は家で映画を見た。",
+        "furigana": "{週末|しゅうまつ}は{家|いえ}で{映画|えいが}を{見|み}た。",
+        "vi": "",
+        "en": "I watched a movie at home over the weekend."
+      },
+      {
+        "ja": "駅で先生に会った。",
+        "furigana": "{駅|えき}で{先生|せんせい}に{会|あ}った。",
+        "vi": "",
+        "en": "I ran into my teacher at the station."
+      },
+      {
+        "ja": "「昼ご飯、食べた？」「うん、もう食べた。」",
+        "furigana": "「{昼|ひる}ご{飯|はん}、{食|た}べた？」「うん、もう{食|た}べた。」",
+        "vi": "",
+        "en": "\"Did you eat lunch?\" \"Yeah, I already ate.\""
+      }
+    ],
+    "tags": [
+      "conjugation",
+      "tense",
+      "casual"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "mashou",
+    "pattern": "〜ましょう",
+    "romaji": "mashou",
+    "meaningVi": "Chúng ta cùng làm... nhé! (Đề nghị hoặc rủ rê lịch sự)",
+    "originalMeaning": "let's (do)",
+    "formation": "Verb-stem + ましょう",
+    "formationVi": "Động từ thể ます bỏ ます + ましょう",
+    "explanationVi": "Dùng khi người nói chủ động đề xuất hoặc rủ người nghe cùng làm một việc gì đó.",
+    "originalNotes": "Used when the speaker expects the listener to agree. To invite more gently, use 〜ませんか.",
+    "examples": [
+      {
+        "ja": "いっしょに行きましょう。",
+        "furigana": "いっしょに{行|い}きましょう。",
+        "vi": "",
+        "en": "Let's go together."
+      },
+      {
+        "ja": "少し休みましょう。",
+        "furigana": "{少|すこ}し{休|やす}みましょう。",
+        "vi": "",
+        "en": "Let's take a short break."
+      },
+      {
+        "ja": "駅の前で会いましょう。",
+        "furigana": "{駅|えき}の{前|まえ}で{会|あ}いましょう。",
+        "vi": "",
+        "en": "Let's meet in front of the station."
+      }
+    ],
+    "tags": [
+      "invitation",
+      "suggestion"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "mashou-ka",
+    "pattern": "〜ましょうか",
+    "romaji": "mashou ka",
+    "meaningVi": "Tôi làm giúp bạn... nhé? / Chúng ta cùng... nhé?",
+    "originalMeaning": "shall I ...?; shall we ...?",
+    "formation": "Verb-stem + ましょうか",
+    "formationVi": "Động từ thể ます bỏ ます + ましょうか",
+    "explanationVi": "Đề nghị giúp đỡ người khác một cách nhã nhặn hoặc hỏi ý kiến rủ rê.",
+    "originalNotes": "Offers to do something for the listener (shall I?) or asks them to decide something together (shall we?).",
+    "examples": [
+      {
+        "ja": "窓を開けましょうか。",
+        "furigana": "{窓|まど}を{開|あ}けましょうか。",
+        "vi": "",
+        "en": "Shall I open the window?"
+      },
+      {
+        "ja": "荷物を持ちましょうか。",
+        "furigana": "{荷物|にもつ}を{持|も}ちましょうか。",
+        "vi": "",
+        "en": "Shall I carry your bags?"
+      },
+      {
+        "ja": "何時に会いましょうか。",
+        "furigana": "{何|なん}{時|じ}に{会|あ}いましょうか。",
+        "vi": "",
+        "en": "What time shall we meet?"
+      }
+    ],
+    "tags": [
+      "suggestion",
+      "invitation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "masen-ka",
+    "pattern": "〜ませんか",
+    "romaji": "masen ka",
+    "meaningVi": "Bạn có muốn cùng làm... không? (Lời mời mọc lịch sự)",
+    "originalMeaning": "won't you ...?; would you like to ...? (polite invitation)",
+    "formation": "Verb-stem + ませんか",
+    "formationVi": "Động từ thể ません + か",
+    "explanationVi": "Lời mời mang tính lịch sự cao, tôn trọng quyết định của người nghe.",
+    "originalNotes": "Gentler than 〜ましょう because it leaves the listener room to decline. Accept with ええ、〜ましょう.",
+    "examples": [
+      {
+        "ja": "いっしょに昼ご飯を食べませんか。",
+        "furigana": "いっしょに{昼|ひる}ご{飯|はん}を{食|た}べませんか。",
+        "vi": "",
+        "en": "Would you like to have lunch together?"
+      },
+      {
+        "ja": "日曜日にテニスをしませんか。",
+        "furigana": "{日曜日|にちようび}にテニスをしませんか。",
+        "vi": "",
+        "en": "Would you like to play tennis on Sunday?"
+      },
+      {
+        "ja": "明日、公園を散歩しませんか。",
+        "furigana": "{明日|あした}、{公園|こうえん}を{散歩|さんぽ}しませんか。",
+        "vi": "",
+        "en": "How about a walk in the park tomorrow?"
+      }
+    ],
+    "tags": [
+      "invitation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "tai",
+    "pattern": "〜たい",
+    "romaji": "tai",
+    "meaningVi": "Muốn làm... (Diễn tả nguyện vọng của bản thân)",
+    "originalMeaning": "want to (do)",
+    "formation": "Verb-stem + たい",
+    "formationVi": "Động từ thể ます bỏ ます + たい (です)",
+    "explanationVi": "Chỉ dùng để diễn tả mong muốn của bản thân ngôi thứ nhất (hoặc hỏi trực tiếp ngôi thứ hai).",
+    "originalNotes": "Conjugates like an い-adjective: 〜たくない, 〜たかった. The object can take が or を. Not used to state another person's wishes directly.",
+    "examples": [
+      {
+        "ja": "夏休みに沖縄へ行きたいです。",
+        "furigana": "{夏休|なつやす}みに{沖縄|おきなわ}へ{行|い}きたいです。",
+        "vi": "",
+        "en": "I want to go to Okinawa during summer vacation."
+      },
+      {
+        "ja": "冷たい水が飲みたいです。",
+        "furigana": "{冷|つめ}たい{水|みず}が{飲|の}みたいです。",
+        "vi": "",
+        "en": "I want to drink some cold water."
+      },
+      {
+        "ja": "何が食べたいですか。",
+        "furigana": "{何|なに}が{食|た}べたいですか。",
+        "vi": "",
+        "en": "What do you want to eat?"
+      }
+    ],
+    "tags": [
+      "desire"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ga-hoshii",
+    "pattern": "〜がほしい",
+    "romaji": "ga hoshii",
+    "meaningVi": "Muốn có... (Diễn tả mong muốn sở hữu một vật)",
+    "originalMeaning": "want (something)",
+    "formation": "Noun + がほしい",
+    "formationVi": "Danh từ + が + ほしい (です)",
+    "explanationVi": "Dùng khi muốn có một đồ vật hoặc trạng thái cụ thể.",
+    "originalNotes": "For things, not actions (actions use 〜たい). Conjugates like an い-adjective: ほしくない, ほしかった.",
+    "examples": [
+      {
+        "ja": "新しいパソコンがほしいです。",
+        "furigana": "{新|あたら}しいパソコンがほしいです。",
+        "vi": "",
+        "en": "I want a new computer."
+      },
+      {
+        "ja": "誕生日に何がほしいですか。",
+        "furigana": "{誕生|たんじょう}{日|び}に{何|なに}がほしいですか。",
+        "vi": "",
+        "en": "What do you want for your birthday?"
+      },
+      {
+        "ja": "今は何もほしくないです。",
+        "furigana": "{今|いま}は{何|なに}もほしくないです。",
+        "vi": "",
+        "en": "I don't want anything right now."
+      }
+    ],
+    "tags": [
+      "desire"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "o-kudasai",
+    "pattern": "〜をください",
+    "romaji": "o kudasai",
+    "meaningVi": "Xin hãy cho tôi... (Yêu cầu nhận vật phẩm)",
+    "originalMeaning": "please give me (something); I'll have",
+    "formation": "Noun + をください",
+    "formationVi": "Danh từ + を + ください",
+    "explanationVi": "Dùng khi gọi món ở nhà hàng hoặc mua hàng tại cửa tiệm.",
+    "originalNotes": "Used when shopping or ordering. A quantity goes after を with no particle: 切手を二枚ください.",
+    "examples": [
+      {
+        "ja": "すみません、水をください。",
+        "furigana": "すみません、{水|みず}をください。",
+        "vi": "",
+        "en": "Excuse me, could I have some water?"
+      },
+      {
+        "ja": "このりんごを三つください。",
+        "furigana": "このりんごを{三|みっ}つください。",
+        "vi": "",
+        "en": "I'll take three of these apples, please."
+      },
+      {
+        "ja": "メニューをください。",
+        "furigana": "",
+        "vi": "",
+        "en": "Could I have the menu, please?"
+      }
+    ],
+    "tags": [
+      "request"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "te-kudasai",
+    "pattern": "〜てください",
+    "romaji": "te kudasai",
+    "meaningVi": "Xin hãy làm... (Yêu cầu hoặc nhờ vả lịch sự)",
+    "originalMeaning": "please (do)",
+    "formation": "Verb-te + ください",
+    "formationVi": "Động từ thể て + ください",
+    "explanationVi": "Cách nhờ vả hoặc đưa ra chỉ dẫn cơ bản trong tiếng Nhật.",
+    "originalNotes": "Polite, but still an instruction the speaker expects to be followed. Softer requests use 〜てくれませんか (N4).",
+    "examples": [
+      {
+        "ja": "もう少しゆっくり話してください。",
+        "furigana": "もう{少|すこ}しゆっくり{話|はな}してください。",
+        "vi": "",
+        "en": "Please speak a little more slowly."
+      },
+      {
+        "ja": "ここでくつをぬいでください。",
+        "furigana": "",
+        "vi": "",
+        "en": "Please take off your shoes here."
+      },
+      {
+        "ja": "すみません、駅までの道を教えてください。",
+        "furigana": "すみません、{駅|えき}までの{道|みち}を{教|おし}えてください。",
+        "vi": "",
+        "en": "Excuse me, could you tell me the way to the station?"
+      }
+    ],
+    "tags": [
+      "request",
+      "politeness"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "naide-kudasai",
+    "pattern": "〜ないでください",
+    "romaji": "naide kudasai",
+    "meaningVi": "Xin đừng làm... (Khuyên nhủ hoặc yêu cầu không làm gì)",
+    "originalMeaning": "please don't (do)",
+    "formation": "Verb-nai + でください",
+    "formationVi": "Động từ thể ない + でください",
+    "explanationVi": "Yêu cầu người khác không thực hiện hành động nào đó một cách lịch sự.",
+    "originalNotes": "Softer than 〜てはいけません. In casual speech ください is dropped: 見ないで.",
+    "examples": [
+      {
+        "ja": "教室で食べないでください。",
+        "furigana": "{教室|きょうしつ}で{食|た}べないでください。",
+        "vi": "",
+        "en": "Please don't eat in the classroom."
+      },
+      {
+        "ja": "この部屋に入らないでください。",
+        "furigana": "この{部屋|へや}に{入|はい}らないでください。",
+        "vi": "",
+        "en": "Please don't go into this room."
+      },
+      {
+        "ja": "心配しないでください。",
+        "furigana": "{心配|しんぱい}しないでください。",
+        "vi": "",
+        "en": "Please don't worry."
+      }
+    ],
+    "tags": [
+      "request",
+      "prohibition"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "te-mo-ii",
+    "pattern": "〜てもいい",
+    "romaji": "te mo ii",
+    "meaningVi": "Được phép làm... / Làm... cũng được (Xin phép hoặc cho phép)",
+    "originalMeaning": "may; it's okay to",
+    "formation": "Verb-te + もいい",
+    "formationVi": "Động từ thể て + もいい (です / ですか)",
+    "explanationVi": "Dùng để hỏi xin phép người khác hoặc cho phép ai làm gì.",
+    "originalNotes": "Add ですか to ask for permission. A polite refusal is often just すみません、ちょっと….",
+    "examples": [
+      {
+        "ja": "この辞書を使ってもいいですか。",
+        "furigana": "この{辞書|じしょ}を{使|つか}ってもいいですか。",
+        "vi": "",
+        "en": "May I use this dictionary?"
+      },
+      {
+        "ja": "今日は早く帰ってもいいです。",
+        "furigana": "{今日|きょう}は{早|はや}く{帰|かえ}ってもいいです。",
+        "vi": "",
+        "en": "You may go home early today."
+      },
+      {
+        "ja": "ここにすわってもいいですか。",
+        "furigana": "",
+        "vi": "",
+        "en": "Is it all right if I sit here?"
+      }
+    ],
+    "tags": [
+      "permission"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "te-wa-ikenai",
+    "pattern": "〜てはいけない",
+    "romaji": "te wa ikenai",
+    "meaningVi": "Không được phép làm... (Cấm đoán nhẹ nhàng)",
+    "originalMeaning": "must not; may not",
+    "formation": "Verb-te + はいけない",
+    "formationVi": "Động từ thể て + はいけない / はいけません",
+    "explanationVi": "Biểu thị điều cấm kỵ theo quy tắc, luật lệ hoặc người lớn nói với trẻ nhỏ.",
+    "originalNotes": "A strong prohibition, often for rules. Polite form: 〜てはいけません. Casual contraction: 〜ちゃいけない / 〜じゃいけない.",
+    "examples": [
+      {
+        "ja": "図書館で大きい声で話してはいけません。",
+        "furigana": "{図書館|としょかん}で{大|おお}きい{声|こえ}で{話|はな}してはいけません。",
+        "vi": "",
+        "en": "You must not talk loudly in the library."
+      },
+      {
+        "ja": "子どもはこの川で泳いではいけません。",
+        "furigana": "{子|こ}どもはこの{川|かわ}で{泳|およ}いではいけません。",
+        "vi": "",
+        "en": "Children must not swim in this river."
+      },
+      {
+        "ja": "ここでたばこを吸ってはいけません。",
+        "furigana": "ここでたばこを{吸|す}ってはいけません。",
+        "vi": "",
+        "en": "You must not smoke here."
+      }
+    ],
+    "tags": [
+      "prohibition"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "nakereba-naranai-nakute-wa-ikenai",
+    "pattern": "〜なければならない / 〜なくてはいけない",
+    "romaji": "nakereba naranai / nakute wa ikenai",
+    "meaningVi": "Phải làm... (Bắt buộc phải làm)",
+    "originalMeaning": "must; have to",
+    "formation": "Verb-nai stem + なければならない / Verb-nai stem + なくてはいけない",
+    "formationVi": "Động từ thể ない bỏ い + ければならない / くてはいけない",
+    "explanationVi": "Diễn tả nghĩa vụ hoặc điều cần thiết phải làm, không thể tránh khỏi.",
+    "originalNotes": "Polite forms end in なりません / いけません. The two mean the same; なければならない sounds slightly more formal.",
+    "examples": [
+      {
+        "ja": "明日は6時に起きなければなりません。",
+        "furigana": "{明日|あした}は6{時|じ}に{起|お}きなければなりません。",
+        "vi": "",
+        "en": "I have to get up at six tomorrow."
+      },
+      {
+        "ja": "今日は早く家に帰らなくてはいけません。",
+        "furigana": "{今日|きょう}は{早|はや}く{家|いえ}に{帰|かえ}らなくてはいけません。",
+        "vi": "",
+        "en": "I have to go home early today."
+      },
+      {
+        "ja": "日本では、家に入る前にくつをぬがなければなりません。",
+        "furigana": "{日本|にほん}では、{家|いえ}に{入|はい}る{前|まえ}にくつをぬがなければなりません。",
+        "vi": "",
+        "en": "In Japan, you have to take off your shoes before going into a house."
+      }
+    ],
+    "tags": [
+      "obligation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "nakute-mo-ii",
+    "pattern": "〜なくてもいい",
+    "romaji": "nakute mo ii",
+    "meaningVi": "Không cần làm... cũng được (Không bắt buộc)",
+    "originalMeaning": "don't have to; need not",
+    "formation": "Verb-nai stem + なくてもいい",
+    "formationVi": "Động từ thể ない bỏ い + くてもいい (です)",
+    "explanationVi": "Diễn tả sự không bắt buộc, làm hay không làm tùy ý.",
+    "originalNotes": "The opposite of 〜なければならない. Ask with 〜なくてもいいですか (Is it all right if I don't ...?).",
+    "examples": [
+      {
+        "ja": "明日は学校へ来なくてもいいです。",
+        "furigana": "{明日|あした}は{学校|がっこう}へ{来|こ}なくてもいいです。",
+        "vi": "",
+        "en": "You don't have to come to school tomorrow."
+      },
+      {
+        "ja": "名前は書かなくてもいいです。",
+        "furigana": "{名前|なまえ}は{書|か}かなくてもいいです。",
+        "vi": "",
+        "en": "You don't need to write your name."
+      },
+      {
+        "ja": "今日は料理をしなくてもいいですよ。",
+        "furigana": "{今日|きょう}は{料理|りょうり}をしなくてもいいですよ。",
+        "vi": "",
+        "en": "You don't have to cook today."
+      }
+    ],
+    "tags": [
+      "necessity",
+      "permission"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "te-iru",
+    "pattern": "〜ている",
+    "romaji": "te iru",
+    "meaningVi": "Đang làm... / Đang trong trạng thái... (Tiếp diễn hoặc trạng thái kết quả)",
+    "originalMeaning": "be doing (ongoing action); be in a state (result of a change); do regularly",
+    "formation": "Verb-te + いる",
+    "formationVi": "Động từ thể て + いる / います",
+    "explanationVi": "Chỉ hành động đang diễn ra tại thời điểm nói hoặc trạng thái duy trì sau hành động (kết hôn, sống, biết...).",
+    "originalNotes": "With action verbs (食べる, 読む) it shows an action in progress; with change verbs (結婚する, 開く, 知る) it shows the resulting state. Polite: 〜ています.",
+    "examples": [
+      {
+        "ja": "弟は今、部屋でゲームをしています。",
+        "furigana": "{弟|おとうと}は{今|いま}、{部屋|へや}でゲームをしています。",
+        "vi": "",
+        "en": "My younger brother is playing a game in his room now."
+      },
+      {
+        "ja": "姉は結婚しています。",
+        "furigana": "{姉|あね}は{結婚|けっこん}しています。",
+        "vi": "",
+        "en": "My older sister is married."
+      },
+      {
+        "ja": "窓が開いています。",
+        "furigana": "{窓|まど}が{開|あ}いています。",
+        "vi": "",
+        "en": "The window is open."
+      }
+    ],
+    "tags": [
+      "state"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "te",
+    "pattern": "〜て",
+    "romaji": "te",
+    "meaningVi": "Và, rồi... (Nối các động từ hoặc tính từ theo chuỗi liên tiếp)",
+    "originalMeaning": "and; and then (linking actions in order)",
+    "formation": "Verb-te + Sentence",
+    "formationVi": "Động từ thể て / Tính từ đuôi い: くて / Tính từ đuôi な: で",
+    "explanationVi": "Dùng để kết nối các hành động xảy ra theo trình tự thời gian.",
+    "originalNotes": "The final verb sets the tense for the whole sentence. 書く→書いて, 飲む→飲んで, 話す→話して, 買う→買って, 行く→行って (irregular).",
+    "examples": [
+      {
+        "ja": "朝起きて、顔を洗います。",
+        "furigana": "{朝|あさ}{起|お}きて、{顔|かお}を{洗|あら}います。",
+        "vi": "",
+        "en": "I get up in the morning and wash my face."
+      },
+      {
+        "ja": "デパートへ行って、セーターを買いました。",
+        "furigana": "デパートへ{行|い}って、セーターを{買|か}いました。",
+        "vi": "",
+        "en": "I went to the department store and bought a sweater."
+      },
+      {
+        "ja": "家に帰って、晩ご飯を食べて、寝ました。",
+        "furigana": "{家|いえ}に{帰|かえ}って、{晩|ばん}ご{飯|はん}を{食|た}べて、{寝|ね}ました。",
+        "vi": "",
+        "en": "I went home, ate dinner and went to bed."
+      }
+    ],
+    "tags": [
+      "sequence"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "te-kara",
+    "pattern": "〜てから",
+    "romaji": "te kara",
+    "meaningVi": "Sau khi làm... thì... (Nhấn mạnh trình tự sau trước)",
+    "originalMeaning": "after doing; (do A) and then (B); since",
+    "formation": "Verb-te + から",
+    "formationVi": "Động từ thể て + から",
+    "explanationVi": "Nhấn mạnh hành động thứ hai chỉ bắt đầu sau khi hành động thứ nhất đã hoàn tất.",
+    "originalNotes": "Stresses that A is finished before B starts, more clearly than a plain て. With ている in the main clause it often means 'since'.",
+    "examples": [
+      {
+        "ja": "手を洗ってから、ご飯を食べましょう。",
+        "furigana": "{手|て}を{洗|あら}ってから、ご{飯|はん}を{食|た}べましょう。",
+        "vi": "",
+        "en": "Let's wash our hands and then eat."
+      },
+      {
+        "ja": "宿題をしてから、テレビを見ます。",
+        "furigana": "{宿題|しゅくだい}をしてから、テレビを{見|み}ます。",
+        "vi": "",
+        "en": "I'll watch TV after I do my homework."
+      },
+      {
+        "ja": "日本に来てから、毎日日本語を勉強しています。",
+        "furigana": "{日本|にほん}に{来|き}てから、{毎日|まいにち}{日本語|にほんご}を{勉強|べんきょう}しています。",
+        "vi": "",
+        "en": "Since coming to Japan, I've been studying Japanese every day."
+      }
+    ],
+    "tags": [
+      "sequence",
+      "time"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "tari-tari-suru",
+    "pattern": "〜たり〜たりする",
+    "romaji": "tari ... tari suru",
+    "meaningVi": "Lúc thì làm..., lúc thì làm... (Liệt kê hành động tiêu biểu)",
+    "originalMeaning": "do things like A and B; sometimes A, sometimes B",
+    "formation": "Verb-ta + り + Verb-ta + りする",
+    "formationVi": "V1-tari + V2-tari + する",
+    "explanationVi": "Liệt kê vài hành động tiêu biểu không theo thứ tự thời gian.",
+    "originalNotes": "Picks out a few actions from many. Tense and politeness go on the final する: 〜たりしました.",
+    "examples": [
+      {
+        "ja": "日曜日はそうじをしたり、洗濯をしたりします。",
+        "furigana": "{日曜日|にちようび}はそうじをしたり、{洗濯|せんたく}をしたりします。",
+        "vi": "",
+        "en": "On Sundays I do things like cleaning and laundry."
+      },
+      {
+        "ja": "休みの日は本を読んだり、音楽を聞いたりします。",
+        "furigana": "{休|やす}みの{日|ひ}は{本|ほん}を{読|よ}んだり、{音楽|おんがく}を{聞|き}いたりします。",
+        "vi": "",
+        "en": "On my days off I read books, listen to music and so on."
+      },
+      {
+        "ja": "夏休みは海で泳いだり、山に登ったりしました。",
+        "furigana": "{夏休|なつやす}みは{海|うみ}で{泳|およ}いだり、{山|やま}に{登|のぼ}ったりしました。",
+        "vi": "",
+        "en": "During summer vacation I swam in the sea, climbed mountains and so on."
+      }
+    ],
+    "tags": [
+      "example"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ta-koto-ga-aru",
+    "pattern": "〜たことがある",
+    "romaji": "ta koto ga aru",
+    "meaningVi": "Đã từng làm... (Diễn tả trải nghiệm trong quá khứ)",
+    "originalMeaning": "have (ever) done; have the experience of doing",
+    "formation": "Verb-ta + ことがある",
+    "formationVi": "Động từ thể た + ことがある / あります",
+    "explanationVi": "Chỉ trải nghiệm từng làm một việc gì đó ít nhất một lần trong đời.",
+    "originalNotes": "Talks about life experience, not something just done: きのう食べたことがある is wrong. Negative 〜たことがありません means 'have never'.",
+    "examples": [
+      {
+        "ja": "富士山に登ったことがあります。",
+        "furigana": "{富士山|ふじさん}に{登|のぼ}ったことがあります。",
+        "vi": "",
+        "en": "I have climbed Mt. Fuji."
+      },
+      {
+        "ja": "日本の映画を見たことがありますか。",
+        "furigana": "{日本|にほん}の{映画|えいが}を{見|み}たことがありますか。",
+        "vi": "",
+        "en": "Have you ever seen a Japanese movie?"
+      },
+      {
+        "ja": "私は馬に乗ったことがありません。",
+        "furigana": "{私|わたし}は{馬|うま}に{乗|の}ったことがありません。",
+        "vi": "",
+        "en": "I have never ridden a horse."
+      }
+    ],
+    "tags": [
+      "experience"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "mae-ni",
+    "pattern": "〜前に",
+    "romaji": "mae ni",
+    "meaningVi": "Trước khi làm...",
+    "originalMeaning": "before (doing); before (an event); ago",
+    "formation": "Verb-dict + 前に / Noun + の + 前に",
+    "formationVi": "Động từ thể từ điển / Danh từ + の + まえに",
+    "explanationVi": "Chỉ hành động xảy ra trước một sự kiện hoặc mốc thời gian khác.",
+    "originalNotes": "The verb before 前に is always in dictionary form, even when talking about the past. With a length of time there is no の: 3年前に (three years ago).",
+    "examples": [
+      {
+        "ja": "寝る前に歯をみがきます。",
+        "furigana": "{寝|ね}る{前|まえ}に{歯|は}をみがきます。",
+        "vi": "",
+        "en": "I brush my teeth before going to bed."
+      },
+      {
+        "ja": "授業の前にコーヒーを飲みます。",
+        "furigana": "{授業|じゅぎょう}の{前|まえ}にコーヒーを{飲|の}みます。",
+        "vi": "",
+        "en": "I drink coffee before class."
+      },
+      {
+        "ja": "3年前に日本へ来ました。",
+        "furigana": "3{年|ねん}{前|まえ}に{日本|にほん}へ{来|き}ました。",
+        "vi": "",
+        "en": "I came to Japan three years ago."
+      }
+    ],
+    "tags": [
+      "time",
+      "sequence"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ato-de",
+    "pattern": "〜後で",
+    "romaji": "ato de",
+    "meaningVi": "Sau khi làm...",
+    "originalMeaning": "after (doing); after (an event)",
+    "formation": "Verb-ta + 後で / Noun + の + 後で",
+    "formationVi": "Động từ thể た / Danh từ + の + あとで",
+    "explanationVi": "Chỉ hành động diễn ra sau khi sự việc kia hoàn tất.",
+    "originalNotes": "The verb before 後で is always in た-form, even for future plans. On its own, 後で means 'later'.",
+    "examples": [
+      {
+        "ja": "晩ご飯を食べた後で、散歩をします。",
+        "furigana": "{晩|ばん}ご{飯|はん}を{食|た}べた{後|あと}で、{散歩|さんぽ}をします。",
+        "vi": "",
+        "en": "I take a walk after eating dinner."
+      },
+      {
+        "ja": "仕事の後で、いっしょに飲みに行きませんか。",
+        "furigana": "{仕事|しごと}の{後|あと}で、いっしょに{飲|の}みに{行|い}きませんか。",
+        "vi": "",
+        "en": "Would you like to go for a drink after work?"
+      },
+      {
+        "ja": "テストが終わった後で、友達と遊びました。",
+        "furigana": "テストが{終|お}わった{後|あと}で、{友達|ともだち}と{遊|あそ}びました。",
+        "vi": "",
+        "en": "After the test was over, I hung out with friends."
+      }
+    ],
+    "tags": [
+      "time",
+      "sequence"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "nagara",
+    "pattern": "〜ながら（while）",
+    "romaji": "nagara",
+    "meaningVi": "Vừa làm... vừa làm... (Hai hành động diễn ra song song)",
+    "originalMeaning": "while (doing two actions at the same time)",
+    "formation": "Verb-stem + ながら",
+    "formationVi": "Động từ thể ます bỏ ます + ながら",
+    "explanationVi": "Cùng một chủ ngữ thực hiện hai hành động cùng lúc, hành động ở vế sau là chính.",
+    "originalNotes": "Both actions are done by the same person. The main action comes last: in A-ながら B, B is the main activity.",
+    "examples": [
+      {
+        "ja": "音楽を聞きながら勉強します。",
+        "furigana": "{音楽|おんがく}を{聞|き}きながら{勉強|べんきょう}します。",
+        "vi": "",
+        "en": "I study while listening to music."
+      },
+      {
+        "ja": "父はいつも新聞を読みながら朝ご飯を食べます。",
+        "furigana": "{父|ちち}はいつも{新聞|しんぶん}を{読|よ}みながら{朝|あさ}ご{飯|はん}を{食|た}べます。",
+        "vi": "",
+        "en": "My father always eats breakfast while reading the newspaper."
+      },
+      {
+        "ja": "コーヒーを飲みながら話しましょう。",
+        "furigana": "コーヒーを{飲|の}みながら{話|はな}しましょう。",
+        "vi": "",
+        "en": "Let's talk over coffee."
+      }
+    ],
+    "tags": [
+      "simultaneity"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ni-iku",
+    "pattern": "〜に行く",
+    "romaji": "ni iku",
+    "meaningVi": "Đi đến đâu để làm gì (Chỉ mục đích của việc đi lại)",
+    "originalMeaning": "go (somewhere) to do",
+    "formation": "Verb-stem + に行く / Noun + に行く",
+    "formationVi": "Địa điểm + へ / に + V-masu bỏ ます + に行く / 来る",
+    "explanationVi": "Diễn tả mục đích di chuyển đến một nơi nào đó.",
+    "originalNotes": "来る and 帰る work the same way: 遊びに来る. With する-nouns the noun can come directly: 買い物に行く, 散歩に行く.",
+    "examples": [
+      {
+        "ja": "デパートへ服を買いに行きます。",
+        "furigana": "デパートへ{服|ふく}を{買|か}いに{行|い}きます。",
+        "vi": "",
+        "en": "I'm going to the department store to buy clothes."
+      },
+      {
+        "ja": "週末、海へ泳ぎに行きました。",
+        "furigana": "{週末|しゅうまつ}、{海|うみ}へ{泳|およ}ぎに{行|い}きました。",
+        "vi": "",
+        "en": "I went to the beach to swim on the weekend."
+      },
+      {
+        "ja": "友達がうちへ遊びに来ました。",
+        "furigana": "{友達|ともだち}がうちへ{遊|あそ}びに{来|き}ました。",
+        "vi": "",
+        "en": "A friend came over to my place to hang out."
+      }
+    ],
+    "tags": [
+      "purpose"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ga-suki-ga-kirai",
+    "pattern": "〜が好き / 〜が嫌い",
+    "romaji": "ga suki / ga kirai",
+    "meaningVi": "Thích... / Ghét... (Sở thích cá nhân)",
+    "originalMeaning": "like; dislike",
+    "formation": "Noun + が好き / Noun + が嫌い / Verb-dict + の + が好き",
+    "formationVi": "Danh từ + が + 好き / 嫌い (です)",
+    "explanationVi": "Đi kèm trợ từ が để chỉ đối tượng được thích hoặc ghét.",
+    "originalNotes": "好き and 嫌い are な-adjectives, so the thing liked takes が, not を. 大好き and 大嫌い are stronger. 嫌い can sound blunt; あまり好きじゃない is softer.",
+    "examples": [
+      {
+        "ja": "私は甘いものが好きです。",
+        "furigana": "{私|わたし}は{甘|あま}いものが{好|す}きです。",
+        "vi": "",
+        "en": "I like sweet things."
+      },
+      {
+        "ja": "弟は野菜が嫌いです。",
+        "furigana": "{弟|おとうと}は{野菜|やさい}が{嫌|きら}いです。",
+        "vi": "",
+        "en": "My younger brother doesn't like vegetables."
+      },
+      {
+        "ja": "母は料理をするのが好きです。",
+        "furigana": "{母|はは}は{料理|りょうり}をするのが{好|す}きです。",
+        "vi": "",
+        "en": "My mother likes cooking."
+      }
+    ],
+    "tags": [
+      "emotion"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ga-jouzu-ga-heta",
+    "pattern": "〜が上手 / 〜が下手",
+    "romaji": "ga jouzu / ga heta",
+    "meaningVi": "Giỏi về... / Kém về... (Kỹ năng, sở trường)",
+    "originalMeaning": "good at; bad at",
+    "formation": "Noun + が上手 / Noun + が下手",
+    "formationVi": "Danh từ + が + 上手 / 下手 (です)",
+    "explanationVi": "Chỉ năng lực làm một việc gì đó. Thường không dùng 上手 để tự khen mình.",
+    "originalNotes": "Mostly used about other people; calling yourself 上手 can sound like bragging. Both are な-adjectives: 料理が上手な人.",
+    "examples": [
+      {
+        "ja": "姉はピアノが上手です。",
+        "furigana": "{姉|あね}はピアノが{上手|じょうず}です。",
+        "vi": "",
+        "en": "My older sister is good at the piano."
+      },
+      {
+        "ja": "私は歌が下手です。",
+        "furigana": "{私|わたし}は{歌|うた}が{下手|へた}です。",
+        "vi": "",
+        "en": "I'm bad at singing."
+      },
+      {
+        "ja": "マイクさんは日本語が上手ですね。",
+        "furigana": "マイクさんは{日本語|にほんご}が{上手|じょうず}ですね。",
+        "vi": "",
+        "en": "Mike, your Japanese is really good."
+      }
+    ],
+    "tags": [
+      "ability"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ga-aru-ga-iru",
+    "pattern": "〜がある / 〜がいる",
+    "romaji": "ga aru / ga iru",
+    "meaningVi": "Có... ở... (Sự tồn tại của người hoặc vật)",
+    "originalMeaning": "there is; there are; have (ある for things, いる for people and animals)",
+    "formation": "Noun + がある / Noun + がいる",
+    "formationVi": "Địa điểm + に + Danh từ + が + ある (vật) / いる (người, động vật)",
+    "explanationVi": "Biểu thị sự tồn tại hoặc sở hữu.",
+    "originalNotes": "ある is for things, plants and events; いる is for people and animals. Negatives: ない / いない (polite: ありません / いません).",
+    "examples": [
+      {
+        "ja": "公園に大きい木があります。",
+        "furigana": "{公園|こうえん}に{大|おお}きい{木|き}があります。",
+        "vi": "",
+        "en": "There is a big tree in the park."
+      },
+      {
+        "ja": "私は妹が一人います。",
+        "furigana": "{私|わたし}は{妹|いもうと}が{一人|ひとり}います。",
+        "vi": "",
+        "en": "I have one younger sister."
+      },
+      {
+        "ja": "明日、日本語のテ���トがあります。",
+        "furigana": "{明日|あした}、{日本語|にほんご}のテストがあります。",
+        "vi": "",
+        "en": "There's a Japanese test tomorrow."
+      }
+    ],
+    "tags": [
+      "state"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "kara-reason",
+    "pattern": "〜から（reason）",
+    "romaji": "kara (reason)",
+    "meaningVi": "Vì... nên... (Chỉ lý do mang tính chủ quan)",
+    "originalMeaning": "because; since; so",
+    "formation": "Sentence + から",
+    "formationVi": "Mệnh đề nguyên nhân + から, Mệnh đề kết quả",
+    "explanationVi": "Nêu lý do, nguyên nhân dẫn đến kết quả hoặc hành động phía sau.",
+    "originalNotes": "The reason comes first: A から B (A, so B). Answer どうして with 〜からです. Nouns and な-adjectives need だ: 雨だから.",
+    "examples": [
+      {
+        "ja": "今日は寒いから、コートを着ます。",
+        "furigana": "{今日|きょう}は{寒|さむ}いから、コートを{着|き}ます。",
+        "vi": "",
+        "en": "It's cold today, so I'll wear a coat."
+      },
+      {
+        "ja": "時間がありませんから、タクシーで行きましょう。",
+        "furigana": "{時間|じかん}がありませんから、タクシーで{行|い}きましょう。",
+        "vi": "",
+        "en": "We don't have time, so let's take a taxi."
+      },
+      {
+        "ja": "「どうして休みましたか。」「頭が痛かったからです。」",
+        "furigana": "「どうして{休|やす}みましたか。」「{頭|あたま}が{痛|いた}かったからです。」",
+        "vi": "",
+        "en": "\"Why were you absent?\" \"Because I had a headache.\""
+      }
+    ],
+    "tags": [
+      "reason"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ga-but",
+    "pattern": "〜が（but）",
+    "romaji": "ga (but)",
+    "meaningVi": "Nhưng, tuy nhiên (Nối hai vế đối lập)",
+    "originalMeaning": "but; although",
+    "formation": "Sentence + が",
+    "formationVi": "Mệnh đề 1 + が, Mệnh đề 2",
+    "explanationVi": "Dùng để nối hai câu mang nghĩa trái ngược hoặc dùng làm tiền đề mở đầu câu.",
+    "originalNotes": "Also used just to soften a request or lead into a topic: すみませんが…. A little more formal than けど (N4).",
+    "examples": [
+      {
+        "ja": "この店は安いですが、あまりおいしくないです。",
+        "furigana": "この{店|みせ}は{安|やす}いですが、あまりおいしくないです。",
+        "vi": "",
+        "en": "This restaurant is cheap, but the food isn't very good."
+      },
+      {
+        "ja": "日本語は難しいですが、おもしろいです。",
+        "furigana": "{日本語|にほんご}は{難|むずか}しいですが、おもしろいです。",
+        "vi": "",
+        "en": "Japanese is difficult, but interesting."
+      },
+      {
+        "ja": "すみませんが、ちょっと静かにしてください。",
+        "furigana": "すみませんが、ちょっと{静|しず}かにしてください。",
+        "vi": "",
+        "en": "Excuse me, but please be a little quieter."
+      }
+    ],
+    "tags": [
+      "contrast",
+      "particle"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "deshou",
+    "pattern": "〜でしょう",
+    "romaji": "deshou",
+    "meaningVi": "Chắc là... / Có lẽ là... (Phỏng đoán lịch sự)",
+    "originalMeaning": "probably; I think; ..., right?",
+    "formation": "Verb-plain / i-Adj / na-Adj / Noun + でしょう",
+    "formationVi": "Thể thông thường / Danh từ + でしょう",
+    "explanationVi": "Diễn tả sự suy đoán của người nói với mức độ chắc chắn vừa phải.",
+    "originalNotes": "Typical of weather forecasts. Said with rising intonation, it asks the listener to agree. Plain form: だろう (N4).",
+    "examples": [
+      {
+        "ja": "明日は雨が降るでしょう。",
+        "furigana": "{明日|あした}は{雨|あめ}が{降|ふ}るでしょう。",
+        "vi": "",
+        "en": "It will probably rain tomorrow."
+      },
+      {
+        "ja": "山の上は寒いでしょう。",
+        "furigana": "{山|やま}の{上|うえ}は{寒|さむ}いでしょう。",
+        "vi": "",
+        "en": "It's probably cold at the top of the mountain."
+      },
+      {
+        "ja": "このかばん、かわいいでしょう？",
+        "furigana": "",
+        "vi": "",
+        "en": "This bag is cute, isn't it?"
+      }
+    ],
+    "tags": [
+      "conjecture"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ku-naru-ni-naru",
+    "pattern": "〜くなる / 〜になる",
+    "romaji": "ku naru / ni naru",
+    "meaningVi": "Trở nên, trở thành... (Chỉ sự biến đổi trạng thái)",
+    "originalMeaning": "become; get; turn",
+    "formation": "i-Adj-ku + なる / na-Adj + になる / Noun + になる",
+    "formationVi": "Tính từ đuôi い bỏ い + くなる / Tính từ đuôi な / Danh từ + になる",
+    "explanationVi": "Diễn tả sự thay đổi của người hoặc vật sang một trạng thái mới.",
+    "originalNotes": "いい becomes よくなる. Often used in the past to describe a change that has happened: 大きくなりました.",
+    "examples": [
+      {
+        "ja": "あたたかくなりましたね。",
+        "furigana": "",
+        "vi": "",
+        "en": "It's gotten warmer, hasn't it?"
+      },
+      {
+        "ja": "部屋がきれいになりました。",
+        "furigana": "{部屋|へや}がきれいになりました。",
+        "vi": "",
+        "en": "The room has become clean."
+      },
+      {
+        "ja": "兄は来年、医者になります。",
+        "furigana": "{兄|あに}は{来年|らいねん}、{医者|いしゃ}になります。",
+        "vi": "",
+        "en": "My older brother will become a doctor next year."
+      }
+    ],
+    "tags": [
+      "change"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ni-suru",
+    "pattern": "〜にする（decide）",
+    "romaji": "ni suru",
+    "meaningVi": "Quyết định chọn...",
+    "originalMeaning": "decide on; choose; I'll have",
+    "formation": "Noun + にする",
+    "formationVi": "Danh từ + にする / にします",
+    "explanationVi": "Dùng khi đưa ra quyết định chọn món ăn, đồ vật trong số các lựa chọn.",
+    "originalNotes": "Common when ordering food or picking from options. Past: 〜にしました (I decided on ...).",
+    "examples": [
+      {
+        "ja": "私はカレーにします。",
+        "furigana": "{私|わたし}はカレーにします。",
+        "vi": "",
+        "en": "I'll have the curry."
+      },
+      {
+        "ja": "飲み物は何にしますか。",
+        "furigana": "{飲|の}み{物|もの}は{何|なに}にしますか。",
+        "vi": "",
+        "en": "What would you like to drink?"
+      },
+      {
+        "ja": "旅行は来月にしましょう。",
+        "furigana": "{旅行|りょこう}は{来月|らいげつ}にしましょう。",
+        "vi": "",
+        "en": "Let's plan the trip for next month."
+      }
+    ],
+    "tags": [
+      "decision"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "mada-te-inai",
+    "pattern": "まだ〜ていない",
+    "romaji": "mada ... te inai",
+    "meaningVi": "Vẫn chưa làm...",
+    "originalMeaning": "not yet (have done)",
+    "formation": "まだ + Verb-te + いない / まだ + Verb-te + いません",
+    "formationVi": "まだ + Động từ thể て + いません",
+    "explanationVi": "Chỉ một hành động theo dự kiến nhưng hiện tại vẫn chưa hoàn thành.",
+    "originalNotes": "Use ていない, not ませんでした, for something that may still happen. The short answer is いいえ、まだです.",
+    "examples": [
+      {
+        "ja": "まだ昼ご飯を食べていません。",
+        "furigana": "まだ{昼|ひる}ご{飯|はん}を{食|た}べていません。",
+        "vi": "",
+        "en": "I haven't eaten lunch yet."
+      },
+      {
+        "ja": "「宿題はもうしましたか。」「いいえ、まだしていません。」",
+        "furigana": "「{宿題|しゅくだい}はもうしましたか。」「いいえ、まだしていません。」",
+        "vi": "",
+        "en": "\"Have you done your homework yet?\" \"No, not yet.\""
+      },
+      {
+        "ja": "電車はまだ来ていません。",
+        "furigana": "{電車|でんしゃ}はまだ{来|き}ていません。",
+        "vi": "",
+        "en": "The train hasn't come yet."
+      }
+    ],
+    "tags": [
+      "negation",
+      "completion"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "mou-ta",
+    "pattern": "もう〜た",
+    "romaji": "mou ... ta",
+    "meaningVi": "Đã làm... rồi",
+    "originalMeaning": "already (have done); (in questions) yet",
+    "formation": "もう + Verb-ta / もう + Verb-stem + ました",
+    "formationVi": "もう + Động từ thể ました",
+    "explanationVi": "Nhấn mạnh hành động đã xảy ra xong trước thời điểm nói.",
+    "originalNotes": "In questions もう means 'yet'. With a negative verb, もう means 'no longer': もう食べません.",
+    "examples": [
+      {
+        "ja": "「もう晩ご飯を食べましたか。」「はい、もう食べました。」",
+        "furigana": "「もう{晩|ばん}ご{飯|はん}を{食|た}べましたか。」「はい、もう{食|た}べました。」",
+        "vi": "",
+        "en": "\"Have you eaten dinner yet?\" \"Yes, I already have.\""
+      },
+      {
+        "ja": "妹はもう寝ました。",
+        "furigana": "{妹|いもうと}はもう{寝|ね}ました。",
+        "vi": "",
+        "en": "My younger sister has already gone to bed."
+      },
+      {
+        "ja": "映画はもう始まりましたよ。",
+        "furigana": "{映画|えいが}はもう{始|はじ}まりましたよ。",
+        "vi": "",
+        "en": "The movie has already started."
+      }
+    ],
+    "tags": [
+      "completion",
+      "time"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "amari-nai",
+    "pattern": "あまり〜ない",
+    "romaji": "amari ... nai",
+    "meaningVi": "Không... lắm (Phủ định một phần)",
+    "originalMeaning": "not very; not much; not often",
+    "formation": "あまり + Verb-nai / あまり + i-Adj-ku + ない / あまり + na-Adj + じゃない",
+    "formationVi": "あまり + Động từ / Tính từ phủ định",
+    "explanationVi": "Dùng trong câu phủ định để giảm mức độ (\"không ngon lắm\", \"không hay xem phim lắm\").",
+    "originalNotes": "Always followed by a negative form. あまり好きじゃない is a softer way to say you dislike something.",
+    "examples": [
+      {
+        "ja": "私はあまりテレビを見ません。",
+        "furigana": "{私|わたし}はあまりテレビを{見|み}ません。",
+        "vi": "",
+        "en": "I don't watch much TV."
+      },
+      {
+        "ja": "このりんごはあまり甘くないです。",
+        "furigana": "このりんごはあまり{甘|あま}くないです。",
+        "vi": "",
+        "en": "This apple isn't very sweet."
+      },
+      {
+        "ja": "今日はあまり忙しくありません。",
+        "furigana": "{今日|きょう}はあまり{忙|いそが}しくありません。",
+        "vi": "",
+        "en": "I'm not very busy today."
+      }
+    ],
+    "tags": [
+      "negation",
+      "degree"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "zenzen-nai",
+    "pattern": "全然〜ない",
+    "romaji": "zenzen ... nai",
+    "meaningVi": "Hoàn toàn không...",
+    "originalMeaning": "not at all; not in the least",
+    "formation": "全然 + Verb-nai / 全然 + i-Adj-ku + ない / 全然 + na-Adj + じゃない",
+    "formationVi": "全然 + Động từ / Tính từ phủ định",
+    "explanationVi": "Dùng để phủ định tuyệt đối 100% (\"hoàn toàn không hiểu\").",
+    "originalNotes": "Stronger than あまり〜ない. In casual speech 全然 is sometimes used with positive words (全然大丈夫), but with a negative is the standard use.",
+    "examples": [
+      {
+        "ja": "この問題は全然わかりません。",
+        "furigana": "この{問題|もんだい}は{全然|ぜんぜん}わかりません。",
+        "vi": "",
+        "en": "I don't understand this question at all."
+      },
+      {
+        "ja": "今日は全然寒くないです。",
+        "furigana": "{今日|きょう}は{全然|ぜんぜん}{寒|さむ}くないです。",
+        "vi": "",
+        "en": "It's not cold at all today."
+      },
+      {
+        "ja": "弟は全然勉強しません。",
+        "furigana": "{弟|おとうと}は{全然|ぜんぜん}{勉強|べんきょう}しません。",
+        "vi": "",
+        "en": "My younger brother doesn't study at all."
+      }
+    ],
+    "tags": [
+      "negation",
+      "degree"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "dake",
+    "pattern": "〜だけ",
+    "romaji": "dake",
+    "meaningVi": "Chỉ... (Giới hạn duy nhất)",
+    "originalMeaning": "only; just",
+    "formation": "Noun + だけ / Verb-dict + だけ",
+    "formationVi": "Danh từ / Số lượng + だけ",
+    "explanationVi": "Biểu thị sự giới hạn, chỉ có bấy nhiêu đó không thêm.",
+    "originalNotes": "Neutral in tone. Compare しか〜ない (N4), which stresses that the amount is small.",
+    "examples": [
+      {
+        "ja": "財布に100円だけあります。",
+        "furigana": "{財布|さいふ}に100{円|えん}だけあります。",
+        "vi": "",
+        "en": "I only have 100 yen in my wallet."
+      },
+      {
+        "ja": "朝はコーヒーだけ飲みます。",
+        "furigana": "{朝|あさ}はコーヒーだけ{飲|の}みます。",
+        "vi": "",
+        "en": "In the morning I only have coffee."
+      },
+      {
+        "ja": "日曜日だけ休みです。",
+        "furigana": "{日曜日|にちようび}だけ{休|やす}みです。",
+        "vi": "",
+        "en": "Sunday is my only day off."
+      }
+    ],
+    "tags": [
+      "limitation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "kurai-gurai",
+    "pattern": "〜くらい / 〜ぐらい（approximately）",
+    "romaji": "kurai / gurai",
+    "meaningVi": "Khoảng, chừng (Ước lượng số lượng hoặc thời gian)",
+    "originalMeaning": "about; approximately (an amount or length of time)",
+    "formation": "Noun + くらい / Noun + ぐらい",
+    "formationVi": "Lượng từ + くらい / ぐらい",
+    "explanationVi": "Chỉ mức độ hoặc lượng ước chừng không chính xác tuyệt đối.",
+    "originalNotes": "Used with amounts and durations. For a point in time (around three o'clock), use ごろ: 3時ごろ.",
+    "examples": [
+      {
+        "ja": "駅まで歩いて10分ぐらいです。",
+        "furigana": "{駅|えき}まで{歩|ある}いて10{分|ぷん}ぐらいです。",
+        "vi": "",
+        "en": "It's about a ten-minute walk to the station."
+      },
+      {
+        "ja": "毎日2時間くらい勉強します。",
+        "furigana": "{毎日|まいにち}2{時間|じかん}くらい{勉強|べんきょう}します。",
+        "vi": "",
+        "en": "I study for about two hours every day."
+      },
+      {
+        "ja": "このかばんは5000円ぐらいでした。",
+        "furigana": "このかばんは5000{円|えん}ぐらいでした。",
+        "vi": "",
+        "en": "This bag was about 5,000 yen."
+      }
+    ],
+    "tags": [
+      "quantity",
+      "degree"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "goro",
+    "pattern": "〜ごろ",
+    "romaji": "goro",
+    "meaningVi": "Vào khoảng... (Mốc thời gian ước lượng)",
+    "originalMeaning": "around; about (a point in time)",
+    "formation": "Noun + ごろ",
+    "formationVi": "Mốc thời gian + ごろ",
+    "explanationVi": "Chỉ dùng cho mốc thời gian (khoảng 3 giờ, khoảng tháng 5).",
+    "originalNotes": "Attaches to clock times, dates and months. に after ごろ is optional: 7時ごろ(に)起きます.",
+    "examples": [
+      {
+        "ja": "毎晩11時ごろ寝ます。",
+        "furigana": "{毎晩|まいばん}11{時|じ}ごろ{寝|ね}ます。",
+        "vi": "",
+        "en": "I go to bed around eleven every night."
+      },
+      {
+        "ja": "4月ごろ、桜が咲きます。",
+        "furigana": "4{月|がつ}ごろ、{桜|さくら}が{咲|さ}きます。",
+        "vi": "",
+        "en": "The cherry blossoms bloom around April."
+      },
+      {
+        "ja": "夕方6時ごろに家に帰ります。",
+        "furigana": "{夕方|ゆうがた}6{時|じ}ごろに{家|いえ}に{帰|かえ}ります。",
+        "vi": "",
+        "en": "I get home around six in the evening."
+      }
+    ],
+    "tags": [
+      "time"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "nani-mo-nai-dare-mo-nai",
+    "pattern": "何も〜ない / 誰も〜ない",
+    "romaji": "nani mo ... nai / dare mo ... nai",
+    "meaningVi": "Không có gì / Không có ai (Phủ định hoàn toàn với từ để hỏi)",
+    "originalMeaning": "nothing; nobody; not anything; not anyone",
+    "formation": "何も + Verb-nai / 誰も + Verb-nai",
+    "formationVi": "Từ để hỏi + も + Động từ phủ định",
+    "explanationVi": "Kết hợp từ để hỏi với も và phủ định để mang nghĩa \"không ai\", \"không gì cả\", \"không đâu cả\".",
+    "originalNotes": "With places, a particle comes before も: どこにも / どこへも行きません (go nowhere). 誰 is often written in hiragana: だれ.",
+    "examples": [
+      {
+        "ja": "けさは何も食べませんでした。",
+        "furigana": "けさは{何|なに}も{食|た}べませんでした。",
+        "vi": "",
+        "en": "I didn't eat anything this morning."
+      },
+      {
+        "ja": "教室にはだれもいません。",
+        "furigana": "{教室|きょうしつ}にはだれもいません。",
+        "vi": "",
+        "en": "There's nobody in the classroom."
+      },
+      {
+        "ja": "冷蔵庫の中には何もありません。",
+        "furigana": "{冷蔵庫|れいぞうこ}の{中|なか}には{何|なに}もありません。",
+        "vi": "",
+        "en": "There's nothing in the fridge."
+      }
+    ],
+    "tags": [
+      "negation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "nani-ka-dare-ka-doko-ka",
+    "pattern": "何か / 誰か / どこか",
+    "romaji": "nani ka / dare ka / doko ka",
+    "meaningVi": "Cái gì đó / Ai đó / Đâu đó (Bất định)",
+    "originalMeaning": "something; someone; somewhere",
+    "formation": "Question word + か",
+    "formationVi": "Từ để hỏi + か",
+    "explanationVi": "Chỉ một đối tượng không xác định rõ ràng (\"uống cái gì đó đi\", \"có ai ở đó không?\").",
+    "originalNotes": "Question word + か gives 'some-' words; question word + も + negative gives 'no-' words. が and を after 何か / だれか are often dropped.",
+    "examples": [
+      {
+        "ja": "何か飲みますか。",
+        "furigana": "{何|なに}か{飲|の}みますか。",
+        "vi": "",
+        "en": "Would you like something to drink?"
+      },
+      {
+        "ja": "だれか来ましたよ。",
+        "furigana": "だれか{来|き}ましたよ。",
+        "vi": "",
+        "en": "Someone's here."
+      },
+      {
+        "ja": "夏休みにどこかへ行きましたか。",
+        "furigana": "{夏休|なつやす}みにどこかへ{行|い}きましたか。",
+        "vi": "",
+        "en": "Did you go anywhere during summer vacation?"
+      }
+    ],
+    "tags": [
+      "question"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "kore-sore-are-dore",
+    "pattern": "これ / それ / あれ / どれ",
+    "romaji": "kore / sore / are / dore",
+    "meaningVi": "Cái này / Cái đó / Cái kia / Cái nào (Đại từ chỉ định)",
+    "originalMeaning": "this one; that one (near you); that one (over there); which one",
+    "formation": "これ / それ / あれ / どれ",
+    "formationVi": "これ / それ / あれ / どれ",
+    "explanationVi": "Đại từ chỉ định đồ vật theo khoảng cách tới người nói và người nghe.",
+    "originalNotes": "こ = near the speaker, そ = near the listener, あ = away from both, ど = question. They stand alone; as a subject どれ takes が, not は.",
+    "examples": [
+      {
+        "ja": "これは私の辞書です。",
+        "furigana": "これは{私|わたし}の{辞書|じしょ}です。",
+        "vi": "",
+        "en": "This is my dictionary."
+      },
+      {
+        "ja": "それは何ですか。",
+        "furigana": "それは{何|なに}ですか。",
+        "vi": "",
+        "en": "What is that?"
+      },
+      {
+        "ja": "「あなたのかさはどれですか。」「あれです。」",
+        "furigana": "",
+        "vi": "",
+        "en": "\"Which one is your umbrella?\" \"That one over there.\""
+      }
+    ],
+    "tags": [
+      "demonstrative"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "kono-sono-ano-dono",
+    "pattern": "この / その / あの / どの",
+    "romaji": "kono / sono / ano / dono",
+    "meaningVi": "... này / ... đó / ... kia / ... nào (Từ chỉ định bổ nghĩa danh từ)",
+    "originalMeaning": "this; that (near you); that ... over there; which (before a noun)",
+    "formation": "この / その / あの / どの + Noun",
+    "formationVi": "この / その / あの / どの + Danh từ",
+    "explanationVi": "Đứng trực tiếp trước danh từ để xác định vật/người cụ thể.",
+    "originalNotes": "Always followed by a noun: この本, never この alone. これ / それ / あれ / どれ are used when there is no noun.",
+    "examples": [
+      {
+        "ja": "このケーキはおいしいです。",
+        "furigana": "",
+        "vi": "",
+        "en": "This cake is delicious."
+      },
+      {
+        "ja": "その本はだれのですか。",
+        "furigana": "その{本|ほん}はだれのですか。",
+        "vi": "",
+        "en": "Whose book is that?"
+      },
+      {
+        "ja": "「どの人が先生ですか。」「あの人です。」",
+        "furigana": "「どの{人|ひと}が{先生|せんせい}ですか。」「あの{人|ひと}です。」",
+        "vi": "",
+        "en": "\"Which person is the teacher?\" \"That person over there.\""
+      }
+    ],
+    "tags": [
+      "demonstrative"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "koko-soko-asoko-doko",
+    "pattern": "ここ / そこ / あそこ / どこ",
+    "romaji": "koko / soko / asoko / doko",
+    "meaningVi": "Chỗ này / Chỗ đó / Chỗ kia / Chỗ nào (Chỉ vị trí, nơi chốn)",
+    "originalMeaning": "here; there (near you); over there; where",
+    "formation": "ここ / そこ / あそこ / どこ",
+    "formationVi": "ここ / そこ / あそこ / どこ",
+    "explanationVi": "Chỉ nơi chốn dựa trên khoảng cách với người nói và người nghe.",
+    "originalNotes": "こちら / そちら / あちら / どちら are politer versions: お国はどちらですか (Where are you from?).",
+    "examples": [
+      {
+        "ja": "ここは私の学校です。",
+        "furigana": "ここは{私|わたし}の{学校|がっこう}です。",
+        "vi": "",
+        "en": "This is my school."
+      },
+      {
+        "ja": "トイレはあそこです。",
+        "furigana": "",
+        "vi": "",
+        "en": "The restroom is over there."
+      },
+      {
+        "ja": "すみません、駅はどこですか。",
+        "furigana": "すみません、{駅|えき}はどこですか。",
+        "vi": "",
+        "en": "Excuse me, where is the station?"
+      }
+    ],
+    "tags": [
+      "demonstrative"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "ku-nai-katta-ku-nakatta",
+    "pattern": "〜くない / 〜かった / 〜くなかった",
+    "romaji": "ku nai / katta / ku nakatta",
+    "meaningVi": "Chia thể tính từ đuôi い (Phủ định, quá khứ)",
+    "originalMeaning": "negative and past forms of i-adjectives (is not; was; was not)",
+    "formation": "i-Adj stem + くない / i-Adj stem + かった / i-Adj stem + くなかった",
+    "formationVi": "〜くない (phủ định) / 〜かった (quá khứ) / 〜くなかった (quá khứ phủ định)",
+    "explanationVi": "Quy tắc biến đổi đuôi của tính từ đuôi い.",
+    "originalNotes": "高い→高くない, 高かった, 高くなかった. Add です to be polite. いい is irregular: よくない, よかった, よくなかった.",
+    "examples": [
+      {
+        "ja": "この部屋はあまり広くないです。",
+        "furigana": "この{部屋|へや}はあまり{広|ひろ}くないです。",
+        "vi": "",
+        "en": "This room isn't very big."
+      },
+      {
+        "ja": "きのうのテストは難しかったです。",
+        "furigana": "きのうのテストは{難|むずか}しかったです。",
+        "vi": "",
+        "en": "Yesterday's test was difficult."
+      },
+      {
+        "ja": "先週見た映画はおもしろくなかったです。",
+        "furigana": "{先週|せんしゅう}{見|み}た{映画|えいが}はおもしろくなかったです。",
+        "vi": "",
+        "en": "The movie I saw last week wasn't interesting."
+      }
+    ],
+    "tags": [
+      "conjugation",
+      "negation",
+      "tense"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "na-na-adjective",
+    "pattern": "〜な（na-adjective）",
+    "romaji": "na (na-adjective)",
+    "meaningVi": "Tính từ đuôi な (Cách dùng bổ nghĩa danh từ)",
+    "originalMeaning": "na-adjectives: take な before a noun and です or だ at the end of a sentence",
+    "formation": "na-Adj + な + Noun / na-Adj + です / na-Adj + ではありません / na-Adj + でした",
+    "formationVi": "Tính từ đuôi な + な + Danh từ",
+    "explanationVi": "Khi đứng trước danh từ để bổ nghĩa, bắt buộc phải có chữ な (vd: きれいな花).",
+    "originalNotes": "Before a noun, add な: 静かな部屋. At the end of a sentence they change like nouns. きれい and きらい end in い but are な-adjectives.",
+    "examples": [
+      {
+        "ja": "京都は有名な町です。",
+        "furigana": "{京都|きょうと}は{有名|ゆうめい}な{町|まち}です。",
+        "vi": "",
+        "en": "Kyoto is a famous city."
+      },
+      {
+        "ja": "きのうは暇でした。",
+        "furigana": "きのうは{暇|ひま}でした。",
+        "vi": "",
+        "en": "I was free yesterday."
+      },
+      {
+        "ja": "この部屋はあまり静かではありません。",
+        "furigana": "この{部屋|へや}はあまり{静|しず}かではありません。",
+        "vi": "",
+        "en": "This room isn't very quiet."
+      }
+    ],
+    "tags": [
+      "conjugation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "kute-de",
+    "pattern": "〜くて / 〜で",
+    "romaji": "kute / de",
+    "meaningVi": "Vừa... lại vừa... (Nối tính từ)",
+    "originalMeaning": "and (linking adjectives or nouns)",
+    "formation": "i-Adj-ku + て / na-Adj + で / Noun + で",
+    "formationVi": "Tính từ đuôi い: くて / Tính từ đuôi な: で",
+    "explanationVi": "Nối hai tính từ có cùng tính chất hoặc diễn tả nhiều đặc điểm.",
+    "originalNotes": "いい becomes よくて. Join qualities that point the same way (both good or both bad); for a contrast, use が instead.",
+    "examples": [
+      {
+        "ja": "この店は安くておいしいです。",
+        "furigana": "この{店|みせ}は{安|やす}くておいしいです。",
+        "vi": "",
+        "en": "This restaurant is cheap and good."
+      },
+      {
+        "ja": "私の町は静かできれいです。",
+        "furigana": "{私|わたし}の{町|まち}は{静|しず}かできれいです。",
+        "vi": "",
+        "en": "My town is quiet and clean."
+      },
+      {
+        "ja": "兄は大学生で、妹は高校生です。",
+        "furigana": "{兄|あに}は{大学生|だいがくせい}で、{妹|いもうと}は{高校生|こうこうせい}です。",
+        "vi": "",
+        "en": "My older brother is a university student, and my younger sister is a high school student."
+      }
+    ],
+    "tags": [
+      "addition",
+      "conjugation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  },
+  {
+    "id": "to-iu-named",
+    "pattern": "〜という（named）",
+    "romaji": "to iu (named)",
+    "meaningVi": "Có tên là, gọi là...",
+    "originalMeaning": "called; named",
+    "formation": "Noun + という + Noun",
+    "formationVi": "Tên gọi + という + Danh từ",
+    "explanationVi": "Dùng khi giới thiệu tên của một người, địa danh, cuốn sách mà người nghe có thể chưa biết.",
+    "originalNotes": "Introduces a name the listener may not know.",
+    "examples": [
+      {
+        "ja": "これは「すきやき」という料理です。",
+        "furigana": "これは「すきやき」という{料理|りょうり}です。",
+        "vi": "",
+        "en": "This is a dish called sukiyaki."
+      },
+      {
+        "ja": "「さくら」という店でアルバイトをしています。",
+        "furigana": "「さくら」という{店|みせ}でアルバイトをしています。",
+        "vi": "",
+        "en": "I work part-time at a shop called Sakura."
+      },
+      {
+        "ja": "山田さんという人から電話がありました。",
+        "furigana": "{山田|やまだ}さんという{人|ひと}から{電話|でんわ}がありました。",
+        "vi": "",
+        "en": "There was a call from someone named Yamada."
+      }
+    ],
+    "tags": [
+      "quotation"
+    ],
+    "translationStatus": "verified",
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0)"
+  }
+]

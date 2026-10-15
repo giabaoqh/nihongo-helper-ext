@@ -44,7 +44,12 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "data/*"
+        "data/*",
+        "data/**/*",
+        "data/jlpt/*",
+        "data/jlpt/vocab/*",
+        "data/jlpt/grammar/*",
+        "data/jlpt/kanji/*"
       ],
       "matches": [
         "<all_urls>"

@@ -1666,5 +1666,588 @@ async function cleanupDuplicateDefaultCards() {
   }
 }
 
+// ========================================================
+// 5. THƯ VIỆN LUYỆN THI JLPT N1–N5 NGOẠI TUYẾN TIẾNG VIỆT
+// Hỗ trợ đầy đủ: Từ vựng, Ngữ pháp, Chữ Hán (Kanji), SRS & Nhập giáo trình
+// ========================================================
+
+const JLPT_CACHE = {};
+let JLPT_META_CACHE = null;
+
+/**
+ * Lấy siêu dữ liệu và thống kê thư viện JLPT N1–N5
+ */
+async function getJLPTMetadata() {
+  if (JLPT_META_CACHE) return JLPT_META_CACHE;
+  try {
+    const url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+      ? chrome.runtime.getURL('data/jlpt/meta.json')
+      : 'data/jlpt/meta.json';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    JLPT_META_CACHE = await res.json();
+    return JLPT_META_CACHE;
+  } catch (err) {
+    console.warn('[Storage] Lỗi nạp JLPT metadata:', err);
+    return {
+      title: 'Thư viện Dữ liệu Luyện thi JLPT N1–N5 Tiếng Việt',
+      grandTotal: 10720,
+      categories: {
+        vocab: { total: 7811, byLevel: { N5: 674, N4: 630, N3: 1659, N2: 1778, N1: 3070 } },
+        kanji: { total: 2383, byLevel: { N5: 84, N4: 169, N3: 387, N2: 398, N1: 1345 } },
+        grammar: { total: 526, byLevel: { N5: 81, N4: 98, N3: 101, N2: 123, N1: 123 } }
+      },
+      license: 'CC BY-SA 4.0'
+    };
+  }
+}
+
+/**
+ * Nạp dữ liệu JLPT theo phân hệ (vocab / kanji / grammar) và cấp độ (N5..N1 hoặc ALL)
+ */
+async function getJLPTData(category = 'vocab', level = 'N5') {
+  const normCategory = (category || 'vocab').toLowerCase().trim();
+  const normLevel = (level || 'N5').toUpperCase().trim();
+  const cacheKey = `${normCategory}_${normLevel}`;
+
+  if (JLPT_CACHE[cacheKey]) {
+    return JLPT_CACHE[cacheKey];
+  }
+
+  if (normLevel === 'ALL') {
+    const allLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+    const results = await Promise.all(allLevels.map(lvl => getJLPTData(normCategory, lvl)));
+    const merged = results.flat();
+    JLPT_CACHE[cacheKey] = merged;
+    return merged;
+  }
+
+  const validLevels = ['N1', 'N2', 'N3', 'N4', 'N5'];
+  const targetLevel = validLevels.includes(normLevel) ? normLevel : 'N5';
+  const lvlFile = targetLevel.toLowerCase() + '.json';
+
+  // Đường dẫn hỗ trợ cả dạng phẳng và phân mục con
+  const relativePath = (normCategory === 'vocab') 
+    ? `data/jlpt/${lvlFile}` 
+    : `data/jlpt/${normCategory}/${lvlFile}`;
+
+  try {
+    const url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+      ? chrome.runtime.getURL(relativePath)
+      : relativePath;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    JLPT_CACHE[cacheKey] = data;
+    return data;
+  } catch (err) {
+    console.warn(`[Storage] Lỗi nạp JLPT ${normCategory} cấp độ ${targetLevel}:`, err);
+    return [];
+  }
+}
+
+// Các hàm tiện ích tương thích ngược
+async function getJLPTWords(level = 'N5') {
+  return getJLPTData('vocab', level);
+}
+
+async function getJLPTKanji(level = 'N5') {
+  return getJLPTData('kanji', level);
+}
+
+async function getJLPTGrammar(level = 'N5') {
+  return getJLPTData('grammar', level);
+}
+
+/**
+ * Tra cứu và tìm kiếm linh hoạt dữ liệu JLPT (Hỗ trợ Từ vựng, Chữ Hán, Ngữ pháp)
+ */
+async function searchJLPTData(query, level = 'all', category = 'vocab') {
+  const cleanQuery = (query || '').trim().toLowerCase();
+  const items = await getJLPTData(category, level);
+  if (!cleanQuery) return items;
+
+  return items.filter(item => {
+    if (category === 'vocab') {
+      return (item.word && item.word.toLowerCase().includes(cleanQuery)) ||
+             (item.reading && item.reading.toLowerCase().includes(cleanQuery)) ||
+             (item.hanviet && item.hanviet.toLowerCase().includes(cleanQuery)) ||
+             (item.meaningVi && item.meaningVi.toLowerCase().includes(cleanQuery)) ||
+             (item.originalMeaning && item.originalMeaning.toLowerCase().includes(cleanQuery));
+    } else if (category === 'kanji') {
+      return (item.character && item.character.toLowerCase().includes(cleanQuery)) ||
+             (item.hanviet && item.hanviet.toLowerCase().includes(cleanQuery)) ||
+             (item.meaningVi && item.meaningVi.toLowerCase().includes(cleanQuery)) ||
+             (Array.isArray(item.onyomi) && item.onyomi.some(o => o.toLowerCase().includes(cleanQuery))) ||
+             (Array.isArray(item.kunyomi) && item.kunyomi.some(k => k.toLowerCase().includes(cleanQuery))) ||
+             (item.originalMeaning && item.originalMeaning.toLowerCase().includes(cleanQuery));
+    } else if (category === 'grammar') {
+      return (item.pattern && item.pattern.toLowerCase().includes(cleanQuery)) ||
+             (item.romaji && item.romaji.toLowerCase().includes(cleanQuery)) ||
+             (item.meaningVi && item.meaningVi.toLowerCase().includes(cleanQuery)) ||
+             (item.formationVi && item.formationVi.toLowerCase().includes(cleanQuery)) ||
+             (item.explanationVi && item.explanationVi.toLowerCase().includes(cleanQuery)) ||
+             (item.originalMeaning && item.originalMeaning.toLowerCase().includes(cleanQuery));
+    }
+    return false;
+  });
+}
+
+// Alias cho searchJLPTWords
+const searchJLPTWords = searchJLPTData;
+
+/**
+ * Lấy thống kê chi tiết tiến độ học tập JLPT theo từng cấp độ và phân hệ
+ */
+async function getJLPTStudyStats() {
+  const meta = await getJLPTMetadata();
+  const cards = await getAllCards();
+  const now = Date.now();
+
+  // Tạo Map tra cứu thẻ theo từ khóa (kanji / pattern / character)
+  const cardMap = new Map();
+  cards.forEach(c => {
+    const key = (c.word || c.kanji || '').trim();
+    if (key) {
+      cardMap.set(key, c);
+    }
+  });
+
+  const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+  const stats = {};
+
+  for (const lvl of levels) {
+    const [vocabList, kanjiList, grammarList] = await Promise.all([
+      getJLPTData('vocab', lvl),
+      getJLPTData('kanji', lvl),
+      getJLPTData('grammar', lvl)
+    ]);
+
+    let vocabSaved = 0, vocabLearning = 0, vocabMastered = 0, vocabDue = 0;
+    let kanjiSaved = 0, kanjiMastered = 0;
+    let grammarSaved = 0, grammarMastered = 0;
+    let verifiedVocabCount = 0;
+
+    vocabList.forEach(w => {
+      if (w.translationStatus === 'verified') verifiedVocabCount++;
+      const card = cardMap.get(w.word);
+      if (card) {
+        vocabSaved++;
+        const srs = card.srs || {};
+        if ((srs.repetition && srs.repetition >= 4) || (srs.interval && srs.interval >= 21)) {
+          vocabMastered++;
+        } else {
+          vocabLearning++;
+        }
+        if (!srs.dueDate || srs.dueDate <= now) {
+          vocabDue++;
+        }
+      }
+    });
+
+    kanjiList.forEach(k => {
+      const card = cardMap.get(k.character);
+      if (card) {
+        kanjiSaved++;
+        const srs = card.srs || {};
+        if ((srs.repetition && srs.repetition >= 4) || (srs.interval && srs.interval >= 21)) {
+          kanjiMastered++;
+        }
+      }
+    });
+
+    grammarList.forEach(g => {
+      const card = cardMap.get(g.pattern);
+      if (card) {
+        grammarSaved++;
+        const srs = card.srs || {};
+        if ((srs.repetition && srs.repetition >= 4) || (srs.interval && srs.interval >= 21)) {
+          grammarMastered++;
+        }
+      }
+    });
+
+    const totalVocab = vocabList.length;
+    const totalKanji = kanjiList.length;
+    const totalGrammar = grammarList.length;
+    const totalItems = totalVocab + totalKanji + totalGrammar;
+    const totalMastered = vocabMastered + kanjiMastered + grammarMastered;
+
+    stats[lvl] = {
+      level: lvl,
+      totalVocab: totalVocab,
+      totalKanji: totalKanji,
+      totalGrammar: totalGrammar,
+      totalItems: totalItems,
+      vocabSaved: vocabSaved,
+      vocabLearning: vocabLearning,
+      vocabMastered: vocabMastered,
+      vocabDue: vocabDue,
+      kanjiSaved: kanjiSaved,
+      kanjiMastered: kanjiMastered,
+      grammarSaved: grammarSaved,
+      grammarMastered: grammarMastered,
+      totalMastered: totalMastered,
+      percentMastered: totalItems > 0 ? Math.round((totalMastered / totalItems) * 100) : 0,
+      percentVocabMastered: totalVocab > 0 ? Math.round((vocabMastered / totalVocab) * 100) : 0,
+      verifiedVocabCount: verifiedVocabCount,
+      missingVocabCount: totalVocab - verifiedVocabCount,
+      // Tương thích ngược với các hàm cũ
+      total: totalVocab,
+      saved: vocabSaved,
+      learning: vocabLearning,
+      mastered: vocabMastered
+    };
+  }
+
+  return {
+    meta: meta,
+    grandTotal: meta.grandTotal || 10720,
+    levels: stats,
+    attribution: meta.attribution,
+    disclaimer: meta.disclaimer
+  };
+}
+
+/**
+ * Thêm hàng loạt các mục JLPT (Từ vựng, Ngữ pháp hoặc Chữ Hán) vào một Bộ thẻ
+ */
+async function addJLPTItemsToDeck(itemsList, targetDeckIdOrName = null, category = 'vocab') {
+  if (!Array.isArray(itemsList) || itemsList.length === 0) {
+    return { success: false, message: 'Danh sách mục rỗng' };
+  }
+
+  const now = Date.now();
+  const decks = await getDecks();
+  const allCards = await getAllCards();
+  const savedWords = await getSavedWords();
+
+  const firstItem = itemsList[0];
+  const levelStr = firstItem.level || 'N5';
+  const categoryTitles = {
+    vocab: 'Từ vựng',
+    kanji: 'Chữ Hán',
+    grammar: 'Ngữ pháp'
+  };
+  const catTitle = categoryTitles[category] || 'Từ vựng';
+
+  let deckName = (typeof targetDeckIdOrName === 'string' && targetDeckIdOrName.trim())
+    ? targetDeckIdOrName.trim()
+    : `JLPT ${levelStr} - ${catTitle}`;
+
+  let targetDeck = decks.find(d => d.id === targetDeckIdOrName || d.name === deckName);
+  if (!targetDeck) {
+    const levelColors = {
+      'N5': '#10b981',
+      'N4': '#0284c7',
+      'N3': '#7c3aed',
+      'N2': '#f59e0b',
+      'N1': '#ef4444'
+    };
+    const defaultColor = levelColors[levelStr] || '#0284c7';
+
+    targetDeck = {
+      id: generateId('deck'),
+      name: deckName,
+      description: `Bộ thẻ ${catTitle} JLPT ${levelStr} ngoại tuyến`,
+      color: defaultColor,
+      createdAt: now,
+      updatedAt: now
+    };
+    decks.push(targetDeck);
+    await saveAllDecks(decks);
+  }
+
+  let addedCards = 0;
+  let updatedCards = 0;
+
+  const defaultSrs = {
+    interval: 0,
+    repetition: 0,
+    easeFactor: 2.5,
+    dueDate: now,
+    state: 'new',
+    lastReviewed: null
+  };
+
+  for (const item of itemsList) {
+    let wordKey = '';
+    let reading = '';
+    let hanviet = '';
+    let meaning = '';
+    let meaningVi = '';
+    let example = '';
+    let exampleMeaning = '';
+    let notes = '';
+
+    if (category === 'kanji') {
+      wordKey = (item.character || '').trim();
+      reading = (item.onyomi || []).concat(item.kunyomi || []).join(', ');
+      hanviet = (item.hanviet || '').trim().toUpperCase();
+      meaningVi = item.meaningVi || 'Chưa có nghĩa tiếng Việt';
+      meaning = meaningVi;
+      notes = `Bộ thủ: ${item.radical || ''} (${item.strokes || 0} nét)\nTừ mẫu: ${(item.words || []).slice(0, 6).join(', ')}`;
+    } else if (category === 'grammar') {
+      wordKey = (item.pattern || '').trim();
+      reading = (item.romaji || '').trim();
+      meaningVi = item.meaningVi || item.originalMeaning || 'Cấu trúc ngữ pháp';
+      meaning = meaningVi;
+      example = item.examples && item.examples[0] ? item.examples[0].ja : '';
+      exampleMeaning = item.examples && item.examples[0] ? (item.examples[0].vi || item.examples[0].en || '') : '';
+      notes = `Cấu trúc: ${item.formationVi || item.formation || ''}\nGiải thích: ${item.explanationVi || item.originalNotes || ''}`;
+    } else {
+      // Vocab
+      wordKey = (item.word || item.kanji || '').trim();
+      reading = (item.reading || item.kana || '').trim();
+      hanviet = (item.hanviet || '').trim().toUpperCase();
+      meaningVi = (item.meaningVi && item.meaningVi !== 'Chưa có nghĩa tiếng Việt') 
+        ? item.meaningVi 
+        : (item.originalMeaning || item.meaning || 'Chưa có nghĩa tiếng Việt');
+      meaning = meaningVi;
+      example = item.example || '';
+      exampleMeaning = item.exampleVi || item.exampleMeaning || item.exampleEn || '';
+      notes = Array.isArray(item.pos) ? `Từ loại: ${item.pos.join(', ')}` : '';
+    }
+
+    if (!wordKey) continue;
+
+    // 1. Kiểm tra chống trùng lặp trong allCards cho deck này
+    const cardIdx = allCards.findIndex(c => c.deckId === targetDeck.id && (c.word === wordKey || c.kanji === wordKey));
+    if (cardIdx !== -1) {
+      const existing = allCards[cardIdx];
+      if (reading) existing.reading = reading;
+      if (hanviet) existing.hanviet = hanviet;
+      if (meaningVi) {
+        existing.meaning = meaningVi;
+        existing.meaningVi = meaningVi;
+      }
+      if (example) existing.example = example;
+      if (exampleMeaning) existing.exampleMeaning = exampleMeaning;
+      if (notes) existing.notes = notes;
+      existing.updatedAt = now;
+      updatedCards++;
+    } else {
+      allCards.unshift({
+        id: item.id || generateId('card'),
+        deckId: targetDeck.id,
+        word: wordKey,
+        reading: reading,
+        hanviet: hanviet,
+        meaning: meaningVi,
+        meaningVi: meaningVi,
+        pos: item.pos || catTitle,
+        example: example,
+        exampleMeaning: exampleMeaning,
+        notes: notes,
+        level: item.level || levelStr,
+        source: item.source || 'OpenJLPT (CC BY-SA 4.0)',
+        createdAt: now,
+        updatedAt: now,
+        srs: { ...defaultSrs }
+      });
+      addedCards++;
+    }
+
+    // 2. Đồng bộ vào savedWords
+    const swIdx = savedWords.findIndex(w => (w.kanji === wordKey || w.word === wordKey));
+    if (swIdx !== -1) {
+      const sw = savedWords[swIdx];
+      if (reading) sw.reading = reading;
+      if (hanviet) sw.hanviet = hanviet;
+      if (meaningVi) {
+        sw.meaning = meaningVi;
+        sw.meaningVi = meaningVi;
+      }
+      sw.folder = targetDeck.name;
+    } else {
+      savedWords.unshift({
+        id: generateId('word'),
+        kanji: wordKey,
+        word: wordKey,
+        reading: reading,
+        hanviet: hanviet,
+        meaning: meaningVi,
+        meaningVi: meaningVi,
+        folder: targetDeck.name,
+        addedAt: now
+      });
+    }
+  }
+
+  await saveAllCards(allCards);
+  await new Promise(r => chrome.storage.local.set({ [STORAGE_KEY]: savedWords }, r));
+  await syncDeckFolders();
+  await setLastSavedFolder(targetDeck.name);
+
+  broadcastDataChange('jlpt_items_added_to_deck', {
+    deckId: targetDeck.id,
+    deckName: targetDeck.name,
+    addedCount: addedCards,
+    updatedCount: updatedCards
+  });
+
+  return {
+    success: true,
+    deck: targetDeck,
+    addedCount: addedCards,
+    updatedCount: updatedCards,
+    totalProcessed: itemsList.length
+  };
+}
+
+// Giữ lại alias cũ addJLPTWordsToDeck
+const addJLPTWordsToDeck = addJLPTItemsToDeck;
+
+/**
+ * Phân tích và kiểm tra tính hợp lệ của tài liệu cá nhân nhập vào (JSON / CSV)
+ */
+function parseAndValidatePersonalImport(rawContent, format = 'auto') {
+  if (!rawContent || !rawContent.trim()) {
+    return {
+      success: false,
+      error: 'Tệp hoặc nội dung nhập vào bị rỗng.'
+    };
+  }
+
+  const clean = rawContent.trim();
+  let records = [];
+
+  // 1. Nhận diện JSON
+  if (format === 'json' || (format === 'auto' && (clean.startsWith('[') || clean.startsWith('{')))) {
+    try {
+      const parsed = JSON.parse(clean);
+      if (Array.isArray(parsed)) {
+        records = parsed;
+      } else if (parsed && Array.isArray(parsed.cards)) {
+        records = parsed.cards;
+      } else if (parsed && Array.isArray(parsed.words)) {
+        records = parsed.words;
+      } else {
+        return {
+          success: false,
+          error: 'Định dạng JSON không hợp lệ. Phải là một mảng danh sách từ vựng [ {...}, {...} ].'
+        };
+      }
+    } catch (e) {
+      return {
+        success: false,
+        error: `Lỗi đọc cú pháp JSON: ${e.message}`
+      };
+    }
+  } else {
+    // 2. Nhận diện CSV / TSV
+    const lines = clean.split(/\r?\n/).filter(line => line.trim().length > 0);
+    if (lines.length < 2) {
+      return {
+        success: false,
+        error: 'File CSV phải có ít nhất 1 dòng tiêu đề và 1 dòng dữ liệu.'
+      };
+    }
+
+    const separator = lines[0].includes('\t') ? '\t' : (lines[0].includes(';') ? ';' : ',');
+    const headerCols = lines[0].split(separator).map(c => c.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+
+    // Tìm vị trí các cột
+    const colIdx = {
+      word: headerCols.findIndex(c => ['word', 'kanji', 'từ', 'tu_vung', 'japanese'].includes(c)),
+      reading: headerCols.findIndex(c => ['reading', 'kana', 'cách đọc', 'furigana', 'hiragana'].includes(c)),
+      hanviet: headerCols.findIndex(c => ['hanviet', 'hán việt', 'han_viet', 'sino_vietnamese'].includes(c)),
+      meaning: headerCols.findIndex(c => ['meaning', 'nghĩa', 'nghia', 'meaningvi', 'dịch'].includes(c)),
+      example: headerCols.findIndex(c => ['example', 'ví dụ', 'vi_du', 'sentence'].includes(c)),
+      exampleMeaning: headerCols.findIndex(c => ['examplemeaning', 'dịch ví dụ', 'nghia_vi_du', 'example_meaning'].includes(c)),
+      textbook: headerCols.findIndex(c => ['textbook', 'giáo trình', 'sách', 'book'].includes(c)),
+      lesson: headerCols.findIndex(c => ['lesson', 'bài', 'bai', 'chương'].includes(c)),
+      level: headerCols.findIndex(c => ['level', 'cấp độ', 'jlpt', 'n'].includes(c))
+    };
+
+    if (colIdx.word === -1 && colIdx.reading === -1) {
+      // Thử dùng mặc định nếu không có header chuẩn: Cột 1 = Từ, Cột 2 = Cách đọc, Cột 3 = Nghĩa
+      for (let i = (headerCols.includes('word') ? 1 : 0); i < lines.length; i++) {
+        const parts = lines[i].split(separator).map(p => p.trim().replace(/^["']|["']$/g, ''));
+        if (parts[0]) {
+          records.push({
+            word: parts[0],
+            reading: parts[1] || '',
+            meaning: parts[2] || '',
+            example: parts[3] || '',
+            exampleMeaning: parts[4] || ''
+          });
+        }
+      }
+    } else {
+      for (let i = 1; i < lines.length; i++) {
+        const parts = lines[i].split(separator).map(p => p.trim().replace(/^["']|["']$/g, ''));
+        const rowWord = colIdx.word !== -1 ? parts[colIdx.word] : '';
+        if (rowWord) {
+          records.push({
+            word: rowWord,
+            reading: colIdx.reading !== -1 ? (parts[colIdx.reading] || '') : '',
+            hanviet: colIdx.hanviet !== -1 ? (parts[colIdx.hanviet] || '') : '',
+            meaning: colIdx.meaning !== -1 ? (parts[colIdx.meaning] || '') : '',
+            example: colIdx.example !== -1 ? (parts[colIdx.example] || '') : '',
+            exampleMeaning: colIdx.exampleMeaning !== -1 ? (parts[colIdx.exampleMeaning] || '') : '',
+            textbook: colIdx.textbook !== -1 ? (parts[colIdx.textbook] || '') : '',
+            lesson: colIdx.lesson !== -1 ? (parts[colIdx.lesson] || '') : '',
+            level: colIdx.level !== -1 ? (parts[colIdx.level] || '') : ''
+          });
+        }
+      }
+    }
+  }
+
+  // 3. Phân loại Valid / Invalid / Duplicate
+  const valid = [];
+  const invalid = [];
+  const seenWords = new Set();
+  const duplicates = [];
+
+  records.forEach((r, idx) => {
+    const rawWord = (r.word || r.kanji || '').trim();
+    if (!rawWord) {
+      invalid.push({ index: idx + 1, item: r, reason: 'Thiếu từ vựng tiếng Nhật (word/kanji bắt buộc).' });
+      return;
+    }
+
+    if (seenWords.has(rawWord)) {
+      duplicates.push({ index: idx + 1, item: r, reason: `Từ vựng "${rawWord}" bị trùng lặp trong tệp nhập.` });
+    } else {
+      seenWords.add(rawWord);
+    }
+
+    valid.push({
+      id: r.id || generateId('card'),
+      word: rawWord,
+      reading: (r.reading || r.kana || '').trim(),
+      hanviet: (r.hanviet || '').trim().toUpperCase(),
+      meaning: (r.meaning || r.meaningVi || 'Chưa rõ nghĩa').trim(),
+      meaningVi: (r.meaningVi || r.meaning || 'Chưa rõ nghĩa').trim(),
+      example: (r.example || '').trim(),
+      exampleMeaning: (r.exampleMeaning || r.exampleTranslation || '').trim(),
+      textbook: (r.textbook || r.book || '').trim(),
+      lesson: (r.lesson || r.bai || '').trim(),
+      level: (r.level || r.jlptLevel || r.jlpt || '').trim().toUpperCase(),
+      notes: r.notes || (r.textbook ? `Giáo trình: ${r.textbook} ${r.lesson ? '- Bài ' + r.lesson : ''}` : '')
+    });
+  });
+
+  return {
+    success: true,
+    totalRecords: records.length,
+    totalCount: records.length,
+    validRecords: valid,
+    validItems: valid,
+    invalidRecords: invalid,
+    invalidItems: invalid,
+    duplicateRecords: duplicates,
+    duplicateItems: duplicates,
+    validCount: valid.length,
+    invalidCount: invalid.length,
+    errorCount: invalid.length,
+    duplicateCount: duplicates.length
+  };
+}
+
 // Tự động kiểm tra và đồng bộ khi nạp storage.js
 syncSavedWordsWithCards().then(() => cleanupDuplicateDefaultCards()).catch(() => {});
+
+

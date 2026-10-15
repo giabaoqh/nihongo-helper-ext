@@ -1,0 +1,3101 @@
+[
+  {
+    "id": "k_n5_0_%E6%97%A5",
+    "character": "日",
+    "hanviet": "NHẬT",
+    "meaningVi": "viết tắt của 日本, Nhật Bản",
+    "originalMeaning": "day; sun; Japan; counter for days",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ニチ",
+      "ジツ"
+    ],
+    "kunyomi": [
+      "ひ",
+      "-び",
+      "-か"
+    ],
+    "nanori": [
+      "あ",
+      "あき",
+      "いる",
+      "く",
+      "くさ",
+      "こう",
+      "す",
+      "たち",
+      "に",
+      "にっ",
+      "につ",
+      "へ"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 1,
+    "radical": "日",
+    "words": [
+      "明日",
+      "一日",
+      "五日",
+      "昨日",
+      "今日",
+      "九日",
+      "十日",
+      "七日"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_1_%E4%B8%80",
+    "character": "一",
+    "hanviet": "NHẤT",
+    "meaningVi": "một, đơn, một cái, ngay khi",
+    "originalMeaning": "one; one radical (no.1)",
+    "translationStatus": "verified",
+    "onyomi": [
+      "イチ",
+      "イツ"
+    ],
+    "kunyomi": [
+      "ひと-",
+      "ひと.つ"
+    ],
+    "nanori": [
+      "かず",
+      "い",
+      "いっ",
+      "いる",
+      "かつ",
+      "かづ",
+      "てん",
+      "はじめ",
+      "ひ",
+      "ひとつ",
+      "まこと"
+    ],
+    "strokes": 1,
+    "grade": 1,
+    "freq": 2,
+    "radical": "一",
+    "words": [
+      "一",
+      "一日",
+      "一緒",
+      "一つ",
+      "一月",
+      "一人",
+      "一昨日",
+      "一昨年"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_2_%E5%9B%BD",
+    "character": "国",
+    "hanviet": "QUỐC",
+    "meaningVi": "họ",
+    "originalMeaning": "country",
+    "translationStatus": "verified",
+    "onyomi": [
+      "コク"
+    ],
+    "kunyomi": [
+      "くに"
+    ],
+    "nanori": [
+      "くな",
+      "こ"
+    ],
+    "strokes": 8,
+    "grade": 2,
+    "freq": 3,
+    "radical": "囗",
+    "words": [
+      "国",
+      "外国",
+      "外国人",
+      "国際",
+      "国語",
+      "国民",
+      "国家",
+      "国会"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_3_%E4%BA%BA",
+    "character": "人",
+    "hanviet": "NHÂN",
+    "meaningVi": "người, mọi người, LT:個|个,位",
+    "originalMeaning": "person",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ジン",
+      "ニン"
+    ],
+    "kunyomi": [
+      "ひと",
+      "-り",
+      "-と"
+    ],
+    "nanori": [
+      "じ",
+      "と",
+      "ね",
+      "ひこ",
+      "ふみ"
+    ],
+    "strokes": 2,
+    "grade": 1,
+    "freq": 5,
+    "radical": "人",
+    "words": [
+      "人",
+      "大人",
+      "一人",
+      "二人",
+      "外国人",
+      "人口",
+      "人形",
+      "御主人"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_4_%E5%B9%B4",
+    "character": "年",
+    "hanviet": "NÊN",
+    "meaningVi": "họ",
+    "originalMeaning": "year; counter for years",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ネン"
+    ],
+    "kunyomi": [
+      "とし"
+    ],
+    "nanori": [
+      "ね"
+    ],
+    "strokes": 6,
+    "grade": 1,
+    "freq": 6,
+    "radical": "干",
+    "words": [
+      "年",
+      "去年",
+      "今年",
+      "毎年",
+      "来年",
+      "一昨年",
+      "再来年",
+      "万年筆"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_5_%E5%A4%A7",
+    "character": "大",
+    "hanviet": "ĐẠI",
+    "meaningVi": "to, lớn, vĩ đại, lớn tuổi hơn",
+    "originalMeaning": "large; big",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ダイ",
+      "タイ"
+    ],
+    "kunyomi": [
+      "おお-",
+      "おお.きい",
+      "-おお.いに"
+    ],
+    "nanori": [
+      "うふ",
+      "お",
+      "おう",
+      "た",
+      "たかし",
+      "とも",
+      "はじめ",
+      "ひろ",
+      "ひろし",
+      "まさ",
+      "まさる",
+      "もと",
+      "わ"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 7,
+    "radical": "大",
+    "words": [
+      "大勢",
+      "大人",
+      "大学",
+      "大切",
+      "大きい",
+      "大きな",
+      "大使館",
+      "大丈夫"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_6_%E5%8D%81",
+    "character": "十",
+    "hanviet": "THẬP",
+    "meaningVi": "mười, 10",
+    "originalMeaning": "ten",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ジュウ",
+      "ジッ",
+      "ジュッ"
+    ],
+    "kunyomi": [
+      "とお",
+      "と",
+      "そ"
+    ],
+    "nanori": [
+      "い",
+      "か",
+      "ぎ",
+      "さ",
+      "し",
+      "そう",
+      "ち",
+      "とう",
+      "ね",
+      "ま",
+      "る",
+      "わ"
+    ],
+    "strokes": 2,
+    "grade": 1,
+    "freq": 8,
+    "radical": "十",
+    "words": [
+      "十",
+      "十日",
+      "二十歳",
+      "二十日",
+      "十分",
+      "五十音",
+      "十字路"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_7_%E4%BA%8C",
+    "character": "二",
+    "hanviet": "NHÌ",
+    "meaningVi": "hai, 2, ngu ngốc",
+    "originalMeaning": "two; two radical (no. 7)",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ニ",
+      "ジ"
+    ],
+    "kunyomi": [
+      "ふた",
+      "ふた.つ",
+      "ふたたび"
+    ],
+    "nanori": [
+      "おと",
+      "つぐ",
+      "つぎ",
+      "にい",
+      "は",
+      "ふ",
+      "ふたつ",
+      "ふだ",
+      "わ"
+    ],
+    "strokes": 2,
+    "grade": 1,
+    "freq": 9,
+    "radical": "二",
+    "words": [
+      "二",
+      "二つ",
+      "二人",
+      "二日",
+      "二十歳",
+      "二十日",
+      "二階建て",
+      "真っ二つ"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_8_%E6%9C%AC",
+    "character": "本",
+    "hanviet": "BẢN",
+    "meaningVi": "gốc, rễ, nguồn gốc, nguyên nhân",
+    "originalMeaning": "book; present; main; origin; true; real; counter for long cylindrical things",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ホン"
+    ],
+    "kunyomi": [
+      "もと"
+    ],
+    "nanori": [
+      "まと",
+      "ごう"
+    ],
+    "strokes": 5,
+    "grade": 1,
+    "freq": 10,
+    "radical": "木",
+    "words": [
+      "本",
+      "本棚",
+      "基本",
+      "資本",
+      "日本",
+      "本人",
+      "本物",
+      "標本"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_9_%E4%B8%AD",
+    "character": "中",
+    "hanviet": "TRUNG",
+    "meaningVi": "Trung Quốc, tiếng Trung, họ",
+    "originalMeaning": "in; inside; middle; mean; center",
+    "translationStatus": "verified",
+    "onyomi": [
+      "チュウ"
+    ],
+    "kunyomi": [
+      "なか",
+      "うち",
+      "あた.る"
+    ],
+    "nanori": [
+      "あたる",
+      "かなえ"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 11,
+    "radical": "丨",
+    "words": [
+      "中",
+      "背中",
+      "途中",
+      "中々",
+      "中学校",
+      "真ん中",
+      "最中",
+      "集中"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_10_%E9%95%B7",
+    "character": "長",
+    "hanviet": "TRƯỜNG",
+    "meaningVi": "dài, lâu, to, lớn, đứng đầu",
+    "originalMeaning": "long; leader; superior; senior",
+    "translationStatus": "verified",
+    "onyomi": [
+      "チョウ"
+    ],
+    "kunyomi": [
+      "なが.い",
+      "おさ"
+    ],
+    "nanori": [
+      "お",
+      "おしゃ",
+      "たかし",
+      "たけ",
+      "な",
+      "は",
+      "ひさ"
+    ],
+    "strokes": 8,
+    "grade": 2,
+    "freq": 12,
+    "radical": "長",
+    "words": [
+      "長い",
+      "課長",
+      "校長",
+      "社長",
+      "部長",
+      "議長",
+      "身長",
+      "成長"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_11_%E5%87%BA",
+    "character": "出",
+    "hanviet": "XUẤT",
+    "meaningVi": "đi ra, đi ra ngoài, phát sinh, xảy ra",
+    "originalMeaning": "exit; leave; go out; come out; put out; protrude",
+    "translationStatus": "verified",
+    "onyomi": [
+      "シュ��",
+      "スイ"
+    ],
+    "kunyomi": [
+      "で.る",
+      "-で",
+      "だ.す",
+      "-だ.す",
+      "い.でる",
+      "い.だす"
+    ],
+    "nanori": [
+      "いず",
+      "いづ",
+      "いで",
+      "じ",
+      "すっ",
+      "すつ",
+      "てん"
+    ],
+    "strokes": 5,
+    "grade": 1,
+    "freq": 13,
+    "radical": "凵",
+    "words": [
+      "出す",
+      "出口",
+      "出る",
+      "出かける",
+      "出席",
+      "出発",
+      "輸出",
+      "思い出す"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_12_%E4%B8%89",
+    "character": "三",
+    "hanviet": "TAM",
+    "meaningVi": "họ",
+    "originalMeaning": "three",
+    "translationStatus": "verified",
+    "onyomi": [
+      "サン",
+      "ゾウ"
+    ],
+    "kunyomi": [
+      "み",
+      "み.つ",
+      "みっ.つ"
+    ],
+    "nanori": [
+      "か",
+      "さ",
+      "さい",
+      "さえ",
+      "さぶ",
+      "ざ",
+      "ざえ",
+      "ざぶ",
+      "そう",
+      "ぞ",
+      "ただ",
+      "みつ",
+      "みん",
+      "も",
+      "や"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 14,
+    "radical": "一",
+    "words": [
+      "三",
+      "三日",
+      "三つ",
+      "再三",
+      "三角",
+      "三日月",
+      "三味線"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_13_%E6%99%82",
+    "character": "時",
+    "hanviet": "THỜI",
+    "meaningVi": "lúc, thời gian",
+    "originalMeaning": "time; hour",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ジ"
+    ],
+    "kunyomi": [
+      "とき",
+      "-どき"
+    ],
+    "nanori": [
+      "と",
+      "とぎ"
+    ],
+    "strokes": 10,
+    "grade": 2,
+    "freq": 16,
+    "radical": "日",
+    "words": [
+      "時間",
+      "時々",
+      "時計",
+      "時代",
+      "時",
+      "一時",
+      "時期",
+      "時刻"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_14_%E8%A1%8C",
+    "character": "行",
+    "hanviet": "HÀNG",
+    "meaningVi": "hàng, dòng, công ty thương mại, ngành kinh doanh",
+    "originalMeaning": "going; journey; carry out; conduct; act; line; row; bank",
+    "translationStatus": "verified",
+    "onyomi": [
+      "コウ",
+      "ギョウ",
+      "アン"
+    ],
+    "kunyomi": [
+      "い.く",
+      "ゆ.く",
+      "-ゆ.き",
+      "-ゆき",
+      "-い.き",
+      "-いき",
+      "おこな.う",
+      "おこ.なう"
+    ],
+    "nanori": [
+      "いく",
+      "なみ",
+      "なめ",
+      "みち",
+      "ゆき",
+      "ゆく"
+    ],
+    "strokes": 6,
+    "grade": 2,
+    "freq": 20,
+    "radical": "行",
+    "words": [
+      "行く",
+      "銀行",
+      "旅行",
+      "飛行機",
+      "行う",
+      "急行",
+      "飛行場",
+      "行き"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_15_%E8%A6%8B",
+    "character": "見",
+    "hanviet": "KIẾN",
+    "meaningVi": "tỏ rõ, hiện ra, gặp, thấy",
+    "originalMeaning": "see; hopes; chances; idea; opinion; look at; visible",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ケン"
+    ],
+    "kunyomi": [
+      "み.る",
+      "み.える",
+      "み.せる"
+    ],
+    "nanori": [],
+    "strokes": 7,
+    "grade": 1,
+    "freq": 22,
+    "radical": "見",
+    "words": [
+      "見る",
+      "見せる",
+      "意見",
+      "見物",
+      "拝見",
+      "花見",
+      "見える",
+      "お見舞い"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_16_%E6%9C%88",
+    "character": "月",
+    "hanviet": "NGUYỆT",
+    "meaningVi": "mặt trăng, tháng, hàng tháng, LT:個|个,輪|轮",
+    "originalMeaning": "month; moon",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ゲツ",
+      "ガツ"
+    ],
+    "kunyomi": [
+      "つき"
+    ],
+    "nanori": [
+      "おと",
+      "がっ",
+      "す",
+      "ずき",
+      "もり"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 23,
+    "radical": "月",
+    "words": [
+      "今月",
+      "先月",
+      "一月",
+      "毎月",
+      "来月",
+      "月曜日",
+      "再来月",
+      "月曜"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_17_%E5%88%86",
+    "character": "分",
+    "hanviet": "PHÂN",
+    "meaningVi": "chia, tách, phân phối, phân bổ",
+    "originalMeaning": "part; minute of time; segment; share; degree; one's lot; duty; understand; know; rate; 1%; chances; shaku/100",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ブン",
+      "フン",
+      "ブ"
+    ],
+    "kunyomi": [
+      "わ.ける",
+      "わ.け",
+      "わ.かれる",
+      "わ.かる",
+      "わ.かつ"
+    ],
+    "nanori": [
+      "いた",
+      "わけ"
+    ],
+    "strokes": 4,
+    "grade": 2,
+    "freq": 24,
+    "radical": "刀",
+    "words": [
+      "自分",
+      "半分",
+      "分かる",
+      "気分",
+      "十分",
+      "大分",
+      "分",
+      "部分"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_18_%E5%BE%8C",
+    "character": "後",
+    "hanviet": "HẬU",
+    "meaningVi": "sau, phía sau",
+    "originalMeaning": "behind; back; later",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ゴ",
+      "コウ"
+    ],
+    "kunyomi": [
+      "のち",
+      "うし.ろ",
+      "うしろ",
+      "あと",
+      "おく.れる"
+    ],
+    "nanori": [
+      "こし",
+      "し",
+      "しい",
+      "しり"
+    ],
+    "strokes": 9,
+    "grade": 2,
+    "freq": 26,
+    "radical": "彳",
+    "words": [
+      "後",
+      "後ろ",
+      "午後",
+      "最後",
+      "後者",
+      "今後",
+      "明後日",
+      "以後"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_19_%E5%89%8D",
+    "character": "前",
+    "hanviet": "TIỀN",
+    "meaningVi": "trước, phía trước, tiến lên, đầu tiên",
+    "originalMeaning": "in front; before",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ゼン"
+    ],
+    "kunyomi": [
+      "まえ",
+      "-まえ"
+    ],
+    "nanori": [
+      "さき",
+      "さと",
+      "まい"
+    ],
+    "strokes": 9,
+    "grade": 2,
+    "freq": 27,
+    "radical": "刀",
+    "words": [
+      "前",
+      "午前",
+      "名前",
+      "以前",
+      "前者",
+      "前進",
+      "前後",
+      "直前"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_20_%E7%94%9F",
+    "character": "生",
+    "hanviet": "SINH",
+    "meaningVi": "được sinh, sinh ra, cuộc sống, phát triển",
+    "originalMeaning": "life; genuine; birth",
+    "translationStatus": "verified",
+    "onyomi": [
+      "セイ",
+      "ショウ"
+    ],
+    "kunyomi": [
+      "い.きる",
+      "い.かす",
+      "い.ける",
+      "う.まれる",
+      "うま.れる",
+      "う.まれ",
+      "うまれ",
+      "う.む",
+      "お.う",
+      "は.える",
+      "は.やす",
+      "き",
+      "なま",
+      "なま-",
+      "な.る",
+      "な.す",
+      "む.す",
+      "-う"
+    ],
+    "nanori": [
+      "あさ",
+      "いき",
+      "いく",
+      "いけ",
+      "うぶ",
+      "うまい",
+      "え",
+      "おい",
+      "ぎゅう",
+      "くるみ",
+      "ごせ",
+      "さ",
+      "じょう",
+      "すぎ",
+      "そ",
+      "そう",
+      "ちる",
+      "なば",
+      "にう",
+      "にゅう",
+      "ふ",
+      "み",
+      "もう",
+      "よい",
+      "りゅう"
+    ],
+    "strokes": 5,
+    "grade": 1,
+    "freq": 29,
+    "radical": "生",
+    "words": [
+      "学生",
+      "生徒",
+      "先生",
+      "誕生日",
+      "留学生",
+      "生まれる",
+      "生活",
+      "生産"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_21_%E4%BA%94",
+    "character": "五",
+    "hanviet": "NGŨ",
+    "meaningVi": "năm, 5",
+    "originalMeaning": "five",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ゴ"
+    ],
+    "kunyomi": [
+      "いつ",
+      "いつ.つ"
+    ],
+    "nanori": [
+      "い",
+      "さ",
+      "さつ",
+      "ち",
+      "ふ",
+      "み",
+      "め"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 31,
+    "radical": "二",
+    "words": [
+      "五",
+      "五日",
+      "五つ",
+      "五十音",
+      "四捨五入",
+      "五月蝿い"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_22_%E9%96%93",
+    "character": "間",
+    "hanviet": "GIAN",
+    "meaningVi": "khoảng không gian, kẽ hở, lỗ hổng, chia rẽ",
+    "originalMeaning": "interval; space",
+    "translationStatus": "verified",
+    "onyomi": [
+      "カン",
+      "ケン"
+    ],
+    "kunyomi": [
+      "あいだ",
+      "ま",
+      "あい"
+    ],
+    "nanori": [
+      "ちか",
+      "は",
+      "はざ",
+      "はし"
+    ],
+    "strokes": 12,
+    "grade": 2,
+    "freq": 33,
+    "radical": "門",
+    "words": [
+      "時間",
+      "間",
+      "昼間",
+      "間違える",
+      "間に合う",
+      "居間",
+      "期間",
+      "週間"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_23_%E4%B8%8A",
+    "character": "上",
+    "hanviet": "THƯỢNG",
+    "meaningVi": "dùng trong 上聲|上声",
+    "originalMeaning": "above; up",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ジョウ",
+      "ショウ",
+      "シャン"
+    ],
+    "kunyomi": [
+      "うえ",
+      "-うえ",
+      "うわ-",
+      "かみ",
+      "あ.げる",
+      "-あ.げる",
+      "あ.がる",
+      "-あ.がる",
+      "あ.がり",
+      "-あ.がり",
+      "のぼ.る",
+      "のぼ.り",
+      "のぼ.せる",
+      "のぼ.す",
+      "たてまつ.る"
+    ],
+    "nanori": [
+      "あおい",
+      "あげ",
+      "い",
+      "か",
+      "かき",
+      "かず",
+      "かん",
+      "こう",
+      "のぼり",
+      "ほつ"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 35,
+    "radical": "一",
+    "words": [
+      "上",
+      "上着",
+      "上手",
+      "上げる",
+      "以上",
+      "屋上",
+      "上がる",
+      "差し上げる"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_24_%E6%9D%B1",
+    "character": "東",
+    "hanviet": "ĐÔNG",
+    "meaningVi": "phía đông, phương đông",
+    "originalMeaning": "east",
+    "translationStatus": "verified",
+    "onyomi": [
+      "トウ"
+    ],
+    "kunyomi": [
+      "ひがし"
+    ],
+    "nanori": [
+      "あい",
+      "あがり",
+      "あずま",
+      "あづま",
+      "こち",
+      "さき",
+      "しの",
+      "とお",
+      "はる",
+      "ひが",
+      "もと"
+    ],
+    "strokes": 8,
+    "grade": 2,
+    "freq": 37,
+    "radical": "木",
+    "words": [
+      "東",
+      "関東",
+      "東西",
+      "東洋"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_25_%E5%9B%9B",
+    "character": "四",
+    "hanviet": "TỨ",
+    "meaningVi": "bốn, 4",
+    "originalMeaning": "four",
+    "translationStatus": "verified",
+    "onyomi": [
+      "シ"
+    ],
+    "kunyomi": [
+      "��",
+      "よ.つ",
+      "よっ.つ",
+      "よん"
+    ],
+    "nanori": [
+      "あ",
+      "つ",
+      "よつ"
+    ],
+    "strokes": 5,
+    "grade": 1,
+    "freq": 47,
+    "radical": "囗",
+    "words": [
+      "四",
+      "四日",
+      "四つ",
+      "四角",
+      "四季",
+      "四角い",
+      "四つ角",
+      "四捨五入"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_26_%E4%BB%8A",
+    "character": "今",
+    "hanviet": "KIM",
+    "meaningVi": "bây giờ, thời gian hiện tại, hiện nay, đương thời",
+    "originalMeaning": "now",
+    "translationStatus": "verified",
+    "onyomi": [
+      "コン",
+      "キン"
+    ],
+    "kunyomi": [
+      "いま"
+    ],
+    "nanori": [
+      "な"
+    ],
+    "strokes": 4,
+    "grade": 2,
+    "freq": 49,
+    "radical": "人",
+    "words": [
+      "今",
+      "今日",
+      "今朝",
+      "今年",
+      "今月",
+      "今週",
+      "今晩",
+      "今度"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_27_%E9%87%91",
+    "character": "金",
+    "hanviet": "KIM",
+    "meaningVi": "họ, họ Kim, nhà Kim của người Nữ Chân",
+    "originalMeaning": "gold",
+    "translationStatus": "verified",
+    "onyomi": [
+      "キン",
+      "コン",
+      "ゴン"
+    ],
+    "kunyomi": [
+      "かね",
+      "かな-",
+      "-がね"
+    ],
+    "nanori": [
+      "かん",
+      "きむ",
+      "こ",
+      "この",
+      "ん"
+    ],
+    "strokes": 8,
+    "grade": 1,
+    "freq": 53,
+    "radical": "金",
+    "words": [
+      "お金",
+      "金曜日",
+      "お金持ち",
+      "金",
+      "金額",
+      "金庫",
+      "金銭",
+      "金属"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_28_%E4%B9%9D",
+    "character": "九",
+    "hanviet": "CỬU",
+    "meaningVi": "chín, 9",
+    "originalMeaning": "nine",
+    "translationStatus": "verified",
+    "onyomi": [
+      "キュウ",
+      "ク"
+    ],
+    "kunyomi": [
+      "ここの",
+      "ここの.つ"
+    ],
+    "nanori": [
+      "いちじく",
+      "いちのく",
+      "この",
+      "ひさし"
+    ],
+    "strokes": 2,
+    "grade": 1,
+    "freq": 55,
+    "radical": "乙",
+    "words": [
+      "九",
+      "九日",
+      "九つ"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_29_%E5%85%A5",
+    "character": "入",
+    "hanviet": "NHẬP",
+    "meaningVi": "đi vào, tham gia, trở thành thành viên, xác nhận hoặc đồng ý với",
+    "originalMeaning": "enter; insert",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ニュウ",
+      "ジュ"
+    ],
+    "kunyomi": [
+      "い.る",
+      "-い.る",
+      "-い.り",
+      "い.れる",
+      "-い.れ",
+      "はい.る"
+    ],
+    "nanori": [
+      "いり",
+      "いる",
+      "に",
+      "の",
+      "りり"
+    ],
+    "strokes": 2,
+    "grade": 1,
+    "freq": 56,
+    "radical": "入",
+    "words": [
+      "入口",
+      "入る",
+      "入れる",
+      "入院",
+      "入学",
+      "輸入",
+      "押し入れ",
+      "記入"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_30_%E5%AD%A6",
+    "character": "学",
+    "hanviet": "HỌC",
+    "meaningVi": "học, học tập, bắt chước, khoa học",
+    "originalMeaning": "study; learning; science",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ガク"
+    ],
+    "kunyomi": [
+      "まな.ぶ"
+    ],
+    "nanori": [
+      "たか",
+      "のり"
+    ],
+    "strokes": 8,
+    "grade": 1,
+    "freq": 63,
+    "radical": "子",
+    "words": [
+      "学生",
+      "学校",
+      "大学",
+      "留学生",
+      "医学",
+      "科学",
+      "数学",
+      "入学"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_31_%E9%AB%98",
+    "character": "高",
+    "hanviet": "CAO",
+    "meaningVi": "họ",
+    "originalMeaning": "tall; high; expensive",
+    "translationStatus": "verified",
+    "onyomi": [
+      "コウ"
+    ],
+    "kunyomi": [
+      "たか.い",
+      "たか",
+      "-だか",
+      "たか.まる",
+      "たか.める"
+    ],
+    "nanori": [
+      "か",
+      "こ",
+      "じょい",
+      "た",
+      "はか"
+    ],
+    "strokes": 10,
+    "grade": 2,
+    "freq": 65,
+    "radical": "高",
+    "words": [
+      "高い",
+      "高校",
+      "高校生",
+      "高等学校",
+      "高価",
+      "高速",
+      "最高",
+      "高級"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_32_%E5%86%86",
+    "character": "円",
+    "hanviet": "VIÊN",
+    "meaningVi": "đồng yên, biến thể tiếng Nhật của 圓|圆",
+    "originalMeaning": "circle; yen; round",
+    "translationStatus": "verified",
+    "onyomi": [
+      "エン"
+    ],
+    "kunyomi": [
+      "まる.い",
+      "まる",
+      "まど",
+      "まど.か",
+      "まろ.やか"
+    ],
+    "nanori": [
+      "つぶら",
+      "のぶ",
+      "まどか",
+      "みつ"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 69,
+    "radical": "冂",
+    "words": [
+      "円",
+      "円周",
+      "楕円",
+      "円い",
+      "円滑",
+      "円満"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_33_%E5%AD%90",
+    "character": "子",
+    "hanviet": "TÍ",
+    "meaningVi": "con trai, trẻ em, hạt, trứng",
+    "originalMeaning": "child; sign of the rat; 11PM-1AM; first sign of Chinese zodiac",
+    "translationStatus": "verified",
+    "onyomi": [
+      "シ",
+      "ス",
+      "ツ"
+    ],
+    "kunyomi": [
+      "こ",
+      "-こ",
+      "ね"
+    ],
+    "nanori": [
+      "い",
+      "き",
+      "ぎ",
+      "く",
+      "け",
+      "ねっ"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 72,
+    "radical": "子",
+    "words": [
+      "子供",
+      "帽子",
+      "お菓子",
+      "男の子",
+      "女の子",
+      "子",
+      "息子",
+      "王子"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_34_%E5%A4%96",
+    "character": "外",
+    "hanviet": "NGOẠI",
+    "meaningVi": "bên ngoài, thêm vào, ngoại, quốc tế",
+    "originalMeaning": "outside",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ガイ",
+      "ゲ"
+    ],
+    "kunyomi": [
+      "そと",
+      "ほか",
+      "はず.す",
+      "はず.れる",
+      "と-"
+    ],
+    "nanori": [
+      "うい",
+      "け",
+      "ふか"
+    ],
+    "strokes": 5,
+    "grade": 2,
+    "freq": 81,
+    "radical": "夕",
+    "words": [
+      "外",
+      "外国",
+      "外国人",
+      "以外",
+      "郊外",
+      "意外",
+      "海外",
+      "外交"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_35_%E5%85%AB",
+    "character": "八",
+    "hanviet": "BÁT",
+    "meaningVi": "tám, 8",
+    "originalMeaning": "eight; eight radical (no. 12)",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ハチ",
+      "ハツ"
+    ],
+    "kunyomi": [
+      "や",
+      "や.つ",
+      "やっ.つ",
+      "よう"
+    ],
+    "nanori": [
+      "な",
+      "は",
+      "はっ",
+      "やち",
+      "やつ"
+    ],
+    "strokes": 2,
+    "grade": 1,
+    "freq": 92,
+    "radical": "八",
+    "words": [
+      "八",
+      "八つ",
+      "八日",
+      "八百屋"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_36_%E5%85%AD",
+    "character": "六",
+    "hanviet": "LỤC",
+    "meaningVi": "sáu, 6",
+    "originalMeaning": "six",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ロク",
+      "リク"
+    ],
+    "kunyomi": [
+      "む",
+      "む.つ",
+      "むっ.つ",
+      "むい"
+    ],
+    "nanori": [
+      "く",
+      "むつ",
+      "ろっ",
+      "ろつ"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 93,
+    "radical": "八",
+    "words": [
+      "六",
+      "六日",
+      "六つ"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_37_%E4%B8%8B",
+    "character": "下",
+    "hanviet": "HẠ",
+    "meaningVi": "xuống, hướng xuống, dưới, thấp hơn",
+    "originalMeaning": "below; down; descend; give; low; inferior",
+    "translationStatus": "verified",
+    "onyomi": [
+      "カ",
+      "ゲ"
+    ],
+    "kunyomi": [
+      "した",
+      "しも",
+      "もと",
+      "さ.げる",
+      "さ.がる",
+      "くだ.る",
+      "くだ.り",
+      "くだ.す",
+      "-くだ.す",
+      "くだ.さる",
+      "お.ろす",
+      "お.��る"
+    ],
+    "nanori": [
+      "さか",
+      "しと"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 97,
+    "radical": "一",
+    "words": [
+      "下",
+      "靴下",
+      "下手",
+      "廊下",
+      "地下鉄",
+      "以下",
+      "下宿",
+      "下着"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_38_%E6%9D%A5",
+    "character": "来",
+    "hanviet": "LAI",
+    "meaningVi": "đến, lại đây, từ khi, trong",
+    "originalMeaning": "come; due; next; cause; become",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ライ",
+      "タイ"
+    ],
+    "kunyomi": [
+      "く.る",
+      "きた.る",
+      "きた.す",
+      "き.たす",
+      "き.たる",
+      "き",
+      "こ"
+    ],
+    "nanori": [
+      "くり",
+      "くる",
+      "ごろ",
+      "さ"
+    ],
+    "strokes": 7,
+    "grade": 2,
+    "freq": 102,
+    "radical": "木",
+    "words": [
+      "来る",
+      "来月",
+      "来週",
+      "来年",
+      "再来年",
+      "将来",
+      "再来月",
+      "再来週"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_39_%E6%B0%97",
+    "character": "気",
+    "hanviet": "KHÍ",
+    "meaningVi": "biến thể tiếng Nhật của 氣|气",
+    "originalMeaning": "spirit; mind; air; atmosphere; mood",
+    "translationStatus": "verified",
+    "onyomi": [
+      "キ",
+      "ケ"
+    ],
+    "kunyomi": [
+      "いき",
+      "き"
+    ],
+    "nanori": [],
+    "strokes": 6,
+    "grade": 1,
+    "freq": 113,
+    "radical": "气",
+    "words": [
+      "元気",
+      "天気",
+      "電気",
+      "病気",
+      "気",
+      "気分",
+      "空気",
+      "気持ち"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_40_%E5%B0%8F",
+    "character": "小",
+    "hanviet": "TIỂU",
+    "meaningVi": "nhỏ, bé, một vài, trẻ",
+    "originalMeaning": "little; small",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ショウ"
+    ],
+    "kunyomi": [
+      "ちい.さい",
+      "こ-",
+      "お-",
+      "さ-"
+    ],
+    "nanori": [
+      "いさら",
+      "こう",
+      "さざ",
+      "しゃお",
+      "ちいさ"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 114,
+    "radical": "小",
+    "words": [
+      "小さい",
+      "小さな",
+      "小鳥",
+      "小説",
+      "小学校",
+      "小",
+      "小包",
+      "小麦"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_41_%E4%B8%83",
+    "character": "七",
+    "hanviet": "THẤT",
+    "meaningVi": "bảy, 7",
+    "originalMeaning": "seven",
+    "translationStatus": "verified",
+    "onyomi": [
+      "シチ"
+    ],
+    "kunyomi": [
+      "なな",
+      "なな.つ",
+      "なの"
+    ],
+    "nanori": [
+      "し",
+      "しっ",
+      "な",
+      "ひち"
+    ],
+    "strokes": 2,
+    "grade": 1,
+    "freq": 115,
+    "radical": "一",
+    "words": [
+      "七",
+      "七つ",
+      "七日"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_42_%E5%B1%B1",
+    "character": "山",
+    "hanviet": "SƠN",
+    "meaningVi": "họ",
+    "originalMeaning": "mountain",
+    "translationStatus": "verified",
+    "onyomi": [
+      "サン",
+      "��ン"
+    ],
+    "kunyomi": [
+      "やま"
+    ],
+    "nanori": [
+      "さ",
+      "やの",
+      "やん"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 131,
+    "radical": "山",
+    "words": [
+      "山",
+      "登山",
+      "火山",
+      "山林",
+      "鉱山",
+      "山岳",
+      "山腹",
+      "山脈"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_43_%E8%A9%B1",
+    "character": "話",
+    "hanviet": "THOẠI",
+    "meaningVi": "nói",
+    "originalMeaning": "tale; talk",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ワ"
+    ],
+    "kunyomi": [
+      "はな.す",
+      "はなし"
+    ],
+    "nanori": [],
+    "strokes": 13,
+    "grade": 2,
+    "freq": 134,
+    "radical": "言",
+    "words": [
+      "話",
+      "電話",
+      "話す",
+      "会話",
+      "世話",
+      "話題",
+      "話し合う",
+      "神話"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_44_%E5%A5%B3",
+    "character": "女",
+    "hanviet": "NỮA",
+    "meaningVi": "nữ, phụ nữ, con gái",
+    "originalMeaning": "woman; female",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ジョ",
+      "ニョ",
+      "ニョウ"
+    ],
+    "kunyomi": [
+      "おんな",
+      "め"
+    ],
+    "nanori": [
+      "おな",
+      "た",
+      "つき",
+      "な"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 151,
+    "radical": "女",
+    "words": [
+      "女",
+      "女の子",
+      "彼女",
+      "女性",
+      "少女",
+      "女王",
+      "女子",
+      "女優"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_45_%E5%8C%97",
+    "character": "北",
+    "hanviet": "BẮC",
+    "meaningVi": "phía bắc, bị đánh bại",
+    "originalMeaning": "north",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ホク"
+    ],
+    "kunyomi": [
+      "きた"
+    ],
+    "nanori": [
+      "きら",
+      "ほう",
+      "ほっ",
+      "ほつ"
+    ],
+    "strokes": 5,
+    "grade": 2,
+    "freq": 153,
+    "radical": "匕",
+    "words": [
+      "北",
+      "南北",
+      "北極"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_46_%E5%8D%88",
+    "character": "午",
+    "hanviet": "NGỌ",
+    "meaningVi": "địa chi thứ 7: 11 giờ sáng-1 giờ chiều, buổi trưa, tháng âm lịch thứ 5 (6 tháng 6-6 tháng 7), năm Ngọ",
+    "originalMeaning": "noon; sign of the horse; 11AM-1PM; seventh sign of Chinese zodiac",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ゴ"
+    ],
+    "kunyomi": [
+      "うま"
+    ],
+    "nanori": [],
+    "strokes": 4,
+    "grade": 2,
+    "freq": 154,
+    "radical": "十",
+    "words": [
+      "午後",
+      "午前",
+      "正午"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_47_%E7%99%BE",
+    "character": "百",
+    "hanviet": "VẦU / BÁCH",
+    "meaningVi": "họ",
+    "originalMeaning": "hundred",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ヒャク",
+      "ビャク"
+    ],
+    "kunyomi": [
+      "もも"
+    ],
+    "nanori": [
+      "お",
+      "ど",
+      "どう",
+      "なり",
+      "ひゃっ",
+      "ひゅく",
+      "も",
+      "もんど",
+      "ゆう"
+    ],
+    "strokes": 6,
+    "grade": 1,
+    "freq": 163,
+    "radical": "白",
+    "words": [
+      "百",
+      "八百屋"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_48_%E6%9B%B8",
+    "character": "書",
+    "hanviet": "THƯ",
+    "meaningVi": "sách, thư tín",
+    "originalMeaning": "write",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ショ"
+    ],
+    "kunyomi": [
+      "か.く",
+      "-が.き",
+      "-がき"
+    ],
+    "nanori": [
+      "かき"
+    ],
+    "strokes": 10,
+    "grade": 2,
+    "freq": 169,
+    "radical": "曰",
+    "words": [
+      "書く",
+      "辞書",
+      "葉書",
+      "図書館",
+      "書斎",
+      "書物",
+      "書類",
+      "読書"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_49_%E5%85%88",
+    "character": "先",
+    "hanviet": "TIÊN",
+    "meaningVi": "trước, đầu tiên, sớm hơn, lúc đầu",
+    "originalMeaning": "before; ahead; previous; future; precedence",
+    "translationStatus": "verified",
+    "onyomi": [
+      "セン"
+    ],
+    "kunyomi": [
+      "さき",
+      "ま.ず"
+    ],
+    "nanori": [
+      "ぽん"
+    ],
+    "strokes": 6,
+    "grade": 1,
+    "freq": 173,
+    "radical": "儿",
+    "words": [
+      "先",
+      "先月",
+      "先週",
+      "先生",
+      "先輩",
+      "先日",
+      "先程",
+      "先祖"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_50_%E5%90%8D",
+    "character": "名",
+    "hanviet": "DANH",
+    "meaningVi": "tên, danh từ, vị trí, nổi tiếng",
+    "originalMeaning": "name; noted; distinguished; reputation",
+    "translationStatus": "verified",
+    "onyomi": [
+      "メイ",
+      "ミョウ"
+    ],
+    "kunyomi": [
+      "な",
+      "-な"
+    ],
+    "nanori": [
+      "と"
+    ],
+    "strokes": 6,
+    "grade": 1,
+    "freq": 177,
+    "radical": "口",
+    "words": [
+      "名前",
+      "有名",
+      "名",
+      "署名",
+      "名人",
+      "宛名",
+      "仮名",
+      "氏名"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_51_%E5%B7%9D",
+    "character": "川",
+    "hanviet": "XUYÊN",
+    "meaningVi": "viết tắt của tỉnh Tứ Xuyên 四川[Si4 chuan1] ở tây nam Trung Quốc",
+    "originalMeaning": "stream; river; river or three-stroke river radical (no. 47)",
+    "translationStatus": "verified",
+    "onyomi": [
+      "セン"
+    ],
+    "kunyomi": [
+      "かわ"
+    ],
+    "nanori": [
+      "か",
+      "こ",
+      "さわ"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 181,
+    "radical": "巛",
+    "words": [
+      "川",
+      "河川"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_52_%E5%8D%83",
+    "character": "千",
+    "hanviet": "THIÊN",
+    "meaningVi": "một nghìn",
+    "originalMeaning": "thousand",
+    "translationStatus": "verified",
+    "onyomi": [
+      "セン"
+    ],
+    "kunyomi": [
+      "ち"
+    ],
+    "nanori": [
+      "かず",
+      "ゆき"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 195,
+    "radical": "十",
+    "words": [
+      "千"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_53_%E6%B0%B4",
+    "character": "水",
+    "hanviet": "HÉO / THUỶ",
+    "meaningVi": "họ",
+    "originalMeaning": "water",
+    "translationStatus": "verified",
+    "onyomi": [
+      "スイ"
+    ],
+    "kunyomi": [
+      "みず",
+      "みず-"
+    ],
+    "nanori": [
+      "うず",
+      "ずみ",
+      "つ",
+      "ど",
+      "み",
+      "みさ",
+      "みつ",
+      "みな",
+      "みん"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 223,
+    "radical": "水",
+    "words": [
+      "水",
+      "水曜日",
+      "水泳",
+      "水道",
+      "水準",
+      "下水",
+      "香水",
+      "水産"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_54_%E5%8D%8A",
+    "character": "半",
+    "hanviet": "BÁN",
+    "meaningVi": "một nửa, bán-, chưa hoàn chỉnh, một nửa",
+    "originalMeaning": "half; middle; odd number; semi-; part-",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ハン"
+    ],
+    "kunyomi": [
+      "なか.ば"
+    ],
+    "nanori": [
+      "は"
+    ],
+    "strokes": 5,
+    "grade": 2,
+    "freq": 224,
+    "radical": "十",
+    "words": [
+      "半",
+      "半分",
+      "大半",
+      "半ば",
+      "半径",
+      "半島",
+      "過半数",
+      "半端"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_55_%E7%94%B7",
+    "character": "男",
+    "hanviet": "NAM",
+    "meaningVi": "nam",
+    "originalMeaning": "male",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ダン",
+      "ナン"
+    ],
+    "kunyomi": [
+      "おとこ",
+      "お"
+    ],
+    "nanori": [
+      "み"
+    ],
+    "strokes": 7,
+    "grade": 1,
+    "freq": 240,
+    "radical": "田",
+    "words": [
+      "男",
+      "男の子",
+      "男性",
+      "男子",
+      "男の人",
+      "長男"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_56_%E8%A5%BF",
+    "character": "西",
+    "hanviet": "TÂY",
+    "meaningVi": "phương Tây, viết tắt của Tây Ban Nha 西班牙, tiếng Tây Ban Nha",
+    "originalMeaning": "west; Spain",
+    "translationStatus": "verified",
+    "onyomi": [
+      "セイ",
+      "サイ",
+      "ス"
+    ],
+    "kunyomi": [
+      "にし"
+    ],
+    "nanori": [
+      "いり",
+      "ひし",
+      "むら"
+    ],
+    "strokes": 6,
+    "grade": 2,
+    "freq": 259,
+    "radical": "襾",
+    "words": [
+      "西",
+      "西洋",
+      "関西",
+      "西暦",
+      "東西",
+      "西日"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_57_%E9%9B%BB",
+    "character": "電",
+    "hanviet": "ĐIỆN",
+    "meaningVi": "điện, chớp",
+    "originalMeaning": "electricity",
+    "translationStatus": "verified",
+    "onyomi": [
+      "デン"
+    ],
+    "kunyomi": [],
+    "nanori": [],
+    "strokes": 13,
+    "grade": 2,
+    "freq": 268,
+    "radical": "雨",
+    "words": [
+      "電気",
+      "電車",
+      "電話",
+      "電灯",
+      "電報",
+      "電子",
+      "停電",
+      "電球"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_58_%E7%84%A1",
+    "character": "無",
+    "hanviet": "VÔ",
+    "meaningVi": "không có",
+    "originalMeaning": "nothingness; none; ain't; nothing; nil; not",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ム",
+      "ブ"
+    ],
+    "kunyomi": [
+      "な.い"
+    ],
+    "nanori": [],
+    "strokes": 12,
+    "grade": 4,
+    "freq": 274,
+    "radical": "火",
+    "words": [
+      "無くす",
+      "無理",
+      "無くなる",
+      "無",
+      "無し",
+      "無事",
+      "無視",
+      "無駄"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_59_%E6%A0%A1",
+    "character": "校",
+    "hanviet": "ĐẮNG / HIỆU",
+    "meaningVi": "kiểm tra, đối chiếu, đọc thử",
+    "originalMeaning": "exam; school; printing; proof; correction",
+    "translationStatus": "verified",
+    "onyomi": [
+      "コウ",
+      "キョウ"
+    ],
+    "kunyomi": [],
+    "nanori": [
+      "めん"
+    ],
+    "strokes": 10,
+    "grade": 1,
+    "freq": 294,
+    "radical": "木",
+    "words": [
+      "学校",
+      "高校",
+      "校長",
+      "高校生",
+      "小学校",
+      "中学校",
+      "高等学校",
+      "校舎"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_60_%E8%AA%9E",
+    "character": "語",
+    "hanviet": "NGỮ",
+    "meaningVi": "ngôn ngữ, lời lẽ",
+    "originalMeaning": "word; speech; language",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ゴ"
+    ],
+    "kunyomi": [
+      "かた.る",
+      "かた.らう"
+    ],
+    "nanori": [],
+    "strokes": 14,
+    "grade": 2,
+    "freq": 301,
+    "radical": "言",
+    "words": [
+      "英語",
+      "語",
+      "語る",
+      "言語",
+      "語学",
+      "国語",
+      "単語",
+      "物語"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_61_%E5%9C%9F",
+    "character": "土",
+    "hanviet": "THỔ",
+    "meaningVi": "nhóm dân tộc Thổ, họ",
+    "originalMeaning": "soil; earth; ground; Turkey",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ド",
+      "ト"
+    ],
+    "kunyomi": [
+      "つち"
+    ],
+    "nanori": [
+      "つく",
+      "は",
+      "ひじ"
+    ],
+    "strokes": 3,
+    "grade": 1,
+    "freq": 307,
+    "radical": "土",
+    "words": [
+      "土曜日",
+      "お土産",
+      "土",
+      "土地",
+      "土曜",
+      "土産",
+      "国土",
+      "土台"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_62_%E6%9C%A8",
+    "character": "木",
+    "hanviet": "MỘC",
+    "meaningVi": "họ",
+    "originalMeaning": "tree; wood",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ボク",
+      "モク"
+    ],
+    "kunyomi": [
+      "き",
+      "こ-"
+    ],
+    "nanori": [
+      "ぐ",
+      "も",
+      "もと"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 317,
+    "radical": "木",
+    "words": [
+      "木",
+      "木曜日",
+      "木綿",
+      "木曜",
+      "植木",
+      "材木",
+      "大木",
+      "並木"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_63_%E8%81%9E",
+    "character": "聞",
+    "hanviet": "VĂN",
+    "meaningVi": "nghe, tiếng động tới, tiếng truyền tới",
+    "originalMeaning": "hear; ask; listen",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ブン",
+      "モン"
+    ],
+    "kunyomi": [
+      "き.く",
+      "き.こえる"
+    ],
+    "nanori": [],
+    "strokes": 14,
+    "grade": 2,
+    "freq": 319,
+    "radical": "耳",
+    "words": [
+      "聞く",
+      "新聞",
+      "新聞社",
+      "聞こえる",
+      "聞き取り"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_64_%E9%A3%9F",
+    "character": "食",
+    "hanviet": "THỰC",
+    "meaningVi": "ăn, thức ăn, thức ăn chăn nuôi, nhật thực, nguyệt thực",
+    "originalMeaning": "eat; food",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ショク",
+      "ジキ"
+    ],
+    "kunyomi": [
+      "く.う",
+      "く.らう",
+      "た.べる",
+      "は.む"
+    ],
+    "nanori": [
+      "ぐい"
+    ],
+    "strokes": 9,
+    "grade": 2,
+    "freq": 328,
+    "radical": "食",
+    "words": [
+      "食堂",
+      "食べ物",
+      "食べる",
+      "食��",
+      "食料品",
+      "食う",
+      "食卓",
+      "食品"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_65_%E8%BB%8A",
+    "character": "車",
+    "hanviet": "XA",
+    "meaningVi": "cái xe",
+    "originalMeaning": "car",
+    "translationStatus": "verified",
+    "onyomi": [
+      "シャ"
+    ],
+    "kunyomi": [
+      "くるま"
+    ],
+    "nanori": [
+      "くら",
+      "くろま"
+    ],
+    "strokes": 7,
+    "grade": 1,
+    "freq": 333,
+    "radical": "車",
+    "words": [
+      "車",
+      "電車",
+      "自転車",
+      "自動車",
+      "汽車",
+      "駐車場",
+      "駐車",
+      "発車"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_66_%E4%BD%95",
+    "character": "何",
+    "hanviet": "HÀ",
+    "meaningVi": "họ",
+    "originalMeaning": "what",
+    "translationStatus": "verified",
+    "onyomi": [
+      "カ"
+    ],
+    "kunyomi": [
+      "なに",
+      "なん",
+      "なに-",
+      "なん-"
+    ],
+    "nanori": [
+      "あが"
+    ],
+    "strokes": 7,
+    "grade": 2,
+    "freq": 340,
+    "radical": "人",
+    "words": [
+      "何",
+      "何か",
+      "何で",
+      "何でも",
+      "何とか",
+      "何々",
+      "何分",
+      "何卒"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_67_%E5%8D%97",
+    "character": "南",
+    "hanviet": "NAM",
+    "meaningVi": "họ",
+    "originalMeaning": "south",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ナン",
+      "ナ"
+    ],
+    "kunyomi": [
+      "みなみ"
+    ],
+    "nanori": [
+      "なみ",
+      "は",
+      "みな",
+      "みまみ"
+    ],
+    "strokes": 9,
+    "grade": 2,
+    "freq": 341,
+    "radical": "十",
+    "words": [
+      "南",
+      "南極",
+      "南米",
+      "南北"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_68_%E4%B8%87",
+    "character": "万",
+    "hanviet": "VẠN",
+    "meaningVi": "dùng trong 万俟",
+    "originalMeaning": "ten thousand; 10,000",
+    "translationStatus": "verified",
+    "onyomi": [
+      "マン",
+      "バン"
+    ],
+    "kunyomi": [
+      "よろず"
+    ],
+    "nanori": [
+      "かず",
+      "ま",
+      "ゆる"
+    ],
+    "strokes": 3,
+    "grade": 2,
+    "freq": 375,
+    "radical": "一",
+    "words": [
+      "万",
+      "万年筆",
+      "万一",
+      "万歳",
+      "万人",
+      "万能"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_69_%E6%AF%8E",
+    "character": "毎",
+    "hanviet": "MỖI",
+    "meaningVi": "biến thể tiếng Nhật của 每",
+    "originalMeaning": "every",
+    "translationStatus": "verified",
+    "onyomi": [
+      "マイ"
+    ],
+    "kunyomi": [
+      "ごと",
+      "-ごと.に"
+    ],
+    "nanori": [
+      "つね"
+    ],
+    "strokes": 6,
+    "grade": 2,
+    "freq": 436,
+    "radical": "毋",
+    "words": [
+      "毎朝",
+      "毎月",
+      "毎週",
+      "毎日",
+      "毎年",
+      "毎晩",
+      "毎度",
+      "毎"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_70_%E7%99%BD",
+    "character": "白",
+    "hanviet": "BẠCH",
+    "meaningVi": "họ",
+    "originalMeaning": "white",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ハク",
+      "ビャク"
+    ],
+    "kunyomi": [
+      "しろ",
+      "しら-",
+      "しろ.い"
+    ],
+    "nanori": [
+      "あき",
+      "か",
+      "はっ"
+    ],
+    "strokes": 5,
+    "grade": 1,
+    "freq": 483,
+    "radical": "白",
+    "words": [
+      "白",
+      "白い",
+      "白髪",
+      "青白い",
+      "真っ白",
+      "告白",
+      "白状",
+      "明白"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_71_%E5%A4%A9",
+    "character": "天",
+    "hanviet": "THIÊN",
+    "meaningVi": "ngày, trời, thượng đế",
+    "originalMeaning": "heavens; sky; imperial",
+    "translationStatus": "verified",
+    "onyomi": [
+      "テン"
+    ],
+    "kunyomi": [
+      "あまつ",
+      "あめ",
+      "あま-"
+    ],
+    "nanori": [
+      "あき",
+      "あも",
+      "た",
+      "たかし",
+      "て",
+      "なま"
+    ],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 512,
+    "radical": "大",
+    "words": [
+      "天気",
+      "天気予報",
+      "天候",
+      "天然",
+      "天皇",
+      "天津",
+      "雨天",
+      "晴天"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_72_%E6%AF%8D",
+    "character": "母",
+    "hanviet": "MẪU",
+    "meaningVi": "mẹ, người nữ lớn tuổi, gốc rễ, nguồn",
+    "originalMeaning": "mother",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ボ"
+    ],
+    "kunyomi": [
+      "はは",
+      "も"
+    ],
+    "nanori": [],
+    "strokes": 5,
+    "grade": 2,
+    "freq": 570,
+    "radical": "毋",
+    "words": [
+      "お母さん",
+      "伯母さん",
+      "祖母",
+      "母親",
+      "父母",
+      "叔母さん",
+      "分母",
+      "母校"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_73_%E7%81%AB",
+    "character": "火",
+    "hanviet": "HOẢ",
+    "meaningVi": "họ",
+    "originalMeaning": "fire",
+    "translationStatus": "verified",
+    "onyomi": [
+      "カ"
+    ],
+    "kunyomi": [
+      "ひ",
+      "-び",
+      "ほ-"
+    ],
+    "nanori": [],
+    "strokes": 4,
+    "grade": 1,
+    "freq": 574,
+    "radical": "火",
+    "words": [
+      "火曜日",
+      "火",
+      "火事",
+      "火災",
+      "火曜",
+      "火口",
+      "火山",
+      "花火"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_74_%E5%8F%B3",
+    "character": "右",
+    "hanviet": "HỮU",
+    "meaningVi": "bên phải, phía tay phải, hữu khuynh, phía tây",
+    "originalMeaning": "right",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ウ",
+      "ユウ"
+    ],
+    "kunyomi": [
+      "みぎ"
+    ],
+    "nanori": [
+      "あき",
+      "すけ"
+    ],
+    "strokes": 5,
+    "grade": 1,
+    "freq": 602,
+    "radical": "口",
+    "words": [
+      "右",
+      "左右"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_75_%E8%AA%AD",
+    "character": "読",
+    "hanviet": "ĐỘC",
+    "meaningVi": "biến thể Nhật Bản của 讀|读",
+    "originalMeaning": "read",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ドク",
+      "トク",
+      "トウ"
+    ],
+    "kunyomi": [
+      "よ.む",
+      "-よ.み"
+    ],
+    "nanori": [
+      "よみ"
+    ],
+    "strokes": 14,
+    "grade": 2,
+    "freq": 618,
+    "radical": "言",
+    "words": [
+      "読む",
+      "読書",
+      "読み",
+      "句読点",
+      "講読",
+      "購読",
+      "読者",
+      "朗読"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_76_%E5%8F%8B",
+    "character": "友",
+    "hanviet": "HỮU",
+    "meaningVi": "bạn bè",
+    "originalMeaning": "friend",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ユウ"
+    ],
+    "kunyomi": [
+      "とも"
+    ],
+    "nanori": [
+      "う",
+      "ど",
+      "ゆ"
+    ],
+    "strokes": 4,
+    "grade": 2,
+    "freq": 622,
+    "radical": "又",
+    "words": [
+      "友達",
+      "友",
+      "親友",
+      "友情",
+      "友人",
+      "友好"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_77_%E5%B7%A6",
+    "character": "左",
+    "hanviet": "TẢ",
+    "meaningVi": "họ",
+    "originalMeaning": "left",
+    "translationStatus": "verified",
+    "onyomi": [
+      "サ",
+      "シャ"
+    ],
+    "kunyomi": [
+      "ひだり"
+    ],
+    "nanori": [
+      "そ"
+    ],
+    "strokes": 5,
+    "grade": 1,
+    "freq": 630,
+    "radical": "工",
+    "words": [
+      "左",
+      "左右",
+      "左利き"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_78_%E4%BC%91",
+    "character": "休",
+    "hanviet": "HƯU",
+    "meaningVi": "họ",
+    "originalMeaning": "rest; day off; retire; sleep",
+    "translationStatus": "verified",
+    "onyomi": [
+      "キュウ"
+    ],
+    "kunyomi": [
+      "やす.む",
+      "やす.まる",
+      "やす.める"
+    ],
+    "nanori": [],
+    "strokes": 6,
+    "grade": 1,
+    "freq": 642,
+    "radical": "人",
+    "words": [
+      "休み",
+      "休む",
+      "夏休み",
+      "昼休み",
+      "休暇",
+      "休憩",
+      "休業",
+      "休講"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_79_%E7%88%B6",
+    "character": "父",
+    "hanviet": "PHỤ",
+    "meaningVi": "cha",
+    "originalMeaning": "father",
+    "translationStatus": "verified",
+    "onyomi": [
+      "フ"
+    ],
+    "kunyomi": [
+      "ちち"
+    ],
+    "nanori": [],
+    "strokes": 4,
+    "grade": 2,
+    "freq": 646,
+    "radical": "父",
+    "words": [
+      "お父さん",
+      "お祖父さん",
+      "祖父",
+      "父親",
+      "父母",
+      "叔父さん",
+      "小父さん",
+      "伯父さん"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_80_%E9%9B%A8",
+    "character": "雨",
+    "hanviet": "VŨ",
+    "meaningVi": "mưa, Lượng từ: 陣|阵, 場|场",
+    "originalMeaning": "rain",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ウ"
+    ],
+    "kunyomi": [
+      "あめ",
+      "あま-",
+      "-さめ"
+    ],
+    "nanori": [],
+    "strokes": 8,
+    "grade": 1,
+    "freq": 950,
+    "radical": "雨",
+    "words": [
+      "雨",
+      "梅雨",
+      "雨戸",
+      "雨具",
+      "雨天"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_81_%E4%B8%88",
+    "character": "丈",
+    "hanviet": "TRƯỢNG",
+    "meaningVi": "đo lường, chồng",
+    "originalMeaning": "length; ten shaku; measure; Mr.; Ms.; height; stature; all (one has); only; that's all; merely",
+    "translationStatus": "verified",
+    "onyomi": [
+      "ジョウ"
+    ],
+    "kunyomi": [
+      "たけ",
+      "だけ"
+    ],
+    "nanori": [
+      "とも",
+      "ますら"
+    ],
+    "strokes": 3,
+    "grade": 8,
+    "freq": 1375,
+    "radical": "一",
+    "words": [
+      "丈夫",
+      "大丈夫",
+      "丈",
+      "頑丈"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_82_%E8%AA%B0",
+    "character": "誰",
+    "hanviet": "THÙY",
+    "meaningVi": "ai (câu hỏi)",
+    "originalMeaning": "who; someone; somebody",
+    "translationStatus": "verified",
+    "onyomi": [
+      "スイ"
+    ],
+    "kunyomi": [
+      "だれ",
+      "たれ",
+      "た"
+    ],
+    "nanori": [],
+    "strokes": 15,
+    "grade": 8,
+    "freq": 1933,
+    "radical": "言",
+    "words": [
+      "誰",
+      "誰か"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  },
+  {
+    "id": "k_n5_83_%E8%B2%BC",
+    "character": "貼",
+    "hanviet": "THIẾP",
+    "meaningVi": "dán, áp sát, men theo, cho thêm, trợ cấp, bù thêm",
+    "originalMeaning": "stick; paste; apply",
+    "translationStatus": "verified",
+    "onyomi": [
+      "テン",
+      "チョウ"
+    ],
+    "kunyomi": [
+      "は.る",
+      "つ.く"
+    ],
+    "nanori": [],
+    "strokes": 12,
+    "grade": 8,
+    "freq": 2444,
+    "radical": "貝",
+    "words": [
+      "貼る"
+    ],
+    "level": "N5",
+    "source": "OpenJLPT (CC BY-SA 4.0) & JPEX KanjiDB"
+  }
+]

@@ -36,6 +36,26 @@ Không gian trung tâm cho việc học tập, quản lý từ vựng và luyệ
   * **📈 Thống kê tiến độ (SRS Stats):** Theo dõi số thẻ đã thuộc, số thẻ đang học và nhật ký các phiên ôn tập gần đây.
   * **⚙️ Cài đặt & Sao lưu:** Điều chỉnh tốc độ phát âm giọng đọc, sao lưu xuất/nhập toàn bộ dữ liệu dưới định dạng JSON an toàn.
 
+### 4. ⛩️ Thư viện Từ vựng JLPT N1–N5 Ngoại tuyến (OpenJLPT)
+* Kho **7.811 từ vựng JLPT N1–N5** tích hợp cục bộ, hoạt động 100% offline không phụ thuộc internet hay API bên ngoài.
+* **Số lượng từ theo cấp độ:**
+  * **N5:** 674 từ
+  * **N4:** 630 từ
+  * **N3:** 1.659 từ
+  * **N2:** 1.778 từ
+  * **N1:** 3.070 từ
+* **Chuẩn hóa thông tin chi tiết:**
+  * Từ vựng gốc tiếng Nhật (Kanji/Kana) kèm ID ổn định theo mã băm SHA-1 của OpenJLPT.
+  * Cách đọc Hiragana/Katakana chuẩn xác từ JMdict.
+  * Âm Hán Việt được đối chiếu và gán tự động từ cơ sở dữ liệu 11.092 chữ Hán nội bộ của JPEX.
+  * Nghĩa tiếng Anh chuẩn mực từ cộng đồng Jonathan Waller và JMdict.
+  * Câu ví dụ song ngữ Nhật - Anh thực tế trích xuất từ kho ngữ liệu Tatoeba.
+* **Tích hợp Flashcard & SRS:**
+  * Duyệt theo từng cấp độ N1–N5, tìm kiếm tức thì theo Kanji, Kana, Hán Việt hoặc nghĩa.
+  * Chọn một số từ hoặc chọn toàn bộ cấp độ để bắt đầu phiên Flashcard Quizlet-style ngay lập tức.
+  * Tùy chọn thêm vào bộ thẻ hiện có hoặc tự động tạo các bộ thẻ theo chủ đề JLPT (VD: `JLPT N5`).
+  * Theo dõi tiến độ học tập (Chưa học / Đang học / Đã thuộc) theo thời gian thực dựa trên thuật toán Spaced Repetition (SRS SM-2).
+
 ---
 
 ## 🎴 Trải nghiệm Ôn tập Flashcard SRS (Review Mode)
@@ -88,5 +108,15 @@ Giao diện học tập tập trung cao độ, ẩn hoàn toàn sidebar và các
 
 ---
 
-## 📄 Bản quyền & Giấy phép
-Dự án được phát hành theo giấy phép [MIT License](LICENSE).
+## 📄 Bản quyền & Nguồn dữ liệu
+
+- **Mã nguồn dự án:** Phát hành theo giấy phép [MIT License](LICENSE).
+- **Thư viện Từ vựng JLPT (N1–N5):** Tích hợp dữ liệu từ dự án mã nguồn mở [OpenJLPT](https://github.com/evanclan/OpenJLPT) bởi Evan Cavanaugh và các cộng tác viên, phát hành theo giấy phép **Creative Commons Attribution-ShareAlike 4.0 International ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/))**.
+  - **Jonathan Waller's JLPT Resources** ([tanos.co.uk](https://www.tanos.co.uk/jlpt/) - CC BY): Danh sách phân loại cấp độ N1–N5 và nghĩa từ vựng tiếng Anh.
+  - **JMdict & KANJIDIC2** ([EDRDG](https://www.edrdg.org/) - CC BY-SA 4.0): Chuẩn hóa cách đọc Kana, từ loại (`pos`) và Furigana.
+  - **Tatoeba Project** ([tatoeba.org](https://tatoeba.org) - CC BY 2.0 FR): Câu ví dụ song ngữ Nhật - Anh kèm định danh câu (`tatoeba_id`).
+  - **JPEX Kanji Database:** Cơ sở dữ liệu 11.092 mục từ Hán Việt chuẩn xác nội bộ, cho phép tra cứu và đối chiếu âm Hán Việt hoàn toàn ngoại tuyến.
+
+### ⚠️ Tuyên bố miễn trừ trách nhiệm (Disclaimer)
+> Tổ chức kỳ thi JLPT (Japan Foundation và Japan Educational Exchanges and Services) **không phát hành** danh sách từ vựng hay Hán tự chính thức cho các cấp độ N1–N5 kể từ kỳ thi đổi mới năm 2010. Danh sách từ vựng trong tiện ích này dựa trên tiêu chuẩn cộng đồng uy tín của Jonathan Waller và OpenJLPT, là tài liệu hỗ trợ học tập tham khảo, **không tuyên bố là danh sách chính thức hoặc đầy đủ tuyệt đối** của kỳ thi JLPT thực tế.
+

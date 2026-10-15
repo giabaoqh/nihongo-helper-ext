@@ -31,6 +31,7 @@
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
       <button class="tab-btn active" data-tab="search-tab">Tra cứu</button>
+      <button class="tab-btn" data-tab="jlpt-tab">JLPT N1–N5</button>
       <button class="tab-btn" data-tab="saved-tab">Từ đã lưu</button>
       <button class="tab-btn" data-tab="settings-tab">Cài đặt</button>
     </nav>
@@ -50,6 +51,49 @@
             <h3>Sẵn sàng tra cứu</h3>
             <p>Nhập từ tiếng Nhật hoặc nghĩa tiếng Việt để bắt đầu tìm kiếm ngoại tuyến siêu tốc.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- JLPT Tab -->
+      <section id="jlpt-tab" class="tab-section">
+        <!-- Bộ chọn cấp độ dạng chip -->
+        <div class="jlpt-chips-wrapper" style="display: flex; gap: 6px; margin-bottom: 8px; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 4px;">
+            <button class="jlpt-chip-btn active" data-level="N5" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #10b981; background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700; font-size: 11.5px; cursor: pointer;">N5</button>
+            <button class="jlpt-chip-btn" data-level="N4" style="padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-weight: 600; font-size: 11.5px; cursor: pointer;">N4</button>
+            <button class="jlpt-chip-btn" data-level="N3" style="padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-weight: 600; font-size: 11.5px; cursor: pointer;">N3</button>
+            <button class="jlpt-chip-btn" data-level="N2" style="padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-weight: 600; font-size: 11.5px; cursor: pointer;">N2</button>
+            <button class="jlpt-chip-btn" data-level="N1" style="padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-weight: 600; font-size: 11.5px; cursor: pointer;">N1</button>
+          </div>
+          <button id="btn-popup-open-jlpt-workspace" title="Mở danh sách và ôn tập toàn màn hình" style="background: none; border: none; font-size: 11.5px; color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: underline;">
+            Mở Workspace ↗
+          </button>
+        </div>
+
+        <!-- Bộ chọn chuyên mục: Từ vựng / Ngữ pháp / Chữ Hán -->
+        <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+          <button class="jlpt-cat-chip active" data-cat="vocab" style="flex: 1; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--primary); background: rgba(2, 132, 199, 0.15); color: var(--primary); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;">📖 Từ vựng</button>
+          <button class="jlpt-cat-chip" data-cat="grammar" style="flex: 1; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;">📐 Ngữ pháp</button>
+          <button class="jlpt-cat-chip" data-cat="kanji" style="flex: 1; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;">🈸 Chữ Hán</button>
+        </div>
+
+        <!-- Ô tìm kiếm từ vựng JLPT -->
+        <div class="search-bar-wrapper" style="margin-bottom: 10px;">
+          <input type="text" id="jlpt-popup-search" placeholder="Tìm theo Kanji, Kana, Hán Việt, Nghĩa...">
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <!-- Nút hành động nhanh -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px;">
+          <span id="jlpt-popup-count-label" style="font-size: 11.5px; color: var(--text-secondary);">674 từ vựng N5</span>
+          <button id="btn-popup-jlpt-practice" style="background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            🃏 Luyện Flashcard nhanh
+          </button>
+        </div>
+
+        <!-- Danh sách kết quả từ vựng JLPT -->
+        <div id="jlpt-popup-results" class="results-list">
+          <!-- Render danh sách từ vựng -->
         </div>
       </section>
 
@@ -186,6 +230,26 @@
             <span id="db-status">Đang tải...</span>
           </div>
           <button id="btn-init-db" class="btn-primary" style="display:none;">Tải dữ liệu từ điển</button>
+        </div>
+
+        <!-- Thẻ 4: Ghi nhận bản quyền & Tuyên bố miễn trừ trách nhiệm (Attribution & Disclaimer) -->
+        <div class="settings-card" style="border-left: 3px solid #10b981;">
+          <h3 style="color: #10b981; display: flex; align-items: center; gap: 6px;">
+            <span>⛩️</span> Nguồn Dữ liệu & Bản quyền JLPT
+          </h3>
+          <p class="help-text" style="line-height: 1.5; margin-bottom: 8px;">
+            Bộ từ vựng JLPT N1–N5 (7.811 từ) được trích xuất từ dự án mã nguồn mở <a href="https://github.com/evanclan/OpenJLPT" target="_blank" style="color: #38bdf8; text-decoration: underline;">OpenJLPT</a>, phát hành theo giấy phép <b>Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</b>.
+          </p>
+          <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px;">
+            <b>Các nguồn hợp thành:</b><br>
+            • <b>Jonathan Waller's JLPT Resources</b> (tanos.co.uk - CC BY): Phân loại cấp độ N1–N5 & nghĩa từ vựng tiếng Anh.<br>
+            • <b>JMdict / KANJIDIC2</b> (EDRDG - CC BY-SA 4.0): Từ loại, chuẩn hóa Furigana.<br>
+            • <b>Tatoeba.org</b> (CC BY 2.0 FR): Câu ví dụ song ngữ Nhật - Anh kèm ID câu.<br>
+            • <b>JPEX Database</b>: 11.092 mục từ Hán Việt chuẩn xác chạy ngoại tuyến 100%.
+          </div>
+          <div style="font-size: 11px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.25); line-height: 1.4;">
+            <b>⚠️ Tuyên bố miễn trừ trách nhiệm (Disclaimer):</b> Tổ chức JLPT / Japan Foundation không phát hành danh sách từ vựng chính thức. Dữ liệu này dựa trên tiêu chuẩn cộng đồng uy tín được đúc kết qua nhiều năm, không tuyên bố là danh sách chính thức hay đầy đủ tuyệt đối.
+          </div>
         </div>
       </section>
     </main>
