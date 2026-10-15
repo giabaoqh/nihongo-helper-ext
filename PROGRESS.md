@@ -50,3 +50,12 @@
 - [x] `test_json_roundtrip.js`: 31/31 tests đạt (100% PASS).
 - [x] `test_all_fixes.js`: 12/12 tests đạt (100% PASS).
 - [x] Xác nhận người dùng mới có thể thực hiện trọn vẹn luồng học: Mở Workspace -> Chọn N4 -> Chọn từ vựng -> Bắt đầu Flashcard -> Đánh giá thẻ -> Kết quả được lưu vào bộ nhớ cục bộ.
+
+#### Phần 7: Tối ưu Hiển thị Nghĩa Từ vựng & Cơ chế Mở rộng Đa tầng (Expandable Meanings)
+- [x] Xử lý triệt để vấn đề danh sách nghĩa quá dài (như `空く（あく）`, `青い`, `上げる`...).
+- [x] Xây dựng hàm tách nghĩa thông minh `parseMeaningSenses`, trích xuất 1–3 nghĩa chính `getPrimaryMeaningText` và hàm render giao diện mở rộng `formatExpandableMeaning`.
+- [x] Cố định độ rộng hiển thị nghĩa tối đa 320px, ngăn vỡ layout bảng hoặc kéo giãn chiều cao hàng.
+- [x] Thêm nút tương tác `▶ Xem thêm (+N nghĩa)` và `▼ Thu gọn nghĩa` hoạt động mượt mà không cần tải lại trang.
+- [x] Đồng bộ áp dụng trên toàn bộ hệ thống: Bảng từ vựng JLPT, Từ đã lưu, Bộ thẻ cá nhân, Hub ôn tập SRS, Tra cứu từ điển, Flashcard chiều Vi->JP và Quiz trắc nghiệm.
+- [x] Kiểm thử tự động `test_expandable_meanings.js`: 27/27 tests đạt (100% PASS).
+

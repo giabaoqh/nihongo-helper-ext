@@ -1686,3 +1686,121 @@ body {
   background: var(--primary-light);
 }
 
+/* ========================================================
+   EXPANDABLE VOCABULARY MEANING STYLES (Readability & Senses)
+   ======================================================== */
+.meaning-display-wrapper {
+  max-width: 320px;
+  text-align: left;
+  word-wrap: break-word;
+}
+
+.meaning-primary-list {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.meaning-primary-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.meaning-primary-num {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0284c7;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.meaning-primary-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.btn-toggle-meaning {
+  background: rgba(2, 132, 199, 0.08);
+  border: 1px solid rgba(2, 132, 199, 0.22);
+  color: #0284c7;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-toggle-meaning:hover {
+  background: rgba(2, 132, 199, 0.16);
+  color: #0369a1;
+  border-color: rgba(2, 132, 199, 0.38);
+}
+
+.btn-toggle-meaning.expanded {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+.btn-toggle-meaning .toggle-icon {
+  font-size: 9px;
+  transition: transform 0.15s ease;
+}
+
+.meaning-extended-drawer {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: var(--bg-card-subtle);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  max-height: 180px;
+  overflow-y: auto;
+  animation: fadeInMeaning 0.2s ease;
+}
+
+@keyframes fadeInMeaning {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.meaning-extended-heading {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+
+.meaning-extended-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.meaning-extended-list li {
+  margin-bottom: 3px;
+  word-break: break-word;
+}
+
+.meaning-extended-orig {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  font-style: italic;
+}
+
+

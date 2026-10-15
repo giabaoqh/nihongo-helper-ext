@@ -474,7 +474,7 @@ function renderDictSearchResults(query, offlineResults, onlineData) {
           <span class="badge-pos">${escapeHtml(item.pos)}</span>
         </div>
       </div>
-      <div class="dict-meaning">${escapeHtml(item.meaning)}</div>
+      <div class="dict-meaning">${formatExpandableMeaning(item.meaning, item.originalMeaning, `dict-${item.word}`)}</div>
       <div class="dict-card-actions">
         <button class="btn btn-ghost btn-sm btn-dict-audio" title="Phát âm">🔊 Nghe</button>
         <button class="btn btn-secondary btn-sm btn-dict-save-word" title="Lưu nhanh vào danh sách Từ đã lưu">⭐ Lưu từ</button>
@@ -616,7 +616,7 @@ function renderSavedWordsView() {
       <td class="cell-kanji">${escapeHtml(word.kanji || word.word)}</td>
       <td class="cell-reading">${escapeHtml(word.reading || '')}</td>
       <td style="color: var(--accent-amber); font-weight: 600;">${escapeHtml(word.hanviet || '')}</td>
-      <td>${escapeHtml(word.meaning || word.meaningVi || '')}</td>
+      <td>${formatExpandableMeaning(word.meaning || word.meaningVi, word.originalMeaning, `saved-${word.id || index}`)}</td>
       <td><span class="badge-pos">${escapeHtml(word.folder || 'Mặc định')}</span></td>
       <td style="text-align: center;">
         <button class="footer-btn btn-row-audio" title="Phát âm" style="display: inline-flex;">🔊</button>
@@ -804,7 +804,7 @@ function renderDeckCardsTable() {
       <td class="cell-kanji">${escapeHtml(card.word)}</td>
       <td class="cell-reading">${escapeHtml(card.reading || '')}</td>
       <td style="color: var(--accent-amber); font-weight: 600;">${escapeHtml(card.hanviet || '')}</td>
-      <td>${escapeHtml(card.meaning || card.meaningVi || '')}</td>
+      <td>${formatExpandableMeaning(card.meaning || card.meaningVi, card.originalMeaning, `deck-${card.id || card.word}`)}</td>
       <td>
         <span class="${isDue ? 'deck-due-badge' : 'badge-pos'}">${dueText}</span>
       </td>
@@ -896,7 +896,7 @@ function renderSrsHubView() {
         <td class="cell-kanji">${escapeHtml(card.word)}</td>
         <td class="cell-reading">${escapeHtml(card.reading || '')}</td>
         <td style="color: var(--accent-amber); font-weight: 600;">${escapeHtml(card.hanviet || '')}</td>
-        <td>${escapeHtml(card.meaning || card.meaningVi || '')}</td>
+        <td>${formatExpandableMeaning(card.meaning || card.meaningVi, card.originalMeaning, `srs-${card.id || idx}`)}</td>
         <td><span class="badge-pos">${escapeHtml(deckName)}</span></td>
         <td><span class="deck-due-badge">${intervalDays > 0 ? `${intervalDays} ngày` : 'Thẻ mới'}</span></td>
       `;
@@ -1071,8 +1071,8 @@ function renderCurrentReviewCard() {
 
   // HIỂN THỊ THEO CHIỀU HỌC: JP -> VI HOẶC VI -> JP
   if (AppState.reviewDirection === 'vi-jp') {
-    // Mặt trước: Nghĩa tiếng Việt
-    if (frontWord) frontWord.innerText = card.meaning || card.meaningVi || 'Chưa rõ nghĩa';
+    // Mặt trước: Nghĩa tiếng Việt (Ưu tiên nghĩa chính để câu hỏi súc tích, dễ nhớ)
+    if (frontWord) frontWord.innerText = getPrimaryMeaningText(card.meaning || card.meaningVi || 'Chưa rõ nghĩa');
   } else {
     // Mặt trước: Từ vựng tiếng Nhật (Mặc định)
     if (frontWord) frontWord.innerText = card.word;
@@ -1638,7 +1638,8 @@ function startQuizSession(selectedScope) {
       const btn = document.createElement('button');
       btn.className = 'btn btn-secondary';
       btn.style.cssText = 'padding: 14px 18px; text-align: left; justify-content: flex-start; font-size: 14px;';
-      btn.innerText = choice.meaning || choice.meaningVi || 'Ý nghĩa từ vựng';
+      btn.setAttribute('data-word', choice.word);
+      btn.innerText = getPrimaryMeaningText(choice.meaning || choice.meaningVi);
 
       btn.onclick = () => {
         // Vô hiệu hóa các nút khác
@@ -1653,7 +1654,7 @@ function startQuizSession(selectedScope) {
           btn.style.color = '#fff';
           // Đánh dấu nút đúng màu xanh
           optionsGrid.querySelectorAll('button').forEach(b => {
-            if (b.innerText === (target.meaning || target.meaningVi)) {
+            if (b.getAttribute('data-word') === target.word) {
               b.style.background = '#059669';
               b.style.color = '#fff';
             }
@@ -1792,6 +1793,36 @@ function setupGlobalActions() {
   const deckCardFilter = document.getElementById('deck-card-filter');
   if (deckCardSearch) deckCardSearch.addEventListener('input', () => renderDeckCardsTable());
   if (deckCardFilter) deckCardFilter.addEventListener('change', () => renderDeckCardsTable());
+
+  // Lắng nghe sự kiện mở rộng / thu gọn danh mục nghĩa từ vựng toàn cục
+  document.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('.btn-toggle-meaning');
+    if (!toggleBtn) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const targetId = toggleBtn.getAttribute('data-target');
+    const drawer = document.getElementById(targetId);
+    if (!drawer) return;
+
+    const isHidden = drawer.style.display === 'none';
+    if (isHidden) {
+      drawer.style.display = 'block';
+      toggleBtn.classList.add('expanded');
+      const icon = toggleBtn.querySelector('.toggle-icon');
+      const text = toggleBtn.querySelector('.toggle-text');
+      if (icon) icon.textContent = '▼';
+      if (text) text.textContent = 'Thu gọn nghĩa';
+    } else {
+      drawer.style.display = 'none';
+      toggleBtn.classList.remove('expanded');
+      const count = toggleBtn.getAttribute('data-count') || '';
+      const icon = toggleBtn.querySelector('.toggle-icon');
+      const text = toggleBtn.querySelector('.toggle-text');
+      if (icon) icon.textContent = '▶';
+      if (text) text.textContent = count ? `Xem thêm (+${count} nghĩa)` : 'Xem thêm nghĩa';
+    }
+  });
 }
 
 function openDeckModal(deck = null) {
@@ -2344,6 +2375,136 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+/**
+ * Tách và chuẩn hóa các phân đoạn ý nghĩa của một từ vựng
+ */
+function parseMeaningSenses(rawText) {
+  if (!rawText || typeof rawText !== 'string') return [];
+  const text = rawText.trim();
+  if (!text) return [];
+
+  let rawSenses = [];
+  if (text.includes(';') || text.includes('\n') || text.includes(' / ') || text.includes(' - ')) {
+    rawSenses = text.split(/(?:;|\n|\s*\/\s*|\s+-\s+)/).map(s => s.trim().replace(/^[-•,]\s*/, '')).filter(Boolean);
+  } else if (text.includes(',')) {
+    rawSenses = text.split(/,\s*/).map(s => s.trim().replace(/^[-•]\s*/, '')).filter(Boolean);
+  } else {
+    rawSenses = [text];
+  }
+
+  const uniqueSenses = [];
+  const seen = new Set();
+  for (const s of rawSenses) {
+    const k = s.toLowerCase();
+    if (!seen.has(k) && s.length > 0) {
+      seen.add(k);
+      uniqueSenses.push(s);
+    }
+  }
+  return uniqueSenses;
+}
+
+/**
+ * Trích xuất 1-3 nghĩa chính dạng văn bản thuần (dùng cho Quiz hoặc hiển thị tóm gọn)
+ */
+function getPrimaryMeaningText(rawText, maxItems = 3) {
+  const senses = parseMeaningSenses(rawText);
+  if (senses.length === 0) return 'Chưa rõ nghĩa';
+  const primary = [];
+  let charLen = 0;
+  for (let i = 0; i < senses.length; i++) {
+    const s = senses[i];
+    const isTech = /^\((?:điện học|hàng hải|ngôn ngữ học|âm nhạc|crickê|toán học|y học|the open|xem|từ lóng|thể dục|chính trị)\)/i.test(s);
+    if (!isTech && primary.length < maxItems && (charLen + s.length <= 110 || primary.length === 0)) {
+      primary.push(s);
+      charLen += s.length;
+    }
+  }
+  return primary.length > 0 ? primary.join('; ') : senses[0];
+}
+
+/**
+ * Hiển thị nghĩa từ vựng có khả năng mở rộng/thu gọn (Expandable Meaning)
+ * - Mặc định: Hiển thị 1-3 nghĩa quan trọng nhất, chống vỡ layout bảng
+ * - Cho phép bấm "Xem thêm nghĩa" để xem toàn bộ danh mục chi tiết mà không rời trang
+ */
+function formatExpandableMeaning(rawText, originalMeaning = '', uniqueId = '') {
+  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
+    return '<span style="color: var(--text-muted); font-size: 12px;">--</span>';
+  }
+  const text = rawText.trim();
+  const safeId = (uniqueId || Math.random().toString(36).substring(2, 9)).replace(/[^a-zA-Z0-9_-]/g, '_');
+
+  const senses = parseMeaningSenses(text);
+
+  // Trường hợp từ ngắn gọn (<= 95 ký tự và <= 2 phân đoạn)
+  if (text.length <= 95 && senses.length <= 2) {
+    let html = `<div class="meaning-primary-text" style="font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.45;">${escapeHtml(text)}</div>`;
+    if (originalMeaning && originalMeaning !== text) {
+      html += `<div style="font-size: 11px; color: var(--text-muted); margin-top: 3px; font-style: italic;">[Gốc] ${escapeHtml(originalMeaning)}</div>`;
+    }
+    return html;
+  }
+
+  // Tách thành nghĩa chính (Primary: 1-3 mục quan trọng) và nghĩa mở rộng (Extended)
+  const primary = [];
+  const extended = [];
+  let charCount = 0;
+
+  for (let i = 0; i < senses.length; i++) {
+    const s = senses[i];
+    const isTech = /^\((?:điện học|hàng hải|ngôn ngữ học|âm nhạc|crickê|toán học|y học|the open|xem|từ lóng|thể dục|chính trị)\)/i.test(s);
+    if (!isTech && primary.length < 3 && (charCount + s.length <= 110 || primary.length === 0)) {
+      primary.push(s);
+      charCount += s.length;
+    } else {
+      extended.push(s);
+    }
+  }
+
+  if (primary.length === 0 && senses.length > 0) {
+    primary.push(senses[0]);
+    extended.push(...senses.slice(1));
+  }
+
+  // Render các mục nghĩa chính
+  const primaryItemsHtml = primary.map((item, idx) => {
+    const numPrefix = primary.length > 1 ? `<span class="meaning-primary-num">${idx + 1}.</span>` : '';
+    return `
+      <div class="meaning-primary-item">
+        ${numPrefix}
+        <span class="meaning-primary-text">${escapeHtml(item)}</span>
+      </div>
+    `;
+  }).join('');
+
+  let html = `<div class="meaning-display-wrapper">`;
+  html += `<div class="meaning-primary-list">${primaryItemsHtml}</div>`;
+
+  // Nếu có thêm các nghĩa mở rộng
+  if (extended.length > 0) {
+    const moreCount = extended.length;
+    html += `
+      <button type="button" class="btn-toggle-meaning" data-target="more-meaning-${safeId}" data-count="${moreCount}" title="Nhấn để mở rộng hoặc thu gọn danh sách nghĩa">
+        <span class="toggle-icon">▶</span>
+        <span class="toggle-text">Xem thêm (+${moreCount} nghĩa)</span>
+      </button>
+      <div id="more-meaning-${safeId}" class="meaning-extended-drawer" style="display: none;">
+        <div class="meaning-extended-heading">Các nghĩa mở rộng & chuyên ngành:</div>
+        <ul class="meaning-extended-list">
+          ${extended.map(ext => `<li>${escapeHtml(ext)}</li>`).join('')}
+        </ul>
+        ${originalMeaning && originalMeaning !== text ? `<div class="meaning-extended-orig">[Gốc] ${escapeHtml(originalMeaning)}</div>` : ''}
+      </div>
+    `;
+  } else if (originalMeaning && originalMeaning !== text) {
+    html += `<div style="font-size: 11px; color: var(--text-muted); margin-top: 3px; font-style: italic;">[Gốc] ${escapeHtml(originalMeaning)}</div>`;
+  }
+
+  html += `</div>`;
+  return html;
 }
 
 function shuffleArray(array) {
@@ -2941,18 +3102,7 @@ function renderJLPTVocabTable() {
         ? `<span style="font-weight: 700; color: #f59e0b; font-size: 12px; letter-spacing: 0.04em;">${escapeHtml(item.hanviet)}</span>`
         : '<span style="color: var(--text-muted); font-size: 12px;">--</span>';
 
-      let meaningHtml = '';
-      if (item.translationStatus === 'verified' && item.meaningVi && item.meaningVi !== 'Chưa có nghĩa tiếng Việt') {
-        meaningHtml = `<div style="font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.4;">${escapeHtml(item.meaningVi)}</div>`;
-        if (item.originalMeaning) {
-          meaningHtml += `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">[Gốc] ${escapeHtml(item.originalMeaning)}</div>`;
-        }
-      } else {
-        meaningHtml = `
-          <div style="font-size: 12.5px; color: var(--text-muted); font-style: italic;">Chưa có nghĩa tiếng Việt</div>
-          ${item.originalMeaning ? `<div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">[Gốc] ${escapeHtml(item.originalMeaning)}</div>` : ''}
-        `;
-      }
+      const meaningHtml = formatExpandableMeaning(item.meaning || item.meaningVi, item.originalMeaning, item.id);
 
       return `
         <tr data-word-id="${item.id}" class="${isChecked ? 'row-selected' : ''}">
@@ -2969,9 +3119,7 @@ function renderJLPTVocabTable() {
             <span style="font-size: 14px; color: var(--primary); font-family: var(--font-jp);">${escapeHtml(item.reading)}</span>
           </td>
           <td>${hanvietHtml}</td>
-          <td>
-            <div style="max-width: 280px;">${meaningHtml}</div>
-          </td>
+          <td>${meaningHtml}</td>
           <td>${exampleHtml}</td>
           <td style="text-align: center;">
             <span style="display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; color: #fff; background: ${lvlColor};">${item.level}</span>

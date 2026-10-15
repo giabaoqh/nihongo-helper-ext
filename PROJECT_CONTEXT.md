@@ -55,9 +55,19 @@
   - **Phần E — Theo dõi tiến độ:** Giải thích ý nghĩa các trạng thái (Chưa học, Đang học, Đã thuộc, Thẻ đến hạn hôm nay), cách duy trì chuỗi học.
   - **Phần F — Nhập & Xuất dữ liệu cá nhân:** Cấu trúc 6 trường JSON chuẩn, công cụ tạo Prompt cho AI (ChatGPT/Claude), cơ chế bảo vệ chống ghi đè dữ liệu cũ.
 
-## 6. Nguồn gốc & Bản quyền (Attribution & Licenses)
+## 6. Tối ưu Hiển thị Nghĩa Từ vựng & Cơ chế Mở rộng Đa tầng (Expandable Meanings)
+- **Vấn đề giải quyết:** Các mục từ đa nghĩa phong phú (như `空く（あく）`, `青い`, `上げる`...) chứa khối lượng văn bản dịch lớn, các thuật ngữ chuyên ngành (điện học, hàng hải...) làm vỡ bố cục hàng và che khuất các cột thao tác.
+- **Giải pháp triển khai:**
+  - **Mặc định:** Trích xuất và hiển thị 1–3 nghĩa tiếng Việt quan trọng nhất phù hợp cấp độ JLPT (độ dài gọn gàng ~100–120 ký tự).
+  - **Cơ chế mở rộng (Expandable Drawer):** Bấm nút `▶ Xem thêm (+N nghĩa)` để mở ngăn kéo xem toàn bộ nghĩa mở rộng, ngữ cảnh chuyên ngành và nghĩa gốc `[Gốc]` mà không phải tải lại trang.
+  - **Nút thu gọn (`▼ Thu gọn nghĩa`):** Thu gọn lại tức thì khi cần.
+  - **Bảo toàn 100% dữ liệu gốc:** Không xóa hoặc rút gọn dữ liệu trong tệp lưu trữ.
+  - **Nhất quán toàn hệ thống:** Áp dụng đồng bộ cho Bảng từ vựng JLPT N1–N5, Từ đã lưu, Chi tiết bộ thẻ Flashcard, Thẻ đến hạn SRS Hub, Tra cứu từ điển và Quiz trắc nghiệm.
+
+## 7. Nguồn gốc & Bản quyền (Attribution & Licenses)
 - **OpenJLPT:** Bản quyền Evan Cavanaugh và cộng đồng (giấy phép CC BY-SA 4.0).
 - **JMdict / KANJIDIC2:** Electronic Dictionary Research and Development Group (EDRDG - CC BY-SA 4.0).
 - **ODVP Japanese - Vietnamese JMdict:** Bản dịch cộng đồng tiếng Việt (GPL / CC BY-SA 4.0).
 - **Từ điển Anh - Việt:** Dự án Từ điển tiếng Việt miễn phí Hồ Ngọc Đức (Open Source / Free Documentation).
 - **Tatoeba Project:** Câu ví dụ song ngữ (CC BY 2.0 FR).
+
