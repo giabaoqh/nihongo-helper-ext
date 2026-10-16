@@ -1,0 +1,33 @@
+{
+  "name": "nihongo-helper-ext",
+  "version": "1.0.0",
+  "description": "Chrome Extension hỗ trợ học tiếng Nhật toàn diện, ngoại tuyến 100% với Từ điển, Phân tích câu, Flashcard SRS & Luyện thi JLPT N1-N5",
+  "main": "JPEX/scripts/background.js",
+  "scripts": {
+    "test": "node test_master_qa_suite.js",
+    "test:master": "node test_master_qa_suite.js",
+    "test:sync": "node test_folder_sync_fix.js",
+    "test:json": "node test_json_roundtrip.js",
+    "test:analyzer": "node test_analyzer.js",
+    "test:jlpt": "node test_all_jlpt_and_guide.js",
+    "test:expandable": "node test_expandable_meanings.js",
+    "test:all": "node test_master_qa_suite.js && node test_folder_sync_fix.js && node test_json_roundtrip.js && node test_all_fixes.js && node test_all_jlpt_and_guide.js && node test_analyzer.js && node test_expandable_meanings.js",
+    "check:dom": "node scripts/check_dom_ids.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giabaoqh/nihongo-helper-ext.git"
+  },
+  "keywords": [
+    "japanese",
+    "nihongo",
+    "chrome-extension",
+    "jlpt",
+    "flashcard",
+    "srs",
+    "spaced-repetition",
+    "offline-dictionary"
+  ],
+  "author": "giabaoqh",
+  "license": "MIT"
+}

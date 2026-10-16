@@ -71,3 +71,17 @@
 - **Từ điển Anh - Việt:** Dự án Từ điển tiếng Việt miễn phí Hồ Ngọc Đức (Open Source / Free Documentation).
 - **Tatoeba Project:** Câu ví dụ song ngữ (CC BY 2.0 FR).
 
+## 8. Kiến trúc Kiểm thử Tự động & Đảm bảo Chất lượng (Automated QA Architecture)
+- **Hệ thống Kiểm thử Ngoại tuyến (Repeatable & Offline):**
+  - Cấu hình tiêu chuẩn qua `package.json` với lệnh `npm test` và `npm run test:all`.
+  - Thực thi hoàn toàn trong môi trường bộ nhớ cô lập (`memoryStore` / mocks) bảo vệ tuyệt đối 100% dữ liệu người dùng thật (Zero Personal Data Mutation).
+  - Không sử dụng API AI bên ngoài hay yêu cầu API key.
+- **Master QA Test Suite (`test_master_qa_suite.js`):**
+  - Bao quát 7 khối kiểm thử từ Khối A đến Khối G với 120 kiểm thử tự động đạt tỷ lệ 100% PASS.
+  - Tích hợp 4 ca kiểm thử hồi quy trọng yếu cho bộ phân tích câu: `さらに`, `eスポーツ`, `待っているだけなので`, `不可能であるように思えるかもしれない`.
+- **Bộ tài liệu QA chuẩn hóa:**
+  - `TEST_PLAN.md`: Ma trận kiểm thử chi tiết, độ ưu tiên P0-P2 và tiêu chí chấp nhận.
+  - `TEST_RESULTS.md`: Báo cáo số liệu thực tế, lệnh thực thi, thời gian chạy và giới hạn môi trường.
+  - `BUG_FIX_LOG.md`: Nhật ký phát hiện lỗi, phân tích nguyên nhân gốc rễ và ca kiểm thử hồi quy cho BUG-01 đến BUG-04.
+
+

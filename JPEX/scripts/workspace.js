@@ -1884,7 +1884,8 @@ function openAddCardModalWithData(data = {}) {
   document.getElementById('card-form-hanviet').value = data.hanviet || '';
   document.getElementById('card-form-meaning').value = data.meaning || '';
   document.getElementById('card-form-example').value = data.example || '';
-  document.getElementById('card-form-exampleMeaning').value = data.exampleMeaning || '';
+  const exMeanEl = document.getElementById('card-form-exampleMeaning') || document.getElementById('card-form-example-meaning');
+  if (exMeanEl) exMeanEl.value = data.exampleMeaning || '';
   document.getElementById('card-form-notes').value = data.notes || '';
 
   modal.style.display = 'flex';
@@ -1901,7 +1902,8 @@ function openEditCardModal(card) {
   document.getElementById('card-form-hanviet').value = card.hanviet || '';
   document.getElementById('card-form-meaning').value = card.meaning || card.meaningVi || '';
   document.getElementById('card-form-example').value = card.example || '';
-  document.getElementById('card-form-exampleMeaning').value = card.exampleMeaning || '';
+  const editExMeanEl = document.getElementById('card-form-exampleMeaning') || document.getElementById('card-form-example-meaning');
+  if (editExMeanEl) editExMeanEl.value = card.exampleMeaning || '';
   document.getElementById('card-form-notes').value = card.notes || '';
 
   modal.style.display = 'flex';
@@ -1915,7 +1917,8 @@ async function saveCardFromModal() {
   const hanviet = document.getElementById('card-form-hanviet').value.trim();
   const meaning = document.getElementById('card-form-meaning').value.trim();
   const example = document.getElementById('card-form-example').value.trim();
-  const exampleMeaning = document.getElementById('card-form-exampleMeaning').value.trim();
+  const saveExMeanEl = document.getElementById('card-form-exampleMeaning') || document.getElementById('card-form-example-meaning');
+  const exampleMeaning = saveExMeanEl ? saveExMeanEl.value.trim() : '';
   const notes = document.getElementById('card-form-notes').value.trim();
 
   if (!word || !meaning) {

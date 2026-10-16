@@ -604,12 +604,34 @@ async function saveDeck(deckData) {
 async function deleteDeck(deckId) {
   if (deckId === 'deck_default') return false;
   let decks = await getDecks();
+  const deckToDelete = decks.find(d => d.id === deckId);
+  const deckName = deckToDelete ? deckToDelete.name : null;
   decks = decks.filter(d => d.id !== deckId);
   await saveAllDecks(decks);
 
   let cards = await getAllCards();
   cards = cards.filter(c => c.deckId !== deckId);
   await saveAllCards(cards);
+
+  if (deckName) {
+    try {
+      const folders = await getSavedFolders();
+      const updatedFolders = folders.filter(f => f !== deckName);
+      await new Promise(r => chrome.storage.local.set({ [FOLDERS_KEY]: updatedFolders }, r));
+
+      const savedWords = await getSavedWords();
+      let changed = false;
+      savedWords.forEach(w => {
+        if (w.folder === deckName) {
+          w.folder = 'Mặc định';
+          changed = true;
+        }
+      });
+      if (changed) {
+        await new Promise(r => chrome.storage.local.set({ [STORAGE_KEY]: savedWords }, r));
+      }
+    } catch (e) {}
+  }
   return true;
 }
 
@@ -753,6 +775,15 @@ async function saveCard(cardData) {
       if (cardData.meaning || cardData.meaningVi) {
         targetW.meaning = (cardData.meaning || cardData.meaningVi).trim();
         targetW.meaningVi = (cardData.meaning || cardData.meaningVi).trim();
+      }
+      if (typeof cardData.example === 'string') targetW.example = cardData.example.trim();
+      if (typeof cardData.exampleMeaning === 'string') targetW.exampleMeaning = cardData.exampleMeaning.trim();
+      if (targetDeckId) {
+        const decks = await getDecks();
+        const d = decks.find(dk => dk.id === targetDeckId || dk.name === targetDeckId);
+        if (d && d.name) {
+          targetW.folder = d.name;
+        }
       }
       await new Promise(r => chrome.storage.local.set({ [STORAGE_KEY]: savedWords }, r));
     }

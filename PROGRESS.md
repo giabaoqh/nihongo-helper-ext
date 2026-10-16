@@ -59,3 +59,14 @@
 - [x] Đồng bộ áp dụng trên toàn bộ hệ thống: Bảng từ vựng JLPT, Từ đã lưu, Bộ thẻ cá nhân, Hub ôn tập SRS, Tra cứu từ điển, Flashcard chiều Vi->JP và Quiz trắc nghiệm.
 - [x] Kiểm thử tự động `test_expandable_meanings.js`: 27/27 tests đạt (100% PASS).
 
+#### Phần 8: Kiểm toán Toàn diện, Phát hiện Lỗi, Sửa chữa & Kiểm thử Hồi quy (Autonomous QA & Bug Fixing)
+- [x] Kiểm toán toàn bộ kiến trúc, tệp cấu hình, cú pháp JavaScript và tính toàn vẹn liên kết DOM.
+- [x] Phát hiện và sửa lỗi BUG-01: Lệch ID input modal `card-form-exampleMeaning` gây lỗi null trong `workspace.html` & `workspace.js`.
+- [x] Phát hiện và sửa lỗi BUG-02: Lệch pha đồng bộ folder và câu ví dụ khi lưu thẻ flashcard trong `storage.js` (`saveCard`).
+- [x] Phát hiện và sửa lỗi BUG-03: Thư mục "ma" và từ vựng mồ côi khi xóa bộ thẻ tùy chỉnh trong `storage.js` (`deleteDeck`).
+- [x] Kiểm tra và xác nhận hồi quy thuật toán phân tích câu (Tokenizer) trên 4 cụm từ trọng yếu: `さらに`, `eスポーツ`, `待っているだけなので`, `不可能であるように思えるかもしれない`.
+- [x] Xây dựng Master QA Test Suite (`test_master_qa_suite.js`) bao quát 7 phân vùng (Sections A–G) với 120 kiểm thử tự động.
+- [x] Thiết lập cấu hình gói tiêu chuẩn `package.json` với lệnh `npm test` và `npm run test:all`.
+- [x] Chạy toàn bộ 7 bộ kiểm thử tự động trong dự án: Tổng cộng 382/382 kiểm thử ĐẠT (100% PASS).
+- [x] Xuất bản tài liệu QA chuẩn mực: `TEST_PLAN.md`, `TEST_RESULTS.md`, `BUG_FIX_LOG.md`.
+
