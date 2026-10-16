@@ -241,10 +241,10 @@ async function runSectionC() {
   vm.createContext(ctx);
   vm.runInContext(storageCode, ctx);
 
-  // C1. Add word to default folder
+  // C1. Add word to default folder (Explicit-only flashcard policy)
   await ctx.saveWord({
     word: '猫',
-    reading: 'ねこ',
+    reading: 'ねco',
     hanviet: 'MIÊU',
     meaning: 'Con mèo'
   }, 'Mặc định');
@@ -252,8 +252,18 @@ async function runSectionC() {
   const words1 = await ctx.getSavedWords();
   const cards1 = await ctx.getAllCards();
   assert(words1.length === 1 && words1[0].word === '猫', 'Thêm từ "猫" vào savedWords thành công');
-  assert(cards1.length === 1 && cards1[0].word === '猫', 'Tự động tạo thẻ Flashcard tương ứng trong deck_default');
-  assert(cards1[0].deckId === 'deck_default', 'Thẻ Flashcard gắn đúng deck_default');
+  assert(cards1.length === 0, 'Lưu từ vào savedWords KHÔNG tự ý tạo thẻ Flashcard (theo yêu cầu Bug 1)');
+
+  // Explicitly add to review deck
+  await ctx.addWordToReview({
+    word: '猫',
+    reading: 'ねこ',
+    hanviet: 'MIÊU',
+    meaning: 'Con mèo'
+  }, 'deck_default');
+  const cards1AfterExplicit = await ctx.getAllCards();
+  assert(cards1AfterExplicit.length === 1 && cards1AfterExplicit[0].word === '猫', 'Thêm vào Bộ thẻ là cách tường minh tạo thẻ Flashcard');
+  assert(cards1AfterExplicit[0].deckId === 'deck_default', 'Thẻ Flashcard gắn đúng deck_default khi thêm tường minh');
 
   // C2. Add word to a custom folder
   await ctx.saveWord({
@@ -264,10 +274,18 @@ async function runSectionC() {
   }, 'JLPT N3');
 
   const words2 = await ctx.getSavedWords();
-  const cards2 = await ctx.getAllCards();
   const inakaWord = words2.find(w => w.word === '田舎');
-  const inakaCards = cards2.filter(c => c.word === '田舎');
   assert(inakaWord && inakaWord.folder === 'JLPT N3', 'Từ "田舎" lưu đúng thư mục "JLPT N3"');
+
+  // Explicitly add to custom deck
+  await ctx.addWordToReview({
+    word: '田舎',
+    reading: 'いなか',
+    hanviet: 'ĐIỀN XÁ',
+    meaning: 'Quê hương, vùng nông thôn'
+  }, 'JLPT N3');
+  const cards2 = await ctx.getAllCards();
+  const inakaCards = cards2.filter(c => c.word === '田舎');
   assert(inakaCards.length === 1, 'Chỉ tạo đúng 1 thẻ Flashcard cho "田舎"');
   assert(inakaCards[0].deckId !== 'deck_default', 'Thẻ của "田舎" KHÔNG nằm ở deck_default');
 
@@ -298,10 +316,7 @@ async function runSectionC() {
   assert(targetW && targetW.example === '田舎に住みたい。', 'Đồng bộ trường ví dụ sang savedWords');
   assert(targetW && targetW.exampleMeaning === 'Tôi muốn sống ở vùng quê.', 'Đồng bộ dịch nghĩa ví dụ sang savedWords');
 
-  // C5. Safe delete deck: default deck protected, custom deck cleaned up
-  const canDelDefault = await ctx.deleteDeck('deck_default');
-  assert(canDelDefault === false, 'Bảo vệ an toàn: Không cho phép xóa bộ thẻ Mặc định');
-
+  // C5. Safe delete deck: custom deck and default deck
   const canDelCustom = await ctx.deleteDeck(kinhTeDeck.id);
   assert(canDelCustom === true, 'Xóa thành công bộ thẻ tùy chỉnh');
   const decksAfterDel = await ctx.getDecks();
@@ -312,6 +327,14 @@ async function runSectionC() {
   const wordsAfterDelDeck = await ctx.getSavedWords();
   const orphanedWord = wordsAfterDelDeck.find(w => w.word === '田舎');
   assert(orphanedWord && orphanedWord.folder === 'Mặc định', 'Từ thuộc bộ thẻ vừa xóa tự động chuyển về folder "Mặc định", KHÔNG bị mất dữ liệu');
+
+  // Safe delete of default deck
+  const canDelDefault = await ctx.deleteDeck('deck_default');
+  assert(canDelDefault === true, 'Cho phép người dùng xóa bộ thẻ Mặc định an toàn (theo yêu cầu Bug 1)');
+  const decksAfterDelDefault = await ctx.getDecks();
+  assert(!decksAfterDelDefault.some(d => d.id === 'deck_default'), 'deck_default đã bị xóa khỏi danh sách decks');
+  const cardsAfterDelDefault = await ctx.getAllCards();
+  assert(!cardsAfterDelDefault.some(c => c.deckId === 'deck_default'), 'Toàn bộ thẻ trong deck_default đã được dọn sạch khi xóa deck');
 }
 
 // ========================================================
@@ -647,6 +670,146 @@ async function runSectionG() {
 }
 
 // ========================================================
+// SECTION H: CRITICAL REGRESSION TESTS FOR BUGS 1 TO 5
+// ========================================================
+async function runSectionH() {
+  console.log('\n========================================================');
+  console.log('📌 PHẦN H: HỒI QUY KIỂM THỬ 5 LỖI CHỨC NĂNG (BUGS 1 - 5)');
+  console.log('========================================================');
+
+  const memoryStore = {
+    savedWords: [],
+    savedFolders: ['Mặc định'],
+    jpex_decks: [{ id: 'deck_default', name: 'Mặc định', createdAt: Date.now(), updatedAt: Date.now() }],
+    jpex_cards: [],
+    jpDictAppSettings: { autoTranslateOnSelect: true, targetLang: 'vi' }
+  };
+
+  const mockChrome = {
+    storage: {
+      local: {
+        get: (keys, cb) => {
+          let res = {};
+          if (Array.isArray(keys)) keys.forEach(k => res[k] = memoryStore[k]);
+          else if (typeof keys === 'string') res[keys] = memoryStore[keys];
+          else if (typeof keys === 'object') Object.keys(keys).forEach(k => res[k] = memoryStore[k] !== undefined ? memoryStore[k] : keys[k]);
+          cb(res);
+        },
+        set: (data, cb) => {
+          Object.assign(memoryStore, data);
+          if (cb) cb();
+        }
+      }
+    }
+  };
+
+  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+  const ctx = {
+    chrome: mockChrome,
+    console: { log: () => {}, warn: () => {}, error: () => {} },
+    Date, Math, Array, Object, String, Number, RegExp, Set, Map, Promise
+  };
+  vm.createContext(ctx);
+  vm.runInContext(storageCode, ctx);
+
+  // Bug 1: Verify saveWord never creates flashcards implicitly
+  await ctx.saveWord({ word: '桜', reading: 'さくら', meaning: 'Hoa anh đào' });
+  let cards = await ctx.getAllCards();
+  assert(cards.length === 0, 'Bug 1: Lưu từ vựng KHÔNG tự ý tạo flashcard trong bất kỳ deck nào');
+  let words = await ctx.getSavedWords();
+  assert(words.some(w => w.word === '桜'), 'Bug 1: Từ vựng vẫn lưu đúng vào savedWords');
+
+  // Bug 1: Default deck can be deleted safely
+  const delDefResult = await ctx.deleteDeck('deck_default');
+  assert(delDefResult === true, 'Bug 1: Cho phép xóa bộ thẻ Mặc định');
+  let currentDecks = await ctx.getDecks();
+  assert(!currentDecks.some(d => d.id === 'deck_default'), 'Bug 1: deck_default không còn tồn tại sau khi xóa');
+
+  // Bug 2 & 5: Add Grammar to deck with sourceType, cardType, level, sourceId
+  const grammarSample = [
+    {
+      id: 'g_n3_001',
+      pattern: '〜てたまらない',
+      romaji: 'te tamaranai',
+      level: 'N3',
+      meaningVi: 'Không chịu nổi, vô cùng',
+      formationVi: 'V-て / A-くて / Na-で + たまらない',
+      explanationVi: 'Diễn tả cảm xúc hoặc mong muốn mãnh liệt',
+      examples: [{ ja: '暑くてたまらない。', vi: 'Nóng không chịu nổi.' }]
+    }
+  ];
+  const gResult = await ctx.addJLPTItemsToDeck(grammarSample, 'Ngữ pháp N3', 'grammar');
+  assert(gResult.success === true && gResult.addedCount === 1, 'Bug 2: Thêm ngữ pháp vào bộ thẻ thành công');
+  cards = await ctx.getAllCards();
+  const gCard = cards.find(c => c.word === '〜てたまらない');
+  assert(gCard !== undefined, 'Bug 2: Thẻ ngữ pháp tồn tại trong cards');
+  assert(gCard.cardType === 'grammar' && gCard.sourceType === 'grammar', 'Bug 5: Thẻ ngữ pháp giữ nguyên cardType & sourceType');
+  assert(gCard.sourceId === 'g_n3_001', 'Bug 5: Thẻ ngữ pháp giữ nguyên sourceId');
+  assert(gCard.level === 'N3', 'Bug 5: Thẻ ngữ pháp giữ nguyên JLPT level');
+
+  // Verify grammar cards do NOT pollute savedWords
+  words = await ctx.getSavedWords();
+  assert(!words.some(w => w.word === '〜てたまらない'), 'Bug 5: Thêm ngữ pháp vào bộ thẻ KHÔNG gây ô nhiễm vào savedWords');
+
+  // Bug 3 & 5: Add Kanji to deck with character, onyomi, kunyomi, hanviet
+  const kanjiSample = [
+    {
+      id: 'k_n5_001',
+      character: '日',
+      hanviet: 'NHẬT',
+      level: 'N5',
+      meaningVi: 'mặt trời, ngày',
+      onyomi: ['ニチ', 'ジツ'],
+      kunyomi: ['ひ', '-び', '-か'],
+      strokes: 4,
+      radical: '日',
+      examples: [{ word: '日本', reading: 'にほん', meaning: 'Nhật Bản' }]
+    }
+  ];
+  const kResult = await ctx.addJLPTItemsToDeck(kanjiSample, 'Chữ Hán N5', 'kanji');
+  assert(kResult.success === true && kResult.addedCount === 1, 'Bug 3: Thêm Chữ Hán vào bộ thẻ thành công');
+  cards = await ctx.getAllCards();
+  const kCard = cards.find(c => c.word === '日');
+  assert(kCard !== undefined, 'Bug 3: Thẻ Chữ Hán tồn tại trong cards');
+  assert(kCard.cardType === 'kanji' && kCard.sourceType === 'kanji', 'Bug 5: Thẻ Chữ Hán giữ nguyên cardType & sourceType');
+  assert(kCard.hanviet === 'NHẬT', 'Bug 3: Thẻ Chữ Hán bảo toàn âm Hán Việt');
+  assert(kCard.reading.includes('On:') && kCard.reading.includes('Kun:'), 'Bug 3: Thẻ Chữ Hán định dạng chuẩn âm On và Kun');
+
+  // Verify kanji cards do NOT pollute savedWords
+  words = await ctx.getSavedWords();
+  assert(!words.some(w => w.word === '日'), 'Bug 5: Thêm Chữ Hán vào bộ thẻ KHÔNG gây ô nhiễm vào savedWords');
+
+  // Bug 4: getJLPTStudyStats returns numeric root fields without crash
+  ctx.getJLPTData = async (cat, lvl) => {
+    if (cat === 'vocab') return [{ word: '猫', level: lvl }, { word: '犬', level: lvl }];
+    if (cat === 'kanji') return [{ character: '日', level: lvl }];
+    if (cat === 'grammar') return [{ pattern: '〜てたまらない', level: lvl }];
+    return [];
+  };
+  ctx.getJLPTMetadata = async () => ({ grandTotal: 20, levels: {} });
+
+  const stats = await ctx.getJLPTStudyStats();
+  assert(stats !== null && typeof stats === 'object', 'Bug 4: getJLPTStudyStats trả về đối tượng hợp lệ');
+  assert(typeof stats.overallMastered === 'number', 'Bug 4: stats.overallMastered là kiểu số (number)');
+  assert(typeof stats.overallLearning === 'number', 'Bug 4: stats.overallLearning là kiểu số (number)');
+  assert(typeof stats.overallDue === 'number', 'Bug 4: stats.overallDue là kiểu số (number)');
+  assert(typeof stats.totalItems === 'number' && stats.totalItems > 0, 'Bug 4: stats.totalItems là kiểu số dương');
+
+  // Verify toLocaleString does not throw
+  let formatSuccess = false;
+  try {
+    const s1 = stats.totalItems.toLocaleString();
+    const s2 = stats.overallMastered.toLocaleString();
+    const s3 = stats.overallLearning.toLocaleString();
+    const s4 = stats.overallDue.toLocaleString();
+    if (s1 && s2 && s3 && s4) formatSuccess = true;
+  } catch (e) {
+    formatSuccess = false;
+  }
+  assert(formatSuccess === true, 'Bug 4: Không còn lỗi TypeError toLocaleString() trên dữ liệu thống kê');
+}
+
+// ========================================================
 // RUN ALL TESTS & REPORT
 // ========================================================
 async function runAll() {
@@ -664,6 +827,7 @@ async function runAll() {
     await runSectionE();
     await runSectionF();
     await runSectionG();
+    await runSectionH();
   } catch (err) {
     console.error('\n❌ LỖI TRONG QUÁ TRÌNH THỰC THI KIỂM THỬ:', err);
     failedTests++;

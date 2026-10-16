@@ -78,18 +78,20 @@ async function runTests() {
   const newCard = store.jpex_cards.find(c => c.word === '行く');
   assert(newCard && newCard.deckId === 'deck_n3', 'Card added to target deck');
 
-  console.log('=== TEST SUITE 4: Delete Deck Safeguards ===');
-  const delDef = await deleteDeck('deck_default');
-  assert(delDef === false, 'Cannot delete system default deck');
+  console.log('=== TEST SUITE 4: SRS Due Items Calculation ===');
+  // Card without srs.dueDate or srs.dueDate <= now should be due
+  const dueItems = await getDueCards('deck_default');
+  assert(dueItems.length > 0 && dueItems.every(c => !c.srs || !c.srs.dueDate || c.srs.dueDate <= Date.now()), 'Accurately detected due cards in deck');
+
+  console.log('=== TEST SUITE 5: Delete Deck Lifecycle ===');
   const delCustom = await deleteDeck('deck_n3');
   assert(delCustom === true, 'Successfully deleted custom deck');
   assert(!store.jpex_decks.some(d => d.id === 'deck_n3'), 'Deck removed from storage');
   assert(!store.jpex_cards.some(c => c.deckId === 'deck_n3'), 'Cards belonging to deleted deck removed');
 
-  console.log('=== TEST SUITE 5: SRS Due Items Calculation ===');
-  // Card without srs.dueDate or srs.dueDate <= now should be due
-  const dueItems = await getDueCards('deck_default');
-  assert(dueItems.length > 0 && dueItems.every(c => !c.srs || !c.srs.dueDate || c.srs.dueDate <= Date.now()), 'Accurately detected due cards in deck');
+  const delDef = await deleteDeck('deck_default');
+  assert(delDef === true, 'Can safely delete default deck (Bug 1 requirement)');
+  assert(!store.jpex_decks.some(d => d.id === 'deck_default'), 'Default deck removed from storage');
 
   console.log(`\n============================`);
   console.log(`TEST RESULTS: ${passed} passed, ${failed} failed.`);

@@ -219,33 +219,8 @@ async function updateWordFolder(kanji, folderName, oldFolderName = null) {
           }
           return true;
         });
-      } else if (targetWord) {
-        // Chưa có thẻ nào: tạo mới trong targetDeck
-        cards.unshift({
-          id: generateId('card'),
-          deckId: targetDeck.id,
-          word: wordKey,
-          reading: targetWord.reading || '',
-          hanviet: targetWord.hanviet || '',
-          meaning: targetWord.meaningVi || targetWord.meaning || 'Từ vựng tiếng Nhật',
-          meaningVi: targetWord.meaningVi || targetWord.meaning || 'Từ vựng tiếng Nhật',
-          pos: targetWord.pos || 'Từ vựng',
-          example: targetWord.example || '',
-          exampleMeaning: targetWord.exampleMeaning || '',
-          notes: targetWord.notes || '',
-          isStarred: !!targetWord.isStarred,
-          createdAt: targetWord.addedAt || Date.now(),
-          updatedAt: Date.now(),
-          srs: {
-            interval: 0,
-            repetition: 0,
-            easeFactor: 2.5,
-            dueDate: Date.now(),
-            state: 'new',
-            lastReviewed: null
-          }
-        });
       }
+      // Khong tu y tao the moi neu tu chua tung co the Flashcard
     }
     await saveAllCards(cards);
   } catch (e) {
@@ -361,42 +336,44 @@ async function addWordToReview(wordData, targetDeckIdOrName = 'deck_default') {
 
   await saveAllCards(allCards);
 
-  // 4. Đồng bộ vào danh sách Từ đã lưu (savedWords)
-  const savedWords = await getSavedWords();
-  const existingWordIdx = savedWords.findIndex(w => (w.kanji === wordKey || w.word === wordKey));
+  // Đồng bộ vào danh sách savedWords nếu là từ vựng (không đồng bộ nếu là grammar/kanji)
+  if (!wordData.cardType || wordData.cardType === 'vocab') {
+    const savedWords = await getSavedWords();
+    const existingWordIdx = savedWords.findIndex(w => (w.kanji === wordKey || w.word === wordKey));
 
-  if (existingWordIdx !== -1) {
-    const existingW = savedWords[existingWordIdx];
-    existingW.folder = targetDeck.name;
-    existingW.reading = reading || existingW.reading;
-    existingW.hanviet = hanviet || existingW.hanviet;
-    existingW.meaning = meaning || existingW.meaning;
-    existingW.meaningVi = meaning || existingW.meaningVi;
-    if (isStarred) existingW.isStarred = true;
-  } else {
-    savedWords.unshift({
-      id: generateId('word'),
-      kanji: wordKey,
-      word: wordKey,
-      reading: reading,
-      hanviet: hanviet,
-      meaning: meaning,
-      meaningVi: meaning,
-      folder: targetDeck.name,
-      addedAt: now,
-      isStarred: isStarred
+    if (existingWordIdx !== -1) {
+      const existingW = savedWords[existingWordIdx];
+      existingW.folder = targetDeck.name;
+      existingW.reading = reading || existingW.reading;
+      existingW.hanviet = hanviet || existingW.hanviet;
+      existingW.meaning = meaning || existingW.meaning;
+      existingW.meaningVi = meaning || existingW.meaningVi;
+      if (isStarred) existingW.isStarred = true;
+    } else {
+      savedWords.unshift({
+        id: generateId('word'),
+        kanji: wordKey,
+        word: wordKey,
+        reading: reading,
+        hanviet: hanviet,
+        meaning: meaning,
+        meaningVi: meaning,
+        folder: targetDeck.name,
+        addedAt: now,
+        isStarred: isStarred
+      });
+    }
+
+    await new Promise((resolve) => {
+      chrome.storage.local.set({ [STORAGE_KEY]: savedWords }, () => resolve());
     });
   }
 
-  await new Promise((resolve) => {
-    chrome.storage.local.set({ [STORAGE_KEY]: savedWords }, () => resolve());
-  });
-
-  // 5. Đồng bộ thư mục & ghi nhớ thư mục vừa lưu
+  // Ghi nhớ thư mục vừa lưu
   await syncDeckFolders();
   await setLastSavedFolder(targetDeck.name);
 
-  // 6. Broadcast Real-time
+  // Broadcast Real-time
   broadcastDataChange('card_added_to_review', { word: wordKey, deckId: targetDeck.id, deckName: targetDeck.name });
 
   return {
@@ -408,15 +385,65 @@ async function addWordToReview(wordData, targetDeckIdOrName = 'deck_default') {
 }
 
 /**
- * Lưu một từ vựng mới vào bộ nhớ (Đồng thời tự động tạo Flashcard trong Deck tương ứng)
+ * Lưu một từ vựng mới vào bộ nhớ (savedWords)
+ * Tách biệt hoàn toàn với hệ thống Flashcard: KHÔNG tự ý tạo thẻ Flashcard khi người dùng chỉ lưu từ
  */
 async function saveWord(wordObj, folderName = "Mặc định") {
+  if (!wordObj) return await getSavedWords();
   const wordKey = (wordObj.kanji || wordObj.word || '').trim();
   if (!wordKey) return await getSavedWords();
 
   const cleanFolder = (folderName || "Mặc định").trim();
-  await addWordToReview(wordObj, cleanFolder);
-  return await getSavedWords();
+  const savedWords = await getSavedWords();
+  const existingIdx = savedWords.findIndex(w => (w.kanji === wordKey || w.word === wordKey));
+  const now = Date.now();
+
+  const reading = (wordObj.reading || wordObj.kana || wordObj.furigana || '').trim();
+  const hanviet = (wordObj.hanviet || wordObj.amhan || '').trim();
+  const meaning = (wordObj.meaning || wordObj.meaningVi || wordObj.definition || wordObj.mean || '').trim();
+  const isStarred = typeof wordObj.isStarred === 'boolean' ? wordObj.isStarred : false;
+
+  if (existingIdx !== -1) {
+    const existing = savedWords[existingIdx];
+    existing.folder = cleanFolder;
+    if (reading) existing.reading = reading;
+    if (hanviet) existing.hanviet = hanviet;
+    if (meaning) {
+      existing.meaning = meaning;
+      existing.meaningVi = meaning;
+    }
+    if (isStarred) existing.isStarred = true;
+    existing.updatedAt = now;
+  } else {
+    savedWords.unshift({
+      id: wordObj.id || generateId('word'),
+      kanji: wordKey,
+      word: wordKey,
+      reading: reading,
+      hanviet: hanviet,
+      meaning: meaning,
+      meaningVi: meaning,
+      folder: cleanFolder,
+      addedAt: now,
+      isStarred: isStarred,
+      jlpt: wordObj.jlpt || wordObj.level || null
+    });
+  }
+
+  await new Promise((resolve) => {
+    chrome.storage.local.set({ [STORAGE_KEY]: savedWords }, () => resolve());
+  });
+
+  // Đảm bảo thư mục tồn tại trong danh sách savedFolders
+  const folders = await getSavedFolders();
+  if (!folders.includes(cleanFolder)) {
+    folders.push(cleanFolder);
+    await new Promise(r => chrome.storage.local.set({ [FOLDERS_KEY]: folders }, r));
+  }
+  await setLastSavedFolder(cleanFolder);
+
+  broadcastDataChange('word_saved', { word: wordKey, folder: cleanFolder });
+  return savedWords;
 }
 
 /**
@@ -553,19 +580,19 @@ async function getDecks() {
   return new Promise((resolve) => {
     chrome.storage.local.get([DECKS_KEY], async (res) => {
       let decks = res[DECKS_KEY];
-      if (!Array.isArray(decks) || decks.length === 0) {
+      if (decks === undefined || decks === null) {
         const folders = await getSavedFolders();
-        decks = folders.map((f, idx) => ({
+        decks = (folders && folders.length > 0 ? folders : ['Mặc định']).map((f, idx) => ({
           id: f === 'Mặc định' ? 'deck_default' : `deck_${idx}_${Date.now()}`,
           name: f,
-          description: f === 'Mặc định' ? 'Bộ thẻ từ vựng chung được lưu từ extension' : `Bộ thẻ chủ đề ${f}`,
+          description: f === 'Mặc định' ? 'Bộ thẻ từ vựng chung' : `Bộ thẻ chủ đề ${f}`,
           color: f === 'Mặc định' ? '#0284c7' : '#7c3aed',
           createdAt: Date.now(),
           updatedAt: Date.now()
         }));
         await saveAllDecks(decks);
       }
-      resolve(decks);
+      resolve(decks || []);
     });
   });
 }
@@ -602,10 +629,10 @@ async function saveDeck(deckData) {
 }
 
 async function deleteDeck(deckId) {
-  if (deckId === 'deck_default') return false;
   let decks = await getDecks();
   const deckToDelete = decks.find(d => d.id === deckId);
-  const deckName = deckToDelete ? deckToDelete.name : null;
+  if (!deckToDelete) return false;
+  const deckName = deckToDelete.name;
   decks = decks.filter(d => d.id !== deckId);
   await saveAllDecks(decks);
 
@@ -1846,6 +1873,11 @@ async function getJLPTStudyStats() {
 
   const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
   const stats = {};
+  let overallTotalItems = 0;
+  let overallMastered = 0;
+  let overallLearning = 0;
+  let overallDue = 0;
+  let overallSaved = 0;
 
   for (const lvl of levels) {
     const [vocabList, kanjiList, grammarList] = await Promise.all([
@@ -1904,6 +1936,12 @@ async function getJLPTStudyStats() {
     const totalItems = totalVocab + totalKanji + totalGrammar;
     const totalMastered = vocabMastered + kanjiMastered + grammarMastered;
 
+    overallTotalItems += totalItems;
+    overallMastered += totalMastered;
+    overallLearning += vocabLearning;
+    overallDue += vocabDue;
+    overallSaved += (vocabSaved + kanjiSaved + grammarSaved);
+
     stats[lvl] = {
       level: lvl,
       totalVocab: totalVocab,
@@ -1931,12 +1969,19 @@ async function getJLPTStudyStats() {
     };
   }
 
+  const grandTotal = (meta && meta.grandTotal) ? meta.grandTotal : (overallTotalItems || 10720);
+
   return {
     meta: meta,
-    grandTotal: meta.grandTotal || 10720,
+    grandTotal: grandTotal,
+    totalItems: grandTotal,
+    overallMastered: overallMastered,
+    overallLearning: overallLearning,
+    overallDue: overallDue,
+    overallSaved: overallSaved,
     levels: stats,
-    attribution: meta.attribution,
-    disclaimer: meta.disclaimer
+    attribution: meta ? meta.attribution : null,
+    disclaimer: meta ? meta.disclaimer : null
   };
 }
 
@@ -2012,20 +2057,31 @@ async function addJLPTItemsToDeck(itemsList, targetDeckIdOrName = null, category
     let notes = '';
 
     if (category === 'kanji') {
-      wordKey = (item.character || '').trim();
-      reading = (item.onyomi || []).concat(item.kunyomi || []).join(', ');
+      wordKey = (item.character || item.kanji || item.word || '').trim();
+      const onyomiStr = Array.isArray(item.onyomi) ? item.onyomi.join(', ') : (item.onyomi || '');
+      const kunyomiStr = Array.isArray(item.kunyomi) ? item.kunyomi.join(', ') : (item.kunyomi || '');
+      reading = [onyomiStr ? `On: ${onyomiStr}` : '', kunyomiStr ? `Kun: ${kunyomiStr}` : ''].filter(Boolean).join(' | ');
       hanviet = (item.hanviet || '').trim().toUpperCase();
-      meaningVi = item.meaningVi || 'Chưa có nghĩa tiếng Việt';
+      meaningVi = item.meaningVi || item.originalMeaning || item.meaning || 'Chưa rõ nghĩa';
       meaning = meaningVi;
-      notes = `Bộ thủ: ${item.radical || ''} (${item.strokes || 0} nét)\nTừ mẫu: ${(item.words || []).slice(0, 6).join(', ')}`;
+      if (item.examples && item.examples.length > 0) {
+        const ex = item.examples[0];
+        example = ex.word ? `${ex.word}${ex.reading ? ' (' + ex.reading + ')' : ''}` : (ex.example || '');
+        exampleMeaning = ex.meaning || ex.meaningVi || '';
+      }
+      const strokesInfo = item.strokes ? `Số nét: ${item.strokes}` : '';
+      const radicalInfo = item.radical ? `Bộ thủ: ${item.radical}` : '';
+      notes = [strokesInfo, radicalInfo].filter(Boolean).join(' • ');
     } else if (category === 'grammar') {
-      wordKey = (item.pattern || '').trim();
-      reading = (item.romaji || '').trim();
-      meaningVi = item.meaningVi || item.originalMeaning || 'Cấu trúc ngữ pháp';
+      wordKey = (item.pattern || item.word || '').trim();
+      reading = (item.romaji || item.reading || '').trim();
+      meaningVi = item.meaningVi || item.originalMeaning || item.meaning || 'Cấu trúc ngữ pháp';
       meaning = meaningVi;
-      example = item.examples && item.examples[0] ? item.examples[0].ja : '';
-      exampleMeaning = item.examples && item.examples[0] ? (item.examples[0].vi || item.examples[0].en || '') : '';
-      notes = `Cấu trúc: ${item.formationVi || item.formation || ''}\nGiải thích: ${item.explanationVi || item.originalNotes || ''}`;
+      example = item.example || (item.examples && item.examples[0] ? (item.examples[0].ja || item.examples[0].example || '') : '');
+      exampleMeaning = item.exampleVi || item.exampleMeaning || (item.examples && item.examples[0] ? (item.examples[0].vi || item.examples[0].meaningVi || item.examples[0].en || '') : '');
+      const formationInfo = item.formationVi ? `Cấu trúc: ${item.formationVi}` : (item.formation ? `Cấu trúc: ${item.formation}` : '');
+      const explanationInfo = item.explanationVi ? `Giải thích: ${item.explanationVi}` : (item.explanation ? `Giải thích: ${item.explanation}` : (item.notes ? `Giải thích: ${item.notes}` : ''));
+      notes = [formationInfo, explanationInfo].filter(Boolean).join('\n\n');
     } else {
       // Vocab
       wordKey = (item.word || item.kanji || '').trim();
@@ -2055,12 +2111,19 @@ async function addJLPTItemsToDeck(itemsList, targetDeckIdOrName = null, category
       if (example) existing.example = example;
       if (exampleMeaning) existing.exampleMeaning = exampleMeaning;
       if (notes) existing.notes = notes;
+      existing.cardType = category;
+      existing.sourceType = category;
+      if (item.id) existing.sourceId = item.id;
+      if (item.level || levelStr) existing.level = item.level || levelStr;
       existing.updatedAt = now;
       updatedCards++;
     } else {
       allCards.unshift({
         id: item.id || generateId('card'),
         deckId: targetDeck.id,
+        cardType: category,
+        sourceType: category,
+        sourceId: item.id || null,
         word: wordKey,
         reading: reading,
         hanviet: hanviet,
@@ -2078,35 +2141,9 @@ async function addJLPTItemsToDeck(itemsList, targetDeckIdOrName = null, category
       });
       addedCards++;
     }
-
-    // 2. Đồng bộ vào savedWords
-    const swIdx = savedWords.findIndex(w => (w.kanji === wordKey || w.word === wordKey));
-    if (swIdx !== -1) {
-      const sw = savedWords[swIdx];
-      if (reading) sw.reading = reading;
-      if (hanviet) sw.hanviet = hanviet;
-      if (meaningVi) {
-        sw.meaning = meaningVi;
-        sw.meaningVi = meaningVi;
-      }
-      sw.folder = targetDeck.name;
-    } else {
-      savedWords.unshift({
-        id: generateId('word'),
-        kanji: wordKey,
-        word: wordKey,
-        reading: reading,
-        hanviet: hanviet,
-        meaning: meaningVi,
-        meaningVi: meaningVi,
-        folder: targetDeck.name,
-        addedAt: now
-      });
-    }
   }
 
   await saveAllCards(allCards);
-  await new Promise(r => chrome.storage.local.set({ [STORAGE_KEY]: savedWords }, r));
   await syncDeckFolders();
   await setLastSavedFolder(targetDeck.name);
 
@@ -2278,7 +2315,6 @@ function parseAndValidatePersonalImport(rawContent, format = 'auto') {
   };
 }
 
-// Tự động kiểm tra và đồng bộ khi nạp storage.js
-syncSavedWordsWithCards().then(() => cleanupDuplicateDefaultCards()).catch(() => {});
+// Khong tu dong tao the Flashcard khi nap storage.js (tuan thu kien truc explicit-only)
 
 
