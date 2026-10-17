@@ -102,6 +102,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) {}
   }
 
+  // Khởi tạo Chế độ Giao diện Sáng / Tối (Theme Management)
+  function initAnalyzerTheme() {
+    const btnThemeToggle = document.getElementById('btn-analyzer-theme-toggle');
+    const themeIcon = document.getElementById('analyzer-theme-icon');
+
+    const applyTheme = (theme) => {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (document.body) document.body.setAttribute('data-theme', theme);
+      if (themeIcon) {
+        themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+      if (btnThemeToggle) {
+        btnThemeToggle.setAttribute('title', theme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối');
+      }
+    };
+
+    const savedTheme = localStorage.getItem('jpex_workspace_theme');
+    let currentTheme = 'light';
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      currentTheme = savedTheme;
+    } else {
+      const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      currentTheme = sysDark ? 'dark' : 'light';
+    }
+    applyTheme(currentTheme);
+
+    if (btnThemeToggle) {
+      btnThemeToggle.addEventListener('click', () => {
+        const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        localStorage.setItem('jpex_workspace_theme', nextTheme);
+        if (typeof updateAppSettings === 'function') {
+          updateAppSettings({ theme: nextTheme });
+        }
+      });
+    }
+
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        const currentSaved = localStorage.getItem('jpex_workspace_theme');
+        if (!currentSaved || currentSaved === 'auto') {
+          applyTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.jpDictAppSettings && changes.jpDictAppSettings.newValue) {
+          const theme = changes.jpDictAppSettings.newValue.theme;
+          if (theme === 'light' || theme === 'dark') {
+            applyTheme(theme);
+          } else if (theme === 'auto') {
+            const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(sysDark ? 'dark' : 'light');
+          }
+        }
+      });
+    }
+  }
+
+  initAnalyzerTheme();
+
   // Khởi tạo Analyzer Engine
   if (typeof SentenceAnalyzer !== 'undefined' && SentenceAnalyzer.init) {
     SentenceAnalyzer.init().catch(err => console.warn('[AnalyzerUI] Lỗi nạp data:', err));
@@ -623,15 +687,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     try {
-      if (typeof saveWord === 'function') {
+      if (typeof addWordToReview === 'function') {
+        await addWordToReview(vocabData, selectedFolder);
+        if (typeof setLastSavedFolder === 'function') {
+          await setLastSavedFolder(selectedFolder);
+        }
+        showToast(`⭐ Đã lưu "${t.surface}" vào bộ thẻ Flashcard "${selectedFolder}"!`, 3000);
+      } else if (typeof saveWord === 'function') {
         await saveWord(vocabData, selectedFolder);
         if (typeof setLastSavedFolder === 'function') {
           await setLastSavedFolder(selectedFolder);
         }
         showToast(`⭐ Đã lưu "${t.surface}" vào thư mục "${selectedFolder}"!`, 3000);
-      } else if (typeof addWordToReview === 'function') {
-        await addWordToReview(vocabData, selectedFolder);
-        showToast(`⭐ Đã lưu "${t.surface}" vào ôn tập Flashcard!`, 3000);
       } else {
         showToast(`⭐ Đã ghi nhận từ "${t.surface}"`, 2500);
       }

@@ -413,6 +413,12 @@ async function saveWord(wordObj, folderName = "Mặc định") {
       existing.meaningVi = meaning;
     }
     if (isStarred) existing.isStarred = true;
+    if (wordObj.example) existing.example = wordObj.example;
+    if (wordObj.exampleMeaning || wordObj.exampleTranslation) {
+      existing.exampleMeaning = wordObj.exampleMeaning || wordObj.exampleTranslation;
+    }
+    if (wordObj.pos || wordObj.partOfSpeech) existing.pos = wordObj.pos || wordObj.partOfSpeech;
+    if (wordObj.notes) existing.notes = wordObj.notes;
     existing.updatedAt = now;
   } else {
     savedWords.unshift({
@@ -423,6 +429,10 @@ async function saveWord(wordObj, folderName = "Mặc định") {
       hanviet: hanviet,
       meaning: meaning,
       meaningVi: meaning,
+      example: (wordObj.example || '').trim(),
+      exampleMeaning: (wordObj.exampleMeaning || wordObj.exampleTranslation || '').trim(),
+      pos: (wordObj.pos || wordObj.partOfSpeech || 'Từ vựng').trim(),
+      notes: (wordObj.notes || '').trim(),
       folder: cleanFolder,
       addedAt: now,
       isStarred: isStarred,
@@ -952,42 +962,372 @@ async function rateCardSrs(cardId, rating) {
   return card;
 }
 
-async function recordReviewHistory(cardId, rating) {
+const STUDY_SESSIONS_KEY = 'nihongo_study_sessions';
+
+/**
+ * Ghi nhận một phiên học Flashcard / Kanji / Grammar thực tế đã diễn ra
+ * @param {Object} sessionData 
+ */
+async function recordStudySession(sessionData) {
+  if (!sessionData || typeof sessionData !== 'object') {
+    return { success: false, message: 'Dữ liệu phiên học không hợp lệ' };
+  }
+
+  // Không lưu các phiên trống không có bất kỳ hành động ôn tập nào
+  const itemsReviewed = Number(sessionData.itemsReviewed) || 0;
+  if (itemsReviewed <= 0) {
+    return { success: false, message: 'Phiên học không có hành động đánh giá nào' };
+  }
+
+  const now = Date.now();
+  const startTime = sessionData.startTime || (now - 60000);
+  const endTime = sessionData.endTime || now;
+  const durationMs = Math.max(1000, endTime - startTime);
+  const knownCount = Number(sessionData.knownCount) || 0;
+  const unknownCount = Number(sessionData.unknownCount) || 0;
+  const totalAnswers = knownCount + unknownCount;
+  const accuracy = totalAnswers > 0 ? Math.round((knownCount / totalAnswers) * 100) : null;
+
+  const sessionRecord = {
+    id: sessionData.id || `sess_${now}_${Math.random().toString(36).substr(2, 6)}`,
+    startTime: startTime,
+    endTime: endTime,
+    durationMs: durationMs,
+    durationSec: Math.round(durationMs / 1000),
+    activityType: sessionData.activityType || 'flashcard',
+    category: sessionData.category || 'vocab',
+    level: sessionData.level || 'all',
+    deckId: sessionData.deckId || null,
+    deckTitle: sessionData.deckTitle || 'Phiên học Flashcard',
+    itemsPresented: Number(sessionData.itemsPresented) || itemsReviewed,
+    itemsReviewed: itemsReviewed,
+    knownCount: knownCount,
+    unknownCount: unknownCount,
+    accuracy: accuracy,
+    status: sessionData.status === 'partial' ? 'partial' : 'completed',
+    itemIds: Array.isArray(sessionData.itemIds) ? sessionData.itemIds : []
+  };
+
   return new Promise((resolve) => {
-    chrome.storage.local.get([REVIEW_STATS_KEY], (res) => {
+    chrome.storage.local.get([STUDY_SESSIONS_KEY, REVIEW_STATS_KEY], (res) => {
+      let sessions = Array.isArray(res[STUDY_SESSIONS_KEY]) ? res[STUDY_SESSIONS_KEY] : [];
+      
+      // Chống ghi đè trùng session ID
+      const existingIdx = sessions.findIndex(s => s.id === sessionRecord.id);
+      if (existingIdx !== -1) {
+        sessions[existingIdx] = sessionRecord;
+      } else {
+        sessions.unshift(sessionRecord);
+      }
+
+      if (sessions.length > 200) {
+        sessions = sessions.slice(0, 200);
+      }
+
+      // Cập nhật REVIEW_STATS_KEY đồng bộ
       const stats = res[REVIEW_STATS_KEY] || {
         totalReviews: 0,
-        streakDays: 1,
+        streakDays: 0,
         lastReviewDate: null,
         history: []
       };
 
-      const todayStr = new Date().toISOString().slice(0, 10);
-      if (stats.lastReviewDate) {
-        const lastDateStr = new Date(stats.lastReviewDate).toISOString().slice(0, 10);
-        if (todayStr !== lastDateStr) {
-          const diffDays = Math.round((new Date(todayStr) - new Date(lastDateStr)) / (86400000));
-          if (diffDays === 1) {
-            stats.streakDays += 1;
-          } else if (diffDays > 1) {
-            stats.streakDays = 1;
-          }
-        }
-      }
-
-      stats.totalReviews += 1;
-      stats.lastReviewDate = Date.now();
+      stats.lastReviewDate = endTime;
+      stats.totalReviews = (stats.totalReviews || 0) + itemsReviewed;
+      
+      if (!Array.isArray(stats.history)) stats.history = [];
       stats.history.unshift({
-        cardId: cardId,
-        rating: rating,
-        timestamp: Date.now()
+        sessionId: sessionRecord.id,
+        deckTitle: sessionRecord.deckTitle,
+        cardsCount: itemsReviewed,
+        accuracy: accuracy !== null ? accuracy : 100,
+        category: sessionRecord.category,
+        level: sessionRecord.level,
+        status: sessionRecord.status,
+        timestamp: endTime
       });
 
       if (stats.history.length > 500) {
         stats.history = stats.history.slice(0, 500);
       }
 
+      chrome.storage.local.set({
+        [STUDY_SESSIONS_KEY]: sessions,
+        [REVIEW_STATS_KEY]: stats
+      }, () => {
+        resolve({ success: true, session: sessionRecord });
+      });
+    });
+  });
+}
+
+/**
+ * Lấy danh sách các phiên học đã hoàn thành
+ */
+async function getStudySessions(limit = 100) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get([STUDY_SESSIONS_KEY], (res) => {
+      let sessions = Array.isArray(res[STUDY_SESSIONS_KEY]) ? res[STUDY_SESSIONS_KEY] : [];
+      sessions.sort((a, b) => (b.endTime || b.startTime || 0) - (a.endTime || a.startTime || 0));
+      resolve(sessions.slice(0, limit));
+    });
+  });
+}
+
+async function recordReviewHistory(cardIdOrSession, rating = null) {
+  return new Promise((resolve) => {
+    chrome.storage.local.get([REVIEW_STATS_KEY], (res) => {
+      const stats = res[REVIEW_STATS_KEY] || {
+        totalReviews: 0,
+        streakDays: 0,
+        lastReviewDate: null,
+        history: []
+      };
+
+      const now = Date.now();
+      stats.lastReviewDate = now;
+
+      if (typeof cardIdOrSession === 'object' && cardIdOrSession !== null) {
+        // Ghi nhận phiên học hoàn thành từ review mode (Session Summary)
+        const count = Number(cardIdOrSession.cardsCount) || 1;
+        stats.totalReviews = (stats.totalReviews || 0) + count;
+        stats.history.unshift({
+          deckTitle: cardIdOrSession.deckTitle || 'Phiên học Flashcard',
+          cardsCount: count,
+          accuracy: typeof cardIdOrSession.accuracy === 'number' ? cardIdOrSession.accuracy : 100,
+          timestamp: cardIdOrSession.timestamp || now
+        });
+      } else {
+        // Ghi nhận từng lượt chấm điểm SRS thẻ đơn lẻ
+        stats.totalReviews = (stats.totalReviews || 0) + 1;
+        stats.history.unshift({
+          cardId: cardIdOrSession,
+          rating: rating,
+          timestamp: now
+        });
+      }
+
+      if (stats.history.length > 500) {
+        stats.history = stats.history.slice(0, 500);
+      }
+
       chrome.storage.local.set({ [REVIEW_STATS_KEY]: stats }, () => resolve(stats));
+    });
+  });
+}
+
+/**
+ * Lấy dữ liệu thống kê tổng hợp ôn tập Flashcard (SRS) và các phiên học thực tế
+ */
+async function getReviewStats() {
+  const allCards = await getAllCards();
+  const sessions = await getStudySessions(200);
+
+  return new Promise((resolve) => {
+    chrome.storage.local.get([REVIEW_STATS_KEY], (res) => {
+      const stats = res[REVIEW_STATS_KEY] || {
+        totalReviews: 0,
+        streakDays: 0,
+        lastReviewDate: null,
+        history: []
+      };
+
+      const now = Date.now();
+      const todayDateObj = new Date(now);
+      const getLocalDateKey = (ts) => {
+        const d = new Date(ts);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      const todayStr = getLocalDateKey(now);
+
+      // 1. Thu thập tất cả các ngày có hoạt động học tập thực tế (Unique Calendar Dates)
+      const activeStudyDates = new Set();
+      sessions.forEach(s => {
+        if (s.itemsReviewed > 0) {
+          activeStudyDates.add(getLocalDateKey(s.endTime || s.startTime));
+        }
+      });
+
+      if (Array.isArray(stats.history)) {
+        stats.history.forEach(item => {
+          if (item && item.timestamp) {
+            activeStudyDates.add(getLocalDateKey(item.timestamp));
+          }
+        });
+      }
+
+      // 2. Tính toán Chuỗi học tập liên tục (Streak Days) theo ngày thực tế
+      let streakDays = 0;
+      if (activeStudyDates.size > 0) {
+        // Kiểm tra xem hôm nay hoặc hôm qua có học không
+        const yesterdayObj = new Date(now);
+        yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+        const yesterdayStr = getLocalDateKey(yesterdayObj.getTime());
+
+        let checkDateObj = new Date(now);
+        if (activeStudyDates.has(todayStr)) {
+          // Hôm nay đã học -> bắt đầu đếm từ hôm nay lùi về
+          streakDays = 1;
+          checkDateObj.setDate(checkDateObj.getDate() - 1);
+          while (activeStudyDates.has(getLocalDateKey(checkDateObj.getTime()))) {
+            streakDays++;
+            checkDateObj.setDate(checkDateObj.getDate() - 1);
+          }
+        } else if (activeStudyDates.has(yesterdayStr)) {
+          // Hôm nay chưa học nhưng hôm qua đã học -> bảo lưu streak kết thúc hôm qua
+          streakDays = 1;
+          checkDateObj.setDate(checkDateObj.getDate() - 2);
+          while (activeStudyDates.has(getLocalDateKey(checkDateObj.getTime()))) {
+            streakDays++;
+            checkDateObj.setDate(checkDateObj.getDate() - 1);
+          }
+        } else {
+          // Đã đứt chuỗi hơn 1 ngày
+          streakDays = 0;
+        }
+      }
+
+      // 3. Thẻ Mastered, Learning, Due theo thuật toán SRS thực tế của hệ thống
+      const itemsMastered = allCards.filter(c => c.srs && (c.srs.state === 'mastered' || (c.srs.interval >= 21))).length;
+      const itemsLearning = allCards.filter(c => c.srs && (c.srs.state === 'learning' || (c.srs.interval > 0 && c.srs.interval < 21))).length;
+      const itemsDue = allCards.filter(c => !c.srs || !c.srs.dueDate || c.srs.dueDate <= now).length;
+
+      // 4. Mục từ/Kanji đã từng được ôn tập (Unique items reviewed)
+      const uniqueReviewedCardIds = new Set();
+      allCards.forEach(c => {
+        if (c.srs && (c.srs.lastReviewed || (c.srs.repetition && c.srs.repetition > 0))) {
+          uniqueReviewedCardIds.add(c.id);
+        }
+      });
+      sessions.forEach(s => {
+        if (Array.isArray(s.itemIds)) {
+          s.itemIds.forEach(id => uniqueReviewedCardIds.add(id));
+        }
+      });
+      const totalUniqueReviewed = uniqueReviewedCardIds.size;
+
+      // 5. Tổng lượt đánh giá ôn tập & chu kỳ thời gian (Hôm nay, 7 ngày, 30 ngày)
+      let todayReviews = 0;
+      let reviews7Days = 0;
+      let reviews30Days = 0;
+
+      const sevenDaysAgo = now - (7 * 86400000);
+      const thirtyDaysAgo = now - (30 * 86400000);
+
+      // Thống kê theo ngày trong 7 ngày gần nhất cho Biểu đồ cột
+      const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+      const dailyActivity7Days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dKey = getLocalDateKey(d.getTime());
+        const dDay = String(d.getDate()).padStart(2, '0');
+        const dMonth = String(d.getMonth() + 1).padStart(2, '0');
+        dailyActivity7Days.push({
+          dateKey: dKey,
+          dateStr: `${dDay}/${dMonth}`,
+          dayName: dayNames[d.getDay()],
+          count: 0,
+          isToday: i === 0
+        });
+      }
+
+      // Duyệt qua các phiên học thực tế
+      let totalKnown = 0;
+      let totalUnknown = 0;
+      const catCount = { vocab: 0, kanji: 0, grammar: 0 };
+      const levelCount = { N5: 0, N4: 0, N3: 0, N2: 0, N1: 0 };
+
+      sessions.forEach(s => {
+        const ts = s.endTime || s.startTime || now;
+        const count = Number(s.itemsReviewed) || 0;
+        const sDateKey = getLocalDateKey(ts);
+
+        totalKnown += (Number(s.knownCount) || 0);
+        totalUnknown += (Number(s.unknownCount) || 0);
+
+        if (sDateKey === todayStr) {
+          todayReviews += count;
+        }
+        if (ts >= sevenDaysAgo) {
+          reviews7Days += count;
+        }
+        if (ts >= thirtyDaysAgo) {
+          reviews30Days += count;
+        }
+
+        // Đổ dữ liệu vào biểu đồ 7 ngày
+        const chartItem = dailyActivity7Days.find(item => item.dateKey === sDateKey);
+        if (chartItem) {
+          chartItem.count += count;
+        }
+
+        // Breakdown theo category
+        const cat = s.category || 'vocab';
+        if (catCount[cat] !== undefined) {
+          catCount[cat] += count;
+        } else {
+          catCount.vocab += count;
+        }
+
+        // Breakdown theo JLPT level
+        const lvl = String(s.level || '').toUpperCase();
+        if (levelCount[lvl] !== undefined) {
+          levelCount[lvl] += count;
+        }
+      });
+
+      // Nếu không có session nào nhưng có history cũ (legacy), tính thêm từ history
+      let totalReviewActions = sessions.reduce((acc, s) => acc + (Number(s.itemsReviewed) || 0), 0);
+      if (sessions.length === 0 && Array.isArray(stats.history)) {
+        stats.history.forEach(item => {
+          const count = Number(item.cardsCount) || 1;
+          const ts = item.timestamp || now;
+          const iDateKey = getLocalDateKey(ts);
+
+          totalReviewActions += count;
+          if (iDateKey === todayStr) todayReviews += count;
+          if (ts >= sevenDaysAgo) reviews7Days += count;
+          if (ts >= thirtyDaysAgo) reviews30Days += count;
+
+          const chartItem = dailyActivity7Days.find(c => c.dateKey === iDateKey);
+          if (chartItem) chartItem.count += count;
+        });
+      }
+
+      // 6. Tính tỷ lệ chính xác (Accuracy %)
+      const totalAnswers = totalKnown + totalUnknown;
+      const overallAccuracy = totalAnswers > 0 ? Math.round((totalKnown / totalAnswers) * 100) : null;
+
+      resolve({
+        totalUniqueReviewed: totalUniqueReviewed,
+        totalReviewActions: totalReviewActions,
+        itemsMastered: itemsMastered,
+        itemsLearning: itemsLearning,
+        itemsDue: itemsDue,
+        streakDays: streakDays,
+        reviewsToday: todayReviews,
+        reviews7Days: reviews7Days,
+        reviews30Days: reviews30Days,
+        dailyActivity7Days: dailyActivity7Days,
+        knownCount: totalKnown,
+        unknownCount: totalUnknown,
+        accuracy: overallAccuracy,
+        categoryBreakdown: catCount,
+        levelBreakdown: levelCount,
+        recentSessions: sessions.slice(0, 10),
+        sessions: sessions,
+        
+        // Tương thích ngược
+        totalReviews: totalReviewActions,
+        todayReviews: todayReviews,
+        streak: streakDays,
+        history: stats.history || []
+      });
     });
   });
 }
@@ -1024,12 +1364,11 @@ async function syncSavedWordsWithCards() {
         reading: w.reading || '',
         hanviet: w.hanviet || '',
         meaning: w.meaningVi || w.meaning || 'Từ vựng tiếng Nhật',
-        meaningVi: w.meaningVi || w.meaning || 'Từ vựng tiếng Nhật',
         pos: w.pos || 'Từ vựng',
-        example: '',
-        exampleMeaning: '',
-        notes: '',
-        isStarred: false,
+        example: w.example || '',
+        exampleMeaning: w.exampleMeaning || '',
+        notes: w.notes || '',
+        isStarred: !!w.isStarred,
         createdAt: w.addedAt || Date.now(),
         updatedAt: Date.now(),
         srs: {
@@ -1247,6 +1586,9 @@ function analyzeImportJson(jsonString) {
       hanviet: (c.hanviet || '').trim(),
       meaning: (c.meaning || c.meaningVi || 'Chưa rõ nghĩa').trim(),
       meaningVi: (c.meaningVi || c.meaning || 'Chưa rõ nghĩa').trim(),
+      cardType: c.cardType || c.sourceType || null,
+      sourceType: c.sourceType || c.cardType || null,
+      sourceId: c.sourceId || null,
       pos: c.pos || 'Từ vựng',
       example: (c.example || '').trim(),
       exampleMeaning: (c.exampleMeaning || '').trim(),
@@ -1617,6 +1959,7 @@ async function importDecksFromJson(jsonString, targetDeckId = null, newDeckName 
       currentCards.forEach(c => {
         const wordKey = c.word || c.kanji;
         if (!wordKey) return;
+        if (c.cardType && c.cardType !== 'vocab') return;
         const exists = savedWords.find(w => (w.kanji === wordKey || w.word === wordKey));
         const folderName = deckMap[c.deckId] || 'Mặc định';
         if (!exists) {
@@ -1628,6 +1971,10 @@ async function importDecksFromJson(jsonString, targetDeckId = null, newDeckName 
             hanviet: c.hanviet || '',
             meaning: c.meaning || c.meaningVi || 'Từ vựng tiếng Nhật',
             meaningVi: c.meaningVi || c.meaning || 'Từ vựng tiếng Nhật',
+            example: c.example || '',
+            exampleMeaning: c.exampleMeaning || '',
+            pos: c.pos || 'Từ vựng',
+            notes: c.notes || '',
             folder: folderName,
             addedAt: c.createdAt || Date.now(),
             isStarred: !!c.isStarred
@@ -2115,15 +2462,33 @@ async function addJLPTItemsToDeck(itemsList, targetDeckIdOrName = null, category
       existing.sourceType = category;
       if (item.id) existing.sourceId = item.id;
       if (item.level || levelStr) existing.level = item.level || levelStr;
+      if (category === 'kanji') {
+        existing.character = wordKey;
+        if (item.onyomi) existing.onyomi = item.onyomi;
+        if (item.kunyomi) existing.kunyomi = item.kunyomi;
+        if (item.strokes) existing.strokes = item.strokes;
+        if (item.radical) existing.radical = item.radical;
+        if (item.examples) existing.examples = item.examples;
+      }
       existing.updatedAt = now;
       updatedCards++;
     } else {
+      const uniqueCardId = (item.id && !allCards.some(c => c.id === item.id))
+        ? item.id
+        : generateId('card');
+
       allCards.unshift({
-        id: item.id || generateId('card'),
+        id: uniqueCardId,
         deckId: targetDeck.id,
         cardType: category,
         sourceType: category,
         sourceId: item.id || null,
+        character: category === 'kanji' ? wordKey : null,
+        onyomi: category === 'kanji' ? (item.onyomi || null) : null,
+        kunyomi: category === 'kanji' ? (item.kunyomi || null) : null,
+        strokes: category === 'kanji' ? (item.strokes || null) : null,
+        radical: category === 'kanji' ? (item.radical || null) : null,
+        examples: category === 'kanji' ? (item.examples || null) : null,
         word: wordKey,
         reading: reading,
         hanviet: hanviet,

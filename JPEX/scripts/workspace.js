@@ -24,8 +24,9 @@ const AppState = {
   reviewQueue: [],
   reviewCurrentIndex: 0,
   reviewFlipped: false,
+  reviewIsFlipping: false,
   reviewDeckTitle: '',
-  theme: 'dark',
+  theme: 'auto',
   speechRate: 1.0,
   autoPlayAudio: false,
   jlptLevel: localStorage.getItem('jpex_jlpt_selected_level') || 'N4',
@@ -86,29 +87,131 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
- * Khởi tạo Dark / Light Mode
+ * Khởi tạo Dark / Light Mode toàn diện
  */
 function initTheme() {
-  const savedTheme = localStorage.getItem('jpex_workspace_theme') || 'dark';
-  setTheme(savedTheme);
+  const savedTheme = localStorage.getItem('jpex_workspace_theme');
 
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    applyTheme(savedTheme, true);
+  } else if (savedTheme === 'auto') {
+    const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(sysDark ? 'dark' : 'light', false);
+  } else {
+    // Người dùng mới hoặc chưa lưu thiết lập: tự động phát hiện theo hệ điều hành OS
+    const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(sysDark ? 'dark' : 'light', false);
+  }
+
+  // Lắng nghe thay đổi theme từ hệ thống khi người dùng chọn 'auto' hoặc chưa chọn thủ công
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      const currentSaved = localStorage.getItem('jpex_workspace_theme');
+      if (!currentSaved || currentSaved === 'auto') {
+        applyTheme(e.matches ? 'dark' : 'light', false);
+      }
+    });
+  }
+
+  // Nút đổi theme ở Sidebar footer
   const themeBtn = document.getElementById('btn-theme-toggle');
   if (themeBtn) {
     themeBtn.addEventListener('click', () => {
-      const nextTheme = AppState.theme === 'dark' ? 'light' : 'dark';
+      const current = AppState.theme === 'dark' ? 'dark' : 'light';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
       setTheme(nextTheme);
+    });
+  }
+
+  // Nút đổi theme trên Topbar của màn hình ôn tập Flashcard
+  const reviewThemeBtn = document.getElementById('btn-review-theme-toggle');
+  if (reviewThemeBtn) {
+    reviewThemeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const current = AppState.theme === 'dark' ? 'dark' : 'light';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      setTheme(nextTheme);
+    });
+  }
+
+  // Menu chọn theme trong View Cài đặt
+  const settingsSelect = document.getElementById('settings-theme-select');
+  if (settingsSelect) {
+    const saved = localStorage.getItem('jpex_workspace_theme') || 'auto';
+    settingsSelect.value = saved;
+    settingsSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val === 'auto') {
+        localStorage.setItem('jpex_workspace_theme', 'auto');
+        if (typeof updateAppSettings === 'function') updateAppSettings({ theme: 'auto' });
+        const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(sysDark ? 'dark' : 'light', false);
+      } else {
+        setTheme(val);
+      }
+    });
+  }
+
+  // Menu chọn theme trong Popover cài đặt của Flashcard
+  const reviewThemeSelect = document.getElementById('setting-review-theme');
+  if (reviewThemeSelect) {
+    const saved = localStorage.getItem('jpex_workspace_theme') || 'auto';
+    reviewThemeSelect.value = saved;
+    reviewThemeSelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val === 'auto') {
+        localStorage.setItem('jpex_workspace_theme', 'auto');
+        if (typeof updateAppSettings === 'function') updateAppSettings({ theme: 'auto' });
+        const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(sysDark ? 'dark' : 'light', false);
+      } else {
+        setTheme(val);
+      }
     });
   }
 }
 
-function setTheme(theme) {
+function applyTheme(theme, isExplicit = false) {
   AppState.theme = theme;
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('jpex_workspace_theme', theme);
+  if (document.body) document.body.setAttribute('data-theme', theme);
+
+  // Cập nhật icon: ☀️ khi đang tối (bấm để chuyển sáng), 🌙 khi đang sáng (bấm để chuyển tối)
   const themeIcon = document.getElementById('theme-icon');
   if (themeIcon) {
-    themeIcon.innerText = theme === 'dark' ? '🌙' : '☀️';
+    themeIcon.innerText = theme === 'dark' ? '☀️' : '🌙';
+    if (themeIcon.parentElement) {
+      themeIcon.parentElement.setAttribute('title', theme === 'dark' ? 'Chuyển sang Chế độ sáng' : 'Chuyển sang Chế độ tối');
+    }
   }
+
+  const reviewThemeIcon = document.getElementById('review-theme-icon');
+  if (reviewThemeIcon) {
+    reviewThemeIcon.innerText = theme === 'dark' ? '☀️' : '🌙';
+    if (reviewThemeIcon.parentElement) {
+      reviewThemeIcon.parentElement.setAttribute('title', theme === 'dark' ? 'Chuyển sang Chế độ sáng' : 'Chuyển sang Chế độ tối');
+    }
+  }
+
+  const settingsSelect = document.getElementById('settings-theme-select');
+  if (settingsSelect) {
+    const saved = localStorage.getItem('jpex_workspace_theme') || 'auto';
+    settingsSelect.value = saved;
+  }
+
+  const reviewThemeSelect = document.getElementById('setting-review-theme');
+  if (reviewThemeSelect) {
+    const saved = localStorage.getItem('jpex_workspace_theme') || 'auto';
+    reviewThemeSelect.value = saved;
+  }
+}
+
+function setTheme(theme) {
+  localStorage.setItem('jpex_workspace_theme', theme);
+  if (typeof updateAppSettings === 'function') {
+    updateAppSettings({ theme });
+  }
+  applyTheme(theme, true);
 }
 
 /**
@@ -986,6 +1089,42 @@ function startReviewModeWithCustomQueue(cardList, title = 'Phiên ôn tập') {
     AppState.reviewAutoplayTimer = null;
   }
 
+  // Nhận diện phân loại nội dung của phiên học
+  let category = 'vocab';
+  const kanjiCardsCount = cardList.filter(c => isKanjiCard(c)).length;
+  const grammarCardsCount = cardList.filter(c => c && (c.cardType === 'grammar' || c.sourceType === 'grammar')).length;
+  if (kanjiCardsCount > cardList.length / 2 || /kanji|chữ hán/i.test(title)) {
+    category = 'kanji';
+  } else if (grammarCardsCount > cardList.length / 2 || /ngữ pháp|grammar/i.test(title)) {
+    category = 'grammar';
+  }
+
+  // Nhận diện cấp độ JLPT
+  let level = 'all';
+  const lvlMatch = title.match(/N[1-5]/i);
+  if (lvlMatch) {
+    level = lvlMatch[0].toUpperCase();
+  } else if (cardList[0] && (cardList[0].level || cardList[0].jlptLevel)) {
+    level = String(cardList[0].level || cardList[0].jlptLevel).toUpperCase();
+  }
+
+  // Khởi tạo phiên học thực tế trong AppState (chỉ lưu khi có hoạt động đánh giá thật)
+  AppState.currentSession = {
+    id: `sess_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+    startTime: Date.now(),
+    activityType: 'flashcard',
+    category: category,
+    level: level,
+    deckTitle: title,
+    deckId: (cardList[0] && cardList[0].deckId) || null,
+    itemsPresented: cardList.length,
+    itemsReviewed: 0,
+    knownCount: 0,
+    unknownCount: 0,
+    reviewedCardsMap: {},
+    status: 'partial'
+  };
+
   const modal = document.getElementById('review-modal');
   if (modal) modal.style.display = 'flex';
 
@@ -1016,6 +1155,123 @@ function startReviewModeWithCustomQueue(cardList, title = 'Phiên ôn tập') {
   renderCurrentReviewCard();
 }
 
+/**
+ * Nhận diện thẻ Chữ Hán (Kanji) an toàn, tránh nhầm lẫn với từ vựng thường
+ */
+function isKanjiCard(card) {
+  if (!card) return false;
+  if (card.cardType === 'kanji' || card.sourceType === 'kanji' || card.type === 'kanji') return true;
+  if (card.character && typeof card.character === 'string' && card.character.trim().length === 1) return true;
+  if (card.onyomi || card.kunyomi || card.strokes || card.radical) return true;
+  
+  // Kiểm tra trường hợp ký tự đơn chữ Hán CJK với On/Kun hoặc Số nét trong reading/notes
+  const word = (card.word || '').trim();
+  if (word.length === 1 && /^[\u4e00-\u9faf\u3400-\u4dbf]$/.test(word)) {
+    const reading = String(card.reading || '');
+    const notes = String(card.notes || '');
+    if (/on\s*:/i.test(reading) || /kun\s*:/i.test(reading)) return true;
+    if (/số\s*nét/i.test(notes) || /bộ\s*thủ/i.test(notes)) return true;
+    if (card.deckName && /kanji|chữ hán/i.test(card.deckName)) return true;
+  }
+  return false;
+}
+
+/**
+ * Trích xuất các trường thông tin Chữ Hán phục vụ mặt sau thẻ
+ */
+function extractKanjiDetails(card) {
+  if (!card) return {};
+  const char = (card.character || card.word || '').trim();
+  
+  // 2. Âm On (音読み)
+  let onyomi = '';
+  if (card.onyomi) {
+    onyomi = Array.isArray(card.onyomi) ? card.onyomi.join(', ') : String(card.onyomi).trim();
+  } else if (card.reading) {
+    const onMatch = card.reading.match(/on\s*:\s*([^|•\n]+)/i);
+    if (onMatch) onyomi = onMatch[1].trim();
+  }
+
+  // 3. Âm Kun (訓読み)
+  let kunyomi = '';
+  if (card.kunyomi) {
+    kunyomi = Array.isArray(card.kunyomi) ? card.kunyomi.join(', ') : String(card.kunyomi).trim();
+  } else if (card.reading) {
+    const kunMatch = card.reading.match(/kun\s*:\s*([^|•\n]+)/i);
+    if (kunMatch) kunyomi = kunMatch[1].trim();
+  }
+
+  // 4. Âm Hán Việt
+  const hanviet = (card.hanviet || '').trim().toUpperCase();
+
+  // 5. Nghĩa tiếng Việt
+  const meaning = (card.meaningVi || card.meaning || card.originalMeaning || '').trim();
+
+  // 6. Số nét (Strokes)
+  let strokes = card.strokes || '';
+  if (!strokes && card.notes) {
+    const stMatch = card.notes.match(/số\s*nét\s*:\s*(\d+)/i);
+    if (stMatch) strokes = stMatch[1];
+  }
+
+  // 7. Bộ thủ (Radical)
+  let radical = card.radical || '';
+  if (!radical && card.notes) {
+    const rdMatch = card.notes.match(/bộ\s*thủ\s*:\s*([^•\n,]+)/i);
+    if (rdMatch) radical = rdMatch[1].trim();
+  }
+
+  // 8. Từ vựng ví dụ
+  const examples = [];
+  if (Array.isArray(card.examples) && card.examples.length > 0) {
+    card.examples.forEach(ex => {
+      if (typeof ex === 'object' && ex !== null) {
+        examples.push({
+          word: ex.word || ex.example || '',
+          reading: ex.reading || '',
+          meaning: ex.meaningVi || ex.meaning || ''
+        });
+      }
+    });
+  } else if (card.example && card.example.trim()) {
+    const lines = card.example.split('\n').filter(Boolean);
+    lines.forEach(l => {
+      const match = l.match(/^([^\s(:]+)(?:\s*\(([^)]+)\))?\s*[:\-—]\s*(.*)$/);
+      if (match) {
+        examples.push({ word: match[1], reading: match[2] || '', meaning: match[3] });
+      } else {
+        examples.push({ word: l, reading: '', meaning: card.exampleMeaning || '' });
+      }
+    });
+  }
+
+  // 9. Ghi chú hoặc thông tin bổ sung (loại bỏ phần số nét, bộ thủ đã hiển thị riêng)
+  let extraNotes = '';
+  if (card.notes) {
+    const cleaned = card.notes
+      .replace(/Chữ Hán JLPT\s*[Nn]?\d/gi, '')
+      .replace(/Số nét\s*:\s*\d+/gi, '')
+      .replace(/Bộ thủ\s*:\s*[^•\n,]+/gi, '')
+      .replace(/^[•\s,\-]+|[•\s,\-]+$/g, '')
+      .trim();
+    if (cleaned.length > 0) {
+      extraNotes = cleaned;
+    }
+  }
+
+  return {
+    character: char,
+    onyomi: onyomi,
+    kunyomi: kunyomi,
+    hanviet: hanviet,
+    meaning: meaning,
+    strokes: strokes,
+    radical: radical,
+    examples: examples,
+    notes: extraNotes
+  };
+}
+
 function renderCurrentReviewCard() {
   if (AppState.reviewCurrentIndex >= AppState.reviewQueue.length) {
     showReviewCompleteScreen();
@@ -1024,6 +1280,7 @@ function renderCurrentReviewCard() {
 
   const card = AppState.reviewQueue[AppState.reviewCurrentIndex];
   AppState.reviewFlipped = false;
+  AppState.reviewIsFlipping = false;
 
   // Cập nhật bộ đếm
   const counterText = document.getElementById('review-counter-text');
@@ -1053,76 +1310,236 @@ function renderCurrentReviewCard() {
     }
   }
 
+  const frontBadge = document.getElementById('card-front-badge');
   const frontWord = document.getElementById('card-front-word');
-  const backWord = document.getElementById('card-back-word');
-  const backReading = document.getElementById('card-back-reading');
-  const backHanviet = document.getElementById('card-back-hanviet');
-  const backMeaning = document.getElementById('card-back-meaning');
-  const exampleBox = document.getElementById('card-back-example-box');
-  const exampleJp = document.getElementById('card-back-example-jp');
-  const exampleVi = document.getElementById('card-back-example-vi');
-  const notesBox = document.getElementById('card-back-notes-box');
-  const notesEl = document.getElementById('card-back-notes');
+  const frontReading = document.getElementById('card-front-reading');
+  const btnAudioFront = document.getElementById('btn-card-audio-front');
 
-  // HIỂN THỊ THEO CHIỀU HỌC: JP -> VI HOẶC VI -> JP
-  if (AppState.reviewDirection === 'vi-jp') {
-    // Mặt trước: Nghĩa tiếng Việt (Ưu tiên nghĩa chính để câu hỏi súc tích, dễ nhớ)
-    if (frontWord) frontWord.innerText = getPrimaryMeaningText(card.meaning || card.meaningVi || 'Chưa rõ nghĩa');
+  // Huy hiệu cấp độ JLPT nếu có
+  if (frontBadge) {
+    const lvl = card.jlptLevel || card.level || card.jlpt;
+    if (lvl) {
+      frontBadge.style.display = 'block';
+      frontBadge.innerText = String(lvl).toUpperCase();
+    } else {
+      frontBadge.style.display = 'none';
+    }
+  }
+
+  const isKanji = isKanjiCard(card);
+  const vocabBack = document.getElementById('vocab-back-content');
+  const kanjiBack = document.getElementById('kanji-back-content');
+
+  if (isKanji) {
+    // ==========================================
+    // CHẾ ĐỘ THẺ CHỮ HÁN (KANJI FLASHCARD)
+    // ==========================================
+    const kDetails = extractKanjiDetails(card);
+
+    // MẶT TRƯỚC: CHỈ HIỂN THỊ DUY NHẤT CHỮ HÁN VÀ HUY HIỆU CẤP ĐỘ
+    // Tuyệt đối không hiển thị âm On/Kun, âm Hán Việt, nghĩa tiếng Việt, số nét, ví dụ
+    if (frontWord) frontWord.innerText = kDetails.character || card.word;
+    if (frontReading) frontReading.style.display = 'none';
+    if (btnAudioFront) btnAudioFront.style.display = 'none'; // Ẩn TTS mặt trước để không lộ phát âm
+
+    // MẶT SAU: HIỂN THỊ ĐẦY ĐỦ CÁC TRƯỜNG DỮ LIỆU ĐÃ TRÍCH XUẤT
+    if (vocabBack) vocabBack.style.display = 'none';
+    if (kanjiBack) kanjiBack.style.display = 'flex';
+
+    // 1. Chữ Hán nhỏ hơn mặt trước
+    const kCharEl = document.getElementById('kanji-back-char');
+    if (kCharEl) kCharEl.innerText = kDetails.character || card.word;
+
+    // 4. Âm Hán Việt
+    const kHanvietEl = document.getElementById('kanji-back-hanviet');
+    if (kHanvietEl) {
+      if (kDetails.hanviet) {
+        kHanvietEl.style.display = 'inline-block';
+        kHanvietEl.innerText = kDetails.hanviet;
+      } else {
+        kHanvietEl.style.display = 'none';
+      }
+    }
+
+    // 5. Nghĩa tiếng Việt (nổi bật, rõ ràng)
+    const kMeaningEl = document.getElementById('kanji-back-meaning');
+    if (kMeaningEl) kMeaningEl.innerText = kDetails.meaning || 'Chưa rõ nghĩa';
+
+    // 2 & 3. Âm On và Âm Kun
+    const colOn = document.getElementById('kanji-col-onyomi');
+    const valOn = document.getElementById('kanji-back-onyomi');
+    const colKun = document.getElementById('kanji-col-kunyomi');
+    const valKun = document.getElementById('kanji-back-kunyomi');
+    const gridReadings = document.getElementById('kanji-back-readings-grid');
+
+    if (kDetails.onyomi) {
+      if (colOn) colOn.style.display = 'flex';
+      if (valOn) valOn.innerText = kDetails.onyomi;
+    } else {
+      if (colOn) colOn.style.display = 'none';
+    }
+
+    if (kDetails.kunyomi) {
+      if (colKun) colKun.style.display = 'flex';
+      if (valKun) valKun.innerText = kDetails.kunyomi;
+    } else {
+      if (colKun) colKun.style.display = 'none';
+    }
+
+    if (gridReadings) {
+      gridReadings.style.display = (kDetails.onyomi || kDetails.kunyomi) ? 'grid' : 'none';
+    }
+
+    // 6 & 7. Số nét và Bộ thủ
+    const itemStrokes = document.getElementById('kanji-item-strokes');
+    const valStrokes = document.getElementById('kanji-back-strokes');
+    const itemRadical = document.getElementById('kanji-item-radical');
+    const valRadical = document.getElementById('kanji-back-radical');
+    const metaRow = document.getElementById('kanji-back-meta-row');
+
+    if (kDetails.strokes) {
+      if (itemStrokes) itemStrokes.style.display = 'flex';
+      if (valStrokes) valStrokes.innerText = kDetails.strokes;
+    } else {
+      if (itemStrokes) itemStrokes.style.display = 'none';
+    }
+
+    if (kDetails.radical) {
+      if (itemRadical) itemRadical.style.display = 'flex';
+      if (valRadical) valRadical.innerText = kDetails.radical;
+    } else {
+      if (itemRadical) itemRadical.style.display = 'none';
+    }
+
+    if (metaRow) {
+      metaRow.style.display = (kDetails.strokes || kDetails.radical) ? 'flex' : 'none';
+    }
+
+    // 8. Từ vựng ví dụ
+    const exBox = document.getElementById('kanji-back-examples-box');
+    const exList = document.getElementById('kanji-back-example-list');
+    if (exBox && exList) {
+      if (kDetails.examples && kDetails.examples.length > 0) {
+        exBox.style.display = 'block';
+        exList.innerHTML = '';
+        kDetails.examples.forEach(ex => {
+          const div = document.createElement('div');
+          div.className = 'kanji-example-item';
+          div.innerHTML = `
+            <span class="ex-word">${escapeHtml(ex.word)}</span>
+            ${ex.reading ? `<span class="ex-reading">(${escapeHtml(ex.reading)})</span>` : ''}
+            ${ex.meaning ? `<span class="ex-sep">—</span><span class="ex-meaning">${escapeHtml(ex.meaning)}</span>` : ''}
+          `;
+          exList.appendChild(div);
+        });
+      } else {
+        exBox.style.display = 'none';
+      }
+    }
+
+    // 9. Ghi chú hoặc thông tin bổ sung
+    const notesBox = document.getElementById('kanji-back-notes-box');
+    const notesEl = document.getElementById('kanji-back-notes');
+    if (notesBox && notesEl) {
+      if (kDetails.notes) {
+        notesBox.style.display = 'block';
+        notesEl.innerText = `Ghi chú: ${kDetails.notes}`;
+      } else {
+        notesBox.style.display = 'none';
+      }
+    }
   } else {
-    // Mặt trước: Từ vựng tiếng Nhật (Mặc định)
-    if (frontWord) frontWord.innerText = card.word;
-  }
+    // ==========================================
+    // CHẾ ĐỘ THẺ TỪ VỰNG THƯỜNG (VOCAB FLASHCARD)
+    // ==========================================
+    if (vocabBack) vocabBack.style.display = 'flex';
+    if (kanjiBack) kanjiBack.style.display = 'none';
+    if (btnAudioFront) btnAudioFront.style.display = 'inline-block';
 
-  // MẶT SAU: Hiển thị đầy đủ thông tin chuẩn Quizlet
-  if (backWord) backWord.innerText = card.word;
-  if (backReading) backReading.innerText = card.reading || '';
-  if (backHanviet) {
-    backHanviet.innerText = card.hanviet ? card.hanviet.toUpperCase() : '';
-    backHanviet.style.display = card.hanviet ? 'inline-block' : 'none';
-  }
-  if (backMeaning) backMeaning.innerText = card.meaning || card.meaningVi || 'Chưa rõ nghĩa';
-
-  if (exampleBox) {
-    if (card.example && card.example.trim()) {
-      exampleBox.style.display = 'block';
-      if (exampleJp) exampleJp.innerText = card.example;
-      if (exampleVi) exampleVi.innerText = card.exampleMeaning || '';
+    // HIỂN THỊ THEO CHIỀU HỌC: JP -> VI HOẶC VI -> JP
+    if (AppState.reviewDirection === 'vi-jp') {
+      if (frontWord) frontWord.innerText = getPrimaryMeaningText(card.meaning || card.meaningVi || 'Chưa rõ nghĩa');
+      if (frontReading) frontReading.style.display = 'none';
     } else {
-      exampleBox.style.display = 'none';
+      if (frontWord) frontWord.innerText = card.word;
+      if (frontReading) {
+        if (card.reading && card.reading !== card.word) {
+          frontReading.style.display = 'block';
+          frontReading.innerText = card.reading;
+        } else {
+          frontReading.style.display = 'none';
+        }
+      }
+    }
+
+    // MẶT SAU: Hiển thị đầy đủ thông tin chuẩn Quizlet
+    const backWord = document.getElementById('card-back-word');
+    const backReading = document.getElementById('card-back-reading');
+    const backHanviet = document.getElementById('card-back-hanviet');
+    const backMeaning = document.getElementById('card-back-meaning');
+    const exampleBox = document.getElementById('card-back-example-box');
+    const exampleJp = document.getElementById('card-back-example-jp');
+    const exampleVi = document.getElementById('card-back-example-vi');
+    const notesBox = document.getElementById('card-back-notes-box');
+    const notesEl = document.getElementById('card-back-notes');
+
+    if (backWord) backWord.innerText = card.word;
+    if (backReading) backReading.innerText = card.reading || '';
+    if (backHanviet) {
+      backHanviet.innerText = card.hanviet ? card.hanviet.toUpperCase() : '';
+      backHanviet.style.display = card.hanviet ? 'inline-block' : 'none';
+    }
+    if (backMeaning) backMeaning.innerText = card.meaning || card.meaningVi || 'Chưa rõ nghĩa';
+
+    if (exampleBox) {
+      if (card.example && card.example.trim()) {
+        exampleBox.style.display = 'block';
+        if (exampleJp) exampleJp.innerText = card.example;
+        if (exampleVi) exampleVi.innerText = card.exampleMeaning || '';
+      } else {
+        exampleBox.style.display = 'none';
+      }
+    }
+
+    if (notesBox) {
+      if (card.notes && card.notes.trim()) {
+        notesBox.style.display = 'block';
+        if (notesEl) notesEl.innerText = `Ghi chú: ${card.notes}`;
+      } else {
+        notesBox.style.display = 'none';
+      }
     }
   }
 
-  if (notesBox) {
-    if (card.notes && card.notes.trim()) {
-      notesBox.style.display = 'block';
-      if (notesEl) notesEl.innerText = `Ghi chú: ${card.notes}`;
-    } else {
-      notesBox.style.display = 'none';
-    }
-  }
-
-  // Tự động phát âm thanh nếu đã bật Auto-TTS
-  if (AppState.reviewAutoTts) {
+  // Tự động phát âm thanh nếu đã bật Auto-TTS (chỉ phát cho từ vựng thông thường)
+  if (AppState.reviewAutoTts && !isKanji) {
     playPronunciation(card.word);
   }
 }
 
 function flipReviewCard() {
   const cardBox = document.getElementById('review-card-box');
-  if (!cardBox) return;
+  if (!cardBox || AppState.reviewIsFlipping) return;
 
+  AppState.reviewIsFlipping = true;
   AppState.reviewFlipped = !AppState.reviewFlipped;
   if (AppState.reviewFlipped) {
     cardBox.classList.add('flipped');
   } else {
     cardBox.classList.remove('flipped');
   }
+
+  // Khóa chống lật dồn dập (480ms khớp với transition CSS 0.5s)
+  setTimeout(() => {
+    AppState.reviewIsFlipping = false;
+  }, 480);
 }
 
 function navigateReviewCard(delta) {
   const nextIdx = AppState.reviewCurrentIndex + delta;
   if (nextIdx >= 0 && nextIdx < AppState.reviewQueue.length) {
     AppState.reviewCurrentIndex = nextIdx;
+    AppState.reviewIsFlipping = false;
     renderCurrentReviewCard();
   }
 }
@@ -1144,6 +1561,18 @@ async function handleQuizletRate(isKnown) {
     isKnown: isKnown,
     prevSrs: card.srs ? { ...card.srs } : null
   });
+
+  // Ghi nhận hành động đánh giá thực tế vào phiên học hiện tại
+  if (AppState.currentSession) {
+    const cardId = card.id || `card_${AppState.reviewCurrentIndex}`;
+    if (AppState.currentSession.reviewedCardsMap[cardId] === undefined) {
+      AppState.currentSession.itemsReviewed++;
+    }
+    AppState.currentSession.reviewedCardsMap[cardId] = isKnown;
+    const vals = Object.values(AppState.currentSession.reviewedCardsMap);
+    AppState.currentSession.knownCount = vals.filter(v => v === true).length;
+    AppState.currentSession.unknownCount = vals.filter(v => v === false).length;
+  }
 
   if (isKnown) {
     AppState.reviewKnownCount++;
@@ -1181,6 +1610,16 @@ async function handleQuizletUndo() {
     AppState.reviewKnownCount = Math.max(0, AppState.reviewKnownCount - 1);
   } else {
     AppState.reviewUnknownCards = AppState.reviewUnknownCards.filter(c => c.id !== lastAction.cardId);
+  }
+
+  // Hoàn tác hành động trong phiên học
+  if (AppState.currentSession && lastAction) {
+    const cardId = lastAction.cardId || `card_${lastAction.index}`;
+    delete AppState.currentSession.reviewedCardsMap[cardId];
+    const vals = Object.values(AppState.currentSession.reviewedCardsMap);
+    AppState.currentSession.itemsReviewed = vals.length;
+    AppState.currentSession.knownCount = vals.filter(v => v === true).length;
+    AppState.currentSession.unknownCount = vals.filter(v => v === false).length;
   }
 
   // Khôi phục lại trạng thái SRS trước đó
@@ -1328,8 +1767,16 @@ function showReviewCompleteScreen() {
     }
   }
 
-  // Ghi nhật ký ôn tập
-  if (typeof recordReviewHistory === 'function') {
+  // Ghi nhận và lưu trữ phiên học hoàn thành thực tế
+  if (AppState.currentSession && AppState.currentSession.itemsReviewed > 0) {
+    AppState.currentSession.status = 'completed';
+    AppState.currentSession.endTime = Date.now();
+    AppState.currentSession.itemIds = Object.keys(AppState.currentSession.reviewedCardsMap);
+    if (typeof recordStudySession === 'function') {
+      recordStudySession(AppState.currentSession).catch(() => {});
+    }
+    AppState.currentSession = null;
+  } else if (typeof recordReviewHistory === 'function') {
     recordReviewHistory({
       deckTitle: AppState.reviewDeckTitle,
       cardsCount: total,
@@ -1344,6 +1791,16 @@ function showReviewCompleteScreen() {
 function setupReviewShortcuts() {
   const cardBox = document.getElementById('review-card-box');
   if (cardBox) cardBox.addEventListener('click', flipReviewCard);
+
+  // Nút phát âm thanh mặt sau cho thẻ Chữ Hán
+  const btnKanjiAudio = document.getElementById('btn-kanji-audio-back');
+  if (btnKanjiAudio) {
+    btnKanjiAudio.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = AppState.reviewQueue[AppState.reviewCurrentIndex];
+      if (card) playPronunciation(card.word);
+    });
+  }
 
   // Mũi tên chuyển thẻ
   const btnPrev = document.getElementById('btn-prev-card');
@@ -1439,12 +1896,26 @@ function setupReviewShortcuts() {
   // Nút Thoát & Quay lại
   const btnExit = document.getElementById('btn-exit-review');
   const btnFinish = document.getElementById('btn-finish-review-session');
-  const closeReview = () => {
+  const closeReview = async () => {
     if (AppState.reviewAutoplayTimer) {
       clearInterval(AppState.reviewAutoplayTimer);
       AppState.reviewAutoplayTimer = null;
       AppState.reviewAutoplay = false;
     }
+
+    // Nếu người dùng đóng sớm nhưng đã có đánh giá ít nhất 1 thẻ -> lưu phiên dở dang (partial)
+    if (AppState.currentSession) {
+      if (AppState.currentSession.itemsReviewed > 0) {
+        AppState.currentSession.status = 'partial';
+        AppState.currentSession.endTime = Date.now();
+        AppState.currentSession.itemIds = Object.keys(AppState.currentSession.reviewedCardsMap);
+        if (typeof recordStudySession === 'function') {
+          await recordStudySession(AppState.currentSession);
+        }
+      }
+      AppState.currentSession = null;
+    }
+
     const modal = document.getElementById('review-modal');
     if (modal) modal.style.display = 'none';
     reloadAllData(true);
@@ -1676,31 +2147,168 @@ async function renderStatsView() {
   const streakEl = document.getElementById('stats-streak-days');
   const masteredEl = document.getElementById('stats-mastered-cards');
   const learningEl = document.getElementById('stats-learning-cards');
-  const starredEl = document.getElementById('stats-starred-cards');
-  const historyList = document.getElementById('stats-history-list');
+  const dueEl = document.getElementById('stats-due-cards');
+  const uniqueEl = document.getElementById('stats-unique-reviewed');
+  const actionsEl = document.getElementById('stats-total-actions');
 
-  const mastered = AppState.allCards.filter(c => c.srs && c.srs.interval >= 7).length;
-  const learning = AppState.allCards.filter(c => c.srs && c.srs.interval > 0 && c.srs.interval < 7).length;
-  const starred = AppState.allCards.filter(c => !!c.isStarred).length;
+  const todayEl = document.getElementById('stats-reviews-today');
+  const r7dEl = document.getElementById('stats-reviews-7d');
+  const r30dEl = document.getElementById('stats-reviews-30d');
+  const chartEl = document.getElementById('stats-daily-chart');
 
-  if (masteredEl) masteredEl.innerText = mastered;
-  if (learningEl) learningEl.innerText = learning;
-  if (starredEl) starredEl.innerText = starred;
+  const accRateEl = document.getElementById('stats-accuracy-rate');
+  const accKnownEl = document.getElementById('stats-known-count');
+  const accUnknownEl = document.getElementById('stats-unknown-count');
 
-  if (typeof getReviewStats === 'function') {
-    const stats = await getReviewStats();
-    if (streakEl) streakEl.innerText = `${stats.streak || 1} ngày`;
+  const catVocabEl = document.getElementById('stats-cat-vocab');
+  const catKanjiEl = document.getElementById('stats-cat-kanji');
+  const catGrammarEl = document.getElementById('stats-cat-grammar');
 
-    if (historyList && Array.isArray(stats.history) && stats.history.length > 0) {
-      historyList.innerHTML = '';
-      stats.history.slice(-10).reverse().forEach(item => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13.5px;';
-        row.innerHTML = `
-          <span><b>${escapeHtml(item.deckTitle || 'Phiên học')}</b> (${item.cardsCount || 0} thẻ)</span>
-          <span style="color: var(--text-muted);">${new Date(item.timestamp).toLocaleString('vi-VN')}</span>
+  const sessionsContainer = document.getElementById('stats-sessions-list');
+  const sessionsCountEl = document.getElementById('stats-sessions-total-count');
+
+  if (typeof getReviewStats !== 'function') return;
+
+  const stats = await getReviewStats();
+
+  // 1. Cập nhật 6 chỉ số Tổng quan
+  if (streakEl) streakEl.innerText = `${stats.streakDays || 0} ngày`;
+  if (masteredEl) masteredEl.innerText = stats.itemsMastered || 0;
+  if (learningEl) learningEl.innerText = stats.itemsLearning || 0;
+  if (dueEl) dueEl.innerText = stats.itemsDue || 0;
+  if (uniqueEl) uniqueEl.innerText = stats.totalUniqueReviewed || 0;
+  if (actionsEl) actionsEl.innerText = stats.totalReviewActions || 0;
+
+  // 2. Cập nhật chu kỳ hoạt động
+  if (todayEl) todayEl.innerText = stats.reviewsToday || 0;
+  if (r7dEl) r7dEl.innerText = stats.reviews7Days || 0;
+  if (r30dEl) r30dEl.innerText = stats.reviews30Days || 0;
+
+  // 3. Biểu đồ cột 7 ngày
+  if (chartEl && Array.isArray(stats.dailyActivity7Days)) {
+    chartEl.innerHTML = '';
+    const maxCount = Math.max(...stats.dailyActivity7Days.map(d => d.count), 5);
+
+    stats.dailyActivity7Days.forEach(day => {
+      const col = document.createElement('div');
+      col.className = `chart-bar-col${day.isToday ? ' is-today' : ''}`;
+      const heightPercent = maxCount > 0 ? Math.round((day.count / maxCount) * 100) : 0;
+      const barHeightPx = Math.max(day.count > 0 ? 8 : 4, Math.round((heightPercent / 100) * 80));
+
+      col.innerHTML = `
+        <span class="chart-bar-count">${day.count}</span>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill" style="height: ${barHeightPx}px;"></div>
+        </div>
+        <span class="chart-bar-label">${day.dayName}</span>
+      `;
+      chartEl.appendChild(col);
+    });
+  }
+
+  // 4. Hiệu quả & Tỷ lệ chính xác
+  if (accRateEl) {
+    accRateEl.innerText = stats.accuracy !== null ? `${stats.accuracy}%` : '--';
+  }
+  if (accKnownEl) accKnownEl.innerText = stats.knownCount || 0;
+  if (accUnknownEl) accUnknownEl.innerText = stats.unknownCount || 0;
+
+  // 5. Phân loại theo nội dung & cấp độ JLPT
+  if (catVocabEl) catVocabEl.innerText = (stats.categoryBreakdown && stats.categoryBreakdown.vocab) || 0;
+  if (catKanjiEl) catKanjiEl.innerText = (stats.categoryBreakdown && stats.categoryBreakdown.kanji) || 0;
+  if (catGrammarEl) catGrammarEl.innerText = (stats.categoryBreakdown && stats.categoryBreakdown.grammar) || 0;
+
+  if (stats.levelBreakdown) {
+    ['N5', 'N4', 'N3', 'N2', 'N1'].forEach(lvl => {
+      const el = document.getElementById(`lvl-stat-${lvl.toLowerCase()}`);
+      if (el) el.innerText = stats.levelBreakdown[lvl] || 0;
+    });
+  }
+
+  // 6. Danh sách các phiên học thực tế
+  if (sessionsCountEl) {
+    const totalSessions = Array.isArray(stats.sessions) ? stats.sessions.length : 0;
+    sessionsCountEl.innerText = `${totalSessions} phiên học`;
+  }
+
+  if (sessionsContainer) {
+    sessionsContainer.innerHTML = '';
+    const sessionsList = Array.isArray(stats.recentSessions) ? stats.recentSessions : [];
+
+    if (sessionsList.length === 0) {
+      sessionsContainer.innerHTML = `
+        <div class="stats-empty-box">
+          <div class="stats-empty-icon">🌱</div>
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Chưa có phiên học nào được ghi nhận</div>
+          <div style="font-size: 12.5px; color: var(--text-muted); max-width: 420px; margin: 0 auto;">
+            Hãy chọn một bộ thẻ và bắt đầu ôn tập thẻ Flashcard để hệ thống tự động ghi lại tiến độ, thời gian và tỷ lệ ghi nhớ thực tế của bạn!
+          </div>
+        </div>
+      `;
+    } else {
+      sessionsList.forEach(session => {
+        const itemCard = document.createElement('div');
+        itemCard.className = 'session-item-card';
+
+        const cat = session.category || 'vocab';
+        let catBadgeClass = 'cat-vocab';
+        let catBadgeText = '📖 Từ vựng';
+        if (cat === 'kanji') {
+          catBadgeClass = 'cat-kanji';
+          catBadgeText = '⛩️ Chữ Hán';
+        } else if (cat === 'grammar') {
+          catBadgeClass = 'cat-grammar';
+          catBadgeText = '📐 Ngữ pháp';
+        } else if (cat === 'mixed') {
+          catBadgeClass = 'cat-mixed';
+          catBadgeText = '🗂️ Hỗn hợp';
+        }
+
+        const levelBadge = (session.level && session.level !== 'all') 
+          ? `<span class="jlpt-mini-chip">${escapeHtml(session.level)}</span>` 
+          : '';
+
+        const durationSec = session.durationSec || Math.round((session.durationMs || 0) / 1000);
+        const durationStr = durationSec >= 60 
+          ? `${Math.floor(durationSec / 60)}p ${durationSec % 60}s` 
+          : `${durationSec}s`;
+
+        const isCompleted = session.status === 'completed';
+        const statusPill = isCompleted
+          ? `<span class="session-status-pill status-completed">✓ Hoàn thành</span>`
+          : `<span class="session-status-pill status-partial">⏳ Dở dang</span>`;
+
+        const timeStr = session.endTime || session.startTime 
+          ? new Date(session.endTime || session.startTime).toLocaleString('vi-VN', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              hour: '2-digit', minute: '2-digit'
+            })
+          : 'Vừa xong';
+
+        const accText = session.accuracy !== null ? `Độ nhớ: <b>${session.accuracy}%</b>` : '';
+
+        itemCard.innerHTML = `
+          <div class="session-left-meta">
+            <span class="session-cat-badge ${catBadgeClass}">${catBadgeText}</span>
+            <div class="session-info">
+              <div class="session-title" style="display: flex; align-items: center; gap: 8px;">
+                <span>${escapeHtml(session.deckTitle || 'Phiên học Flashcard')}</span>
+                ${levelBadge}
+              </div>
+              <div class="session-stats-details">
+                <span>Đã ôn: <b>${session.itemsReviewed}</b>/${session.itemsPresented} thẻ</span>
+                <span>(✓ ${session.knownCount} • ✕ ${session.unknownCount})</span>
+                ${accText ? `<span>• ${accText}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="session-right-status">
+            <span class="session-duration">⏱ ${durationStr}</span>
+            ${statusPill}
+            <span class="session-time-str">${timeStr}</span>
+          </div>
         `;
-        historyList.appendChild(row);
+        sessionsContainer.appendChild(itemCard);
       });
     }
   }
@@ -3611,13 +4219,21 @@ async function handleJLPTLaunchSession() {
 
       return {
         id: (existingCard && existingCard.id) || item.id,
+        cardType: 'kanji',
+        sourceType: 'kanji',
+        character: item.character,
         word: item.character,
+        onyomi: item.onyomi,
+        kunyomi: item.kunyomi,
+        strokes: item.strokes,
+        radical: item.radical,
         reading: readingCombined,
         hanviet: item.hanviet || '',
         meaning: item.meaningVi || item.originalMeaning || 'Chưa có nghĩa tiếng Việt',
         meaningVi: item.meaningVi || item.originalMeaning,
         example: examplesText,
         exampleMeaning: '',
+        examples: item.examples,
         level: item.level,
         notes: `Chữ Hán JLPT ${item.level} • Số nét: ${item.strokes || '?'}`,
         srs: existingCard ? existingCard.srs : { interval: 0, repetition: 0, easeFactor: 2.5, dueDate: Date.now(), state: 'new' }
@@ -3630,6 +4246,8 @@ async function handleJLPTLaunchSession() {
 
       return {
         id: (existingCard && existingCard.id) || item.id,
+        cardType: 'grammar',
+        sourceType: 'grammar',
         word: item.pattern,
         reading: item.romaji || '',
         hanviet: '',

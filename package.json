@@ -11,7 +11,9 @@
     "test:analyzer": "node test_analyzer.js",
     "test:jlpt": "node test_all_jlpt_and_guide.js",
     "test:expandable": "node test_expandable_meanings.js",
-    "test:all": "node test_master_qa_suite.js && node test_folder_sync_fix.js && node test_json_roundtrip.js && node test_all_fixes.js && node test_all_jlpt_and_guide.js && node test_analyzer.js && node test_expandable_meanings.js",
+    "test:audit": "node test_audit_fixes_regression.js",
+    "test:kanji_stats": "node test_kanji_frontback_and_stats.js",
+    "test:all": "node test_master_qa_suite.js && node test_folder_sync_fix.js && node test_json_roundtrip.js && node test_all_fixes.js && node test_all_jlpt_and_guide.js && node test_analyzer.js && node test_expandable_meanings.js && node test_audit_fixes_regression.js && node test_kanji_frontback_and_stats.js",
     "check:dom": "node scripts/check_dom_ids.js"
   },
   "repository": {

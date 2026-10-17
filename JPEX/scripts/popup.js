@@ -34,8 +34,64 @@ const SEED_DICTIONARY = [
 const db = new JPEXDatabase();
 let searchTimeout = null;
 
+/**
+ * Khởi tạo giao diện Sáng / Tối cho Popup đồng bộ với Workspace và OS
+ */
+function initPopupTheme() {
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (document.body) document.body.setAttribute('data-theme', theme);
+  };
+
+  const savedTheme = localStorage.getItem('jpex_workspace_theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    applyTheme(savedTheme);
+  } else if (typeof getAppSettings === 'function') {
+    getAppSettings().then(settings => {
+      if (settings && (settings.theme === 'light' || settings.theme === 'dark')) {
+        applyTheme(settings.theme);
+      } else {
+        const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(sysDark ? 'dark' : 'light');
+      }
+    }).catch(() => {
+      const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(sysDark ? 'dark' : 'light');
+    });
+  } else {
+    const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(sysDark ? 'dark' : 'light');
+  }
+
+  // Lắng nghe thay đổi theme từ hệ thống khi ở chế độ auto
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      const currentSaved = localStorage.getItem('jpex_workspace_theme');
+      if (!currentSaved || currentSaved === 'auto') {
+        applyTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  }
+
+  // Lắng nghe thay đổi theme khi người dùng đổi ở Workspace
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.jpDictAppSettings && changes.jpDictAppSettings.newValue) {
+        const theme = changes.jpDictAppSettings.newValue.theme;
+        if (theme === 'light' || theme === 'dark') {
+          applyTheme(theme);
+        } else if (theme === 'auto') {
+          const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          applyTheme(sysDark ? 'dark' : 'light');
+        }
+      }
+    });
+  }
+}
+
 // Lắng nghe khi Popup mở ra
 document.addEventListener('DOMContentLoaded', async () => {
+  initPopupTheme();
   setupTabs();
   setupSearch();
   setupDatabase();
@@ -200,52 +256,80 @@ async function setupSettingsTab() {
   const hoverLookupToggle = document.getElementById('toggle-hover-lookup');
   const hoverKeySelect = document.getElementById('select-hover-key');
   const targetLangSelect = document.getElementById('select-target-lang');
-  if (!autoTranslateToggle) return;
+  const toggleFurigana = document.getElementById('toggle-furigana');
+  const selectFuriganaHotkey = document.getElementById('select-furigana-hotkey');
 
   try {
-    const settings = await getAppSettings();
-    autoTranslateToggle.checked = !!settings.autoTranslateOnSelect;
+    const settings = typeof getAppSettings === 'function' ? await getAppSettings() : {};
+
+    if (autoTranslateToggle) {
+      autoTranslateToggle.checked = !!settings.autoTranslateOnSelect;
+      if (!autoTranslateToggle.dataset.hasListener) {
+        autoTranslateToggle.dataset.hasListener = 'true';
+        autoTranslateToggle.addEventListener('change', async (e) => {
+          await updateAppSettings({ autoTranslateOnSelect: e.target.checked });
+          console.log('[JP-Dict Popup] Đã đổi trạng thái tự động dịch:', e.target.checked);
+        });
+      }
+    }
+
     if (hoverLookupToggle) {
       hoverLookupToggle.checked = settings.hoverLookupEnabled !== false;
+      if (!hoverLookupToggle.dataset.hasListener) {
+        hoverLookupToggle.dataset.hasListener = 'true';
+        hoverLookupToggle.addEventListener('change', async (e) => {
+          await updateAppSettings({ hoverLookupEnabled: e.target.checked });
+          console.log('[JP-Dict Popup] Đã đổi trạng thái Hover tra nhanh:', e.target.checked);
+        });
+      }
     }
+
     if (hoverKeySelect) {
       hoverKeySelect.value = settings.hoverKey || 'Shift';
+      if (!hoverKeySelect.dataset.hasListener) {
+        hoverKeySelect.dataset.hasListener = 'true';
+        hoverKeySelect.addEventListener('change', async (e) => {
+          await updateAppSettings({ hoverKey: e.target.value });
+          console.log('[JP-Dict Popup] Đã đổi phím tắt Hover:', e.target.value);
+        });
+      }
     }
+
     if (targetLangSelect) {
       targetLangSelect.value = settings.targetLang || 'both';
+      if (!targetLangSelect.dataset.hasListener) {
+        targetLangSelect.dataset.hasListener = 'true';
+        targetLangSelect.addEventListener('change', async (e) => {
+          await updateAppSettings({ targetLang: e.target.value });
+          console.log('[JP-Dict Popup] Đã đổi ngôn ngữ dịch:', e.target.value);
+        });
+      }
     }
 
-    // Tránh gán lặp lại listener
-    if (!autoTranslateToggle.dataset.hasListener) {
-      autoTranslateToggle.dataset.hasListener = 'true';
-      autoTranslateToggle.addEventListener('change', async (e) => {
-        await updateAppSettings({ autoTranslateOnSelect: e.target.checked });
-        console.log('[JP-Dict Popup] Đã đổi trạng thái tự động dịch:', e.target.checked);
-      });
+    if (toggleFurigana) {
+      toggleFurigana.checked = !!settings.furiganaEnabled;
+      if (!toggleFurigana.dataset.hasListener) {
+        toggleFurigana.dataset.hasListener = 'true';
+        toggleFurigana.addEventListener('change', async () => {
+          if (typeof updateAppSettings === 'function') {
+            await updateAppSettings({ furiganaEnabled: toggleFurigana.checked });
+            console.log('[JP-Dict Popup] Đã đổi trạng thái Furigana:', toggleFurigana.checked);
+          }
+        });
+      }
     }
 
-    if (hoverLookupToggle && !hoverLookupToggle.dataset.hasListener) {
-      hoverLookupToggle.dataset.hasListener = 'true';
-      hoverLookupToggle.addEventListener('change', async (e) => {
-        await updateAppSettings({ hoverLookupEnabled: e.target.checked });
-        console.log('[JP-Dict Popup] Đã đổi trạng thái Hover tra nhanh:', e.target.checked);
-      });
-    }
-
-    if (hoverKeySelect && !hoverKeySelect.dataset.hasListener) {
-      hoverKeySelect.dataset.hasListener = 'true';
-      hoverKeySelect.addEventListener('change', async (e) => {
-        await updateAppSettings({ hoverKey: e.target.value });
-        console.log('[JP-Dict Popup] Đã đổi phím tắt Hover:', e.target.value);
-      });
-    }
-
-    if (targetLangSelect && !targetLangSelect.dataset.hasListener) {
-      targetLangSelect.dataset.hasListener = 'true';
-      targetLangSelect.addEventListener('change', async (e) => {
-        await updateAppSettings({ targetLang: e.target.value });
-        console.log('[JP-Dict Popup] Đã đổi ngôn ngữ dịch:', e.target.value);
-      });
+    if (selectFuriganaHotkey) {
+      selectFuriganaHotkey.value = settings.furiganaHotkey || 'Alt+F';
+      if (!selectFuriganaHotkey.dataset.hasListener) {
+        selectFuriganaHotkey.dataset.hasListener = 'true';
+        selectFuriganaHotkey.addEventListener('change', async () => {
+          if (typeof updateAppSettings === 'function') {
+            await updateAppSettings({ furiganaHotkey: selectFuriganaHotkey.value });
+            console.log('[JP-Dict Popup] Đã đổi phím nóng Furigana:', selectFuriganaHotkey.value);
+          }
+        });
+      }
     }
   } catch (err) {
     console.error('[JP-Dict Popup] Lỗi nạp cài đặt:', err);
@@ -927,34 +1011,6 @@ function setupFlashcardAndExport() {
     });
   }
 }
-
-
-  // Nạp & lưu cài đặt Furigana & Phím nóng
-  const toggleFurigana = document.getElementById('toggle-furigana');
-  const selectFuriganaHotkey = document.getElementById('select-furigana-hotkey');
-
-  if (typeof getAppSettings === 'function') {
-    getAppSettings().then(settings => {
-      if (toggleFurigana) toggleFurigana.checked = !!settings.furiganaEnabled;
-      if (selectFuriganaHotkey && settings.furiganaHotkey) selectFuriganaHotkey.value = settings.furiganaHotkey;
-    });
-  }
-
-  if (toggleFurigana) {
-    toggleFurigana.addEventListener('change', async () => {
-      if (typeof updateAppSettings === 'function') {
-        await updateAppSettings({ furiganaEnabled: toggleFurigana.checked });
-      }
-    });
-  }
-
-  if (selectFuriganaHotkey) {
-    selectFuriganaHotkey.addEventListener('change', async () => {
-      if (typeof updateAppSettings === 'function') {
-        await updateAppSettings({ furiganaHotkey: selectFuriganaHotkey.value });
-      }
-    });
-  }
 
 /**
  * Nút kích hoạt Không gian Từ điển & Thẻ nhớ Toàn màn hình (Workspace) từ Header

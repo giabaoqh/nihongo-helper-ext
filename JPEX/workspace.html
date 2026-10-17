@@ -1005,11 +1005,12 @@
              VIEW 8: THỐNG KÊ TIẾN ĐỘ (STATS)
              ============================================== -->
         <section class="view-section" id="view-stats">
-          <div class="stats-grid">
+          <!-- HÀNG 1: TỔNG QUAN 6 CHỈ SỐ HỌC TẬP THỰC TẾ -->
+          <div class="stats-overview-grid">
             <div class="stat-card">
               <div class="stat-icon" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">🔥</div>
               <div class="stat-info">
-                <div class="stat-value" id="stats-streak-days">1 ngày</div>
+                <div class="stat-value" id="stats-streak-days">0 ngày</div>
                 <div class="stat-label">Chuỗi học tập liên tục</div>
               </div>
             </div>
@@ -1018,7 +1019,7 @@
               <div class="stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">✅</div>
               <div class="stat-info">
                 <div class="stat-value" id="stats-mastered-cards">0</div>
-                <div class="stat-label">Thẻ đã ghi nhớ tốt</div>
+                <div class="stat-label">Thẻ đã ghi nhớ tốt (SRS)</div>
               </div>
             </div>
 
@@ -1031,19 +1032,127 @@
             </div>
 
             <div class="stat-card">
-              <div class="stat-icon" style="background: rgba(225, 29, 72, 0.12); color: #e11d48;">⭐</div>
+              <div class="stat-icon" style="background: rgba(225, 29, 72, 0.12); color: #e11d48;">⏰</div>
               <div class="stat-info">
-                <div class="stat-value" id="stats-starred-cards">0</div>
-                <div class="stat-label">Thẻ khó / Đã gắn sao</div>
+                <div class="stat-value" id="stats-due-cards">0</div>
+                <div class="stat-label">Thẻ đến hạn ôn hôm nay</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">🗂️</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stats-unique-reviewed">0</div>
+                <div class="stat-label">Mục từ/Kanji đã ôn tập</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(14, 165, 233, 0.12); color: #0ea5e9;">⚡</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stats-total-actions">0</div>
+                <div class="stat-label">Tổng lượt đánh giá ôn tập</div>
               </div>
             </div>
           </div>
 
-          <div class="dict-card" style="margin-top: 24px;">
-            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Nhật ký các phiên học gần đây</h3>
-            <div id="stats-history-list">
-              <p style="color: var(--text-muted); font-size: 13.5px;">Chưa có phiên học nào. Bắt đầu ôn tập thẻ để ghi lại tiến độ!</p>
+          <!-- HÀNG 2: HOẠT ĐỘNG ÔN TẬP VÀ HIỆU QUẢ GHI NHỚ -->
+          <div class="stats-activity-columns" style="margin-top: 24px;">
+            <!-- Cột trái: Hoạt động học theo thời gian & Biểu đồ 7 ngày -->
+            <div class="dict-card">
+              <div class="stats-card-header">
+                <h3 style="font-size: 16px; font-weight: 700; margin: 0;">📅 Hoạt động ôn tập</h3>
+                <span class="stats-badge-subtle" id="stats-activity-subtitle">7 ngày gần nhất</span>
+              </div>
+
+              <!-- Thống kê chu kỳ nhanh -->
+              <div class="stats-periods-row">
+                <div class="period-item">
+                  <span class="period-num" id="stats-reviews-today">0</span>
+                  <span class="period-lbl">Hôm nay</span>
+                </div>
+                <div class="period-item">
+                  <span class="period-num" id="stats-reviews-7d">0</span>
+                  <span class="period-lbl">7 ngày qua</span>
+                </div>
+                <div class="period-item">
+                  <span class="period-num" id="stats-reviews-30d">0</span>
+                  <span class="period-lbl">30 ngày qua</span>
+                </div>
+              </div>
+
+              <!-- Biểu đồ cột thuần CSS cho 7 ngày gần nhất -->
+              <div class="daily-chart-wrap" id="stats-daily-chart">
+                <!-- Javascript sẽ điền các cột biểu đồ vào đây -->
+              </div>
             </div>
+
+            <!-- Cột phải: Hiệu quả ghi nhớ, Độ chính xác & Phân loại -->
+            <div class="dict-card">
+              <div class="stats-card-header">
+                <h3 style="font-size: 16px; font-weight: 700; margin: 0;">🎯 Hiệu quả & Phân loại</h3>
+                <span class="stats-badge-subtle" id="stats-accuracy-badge">Độ chính xác</span>
+              </div>
+
+              <div class="accuracy-showcase">
+                <div class="accuracy-score-box">
+                  <div class="accuracy-big-val" id="stats-accuracy-rate">--</div>
+                  <div class="accuracy-big-lbl">Tỷ lệ trả lời Đã thuộc</div>
+                </div>
+                <div class="accuracy-breakdown-row">
+                  <div class="acc-pill known-pill">
+                    <span class="acc-pill-icon">✓</span>
+                    <span class="acc-pill-val" id="stats-known-count">0</span>
+                    <span class="acc-pill-lbl">Đã nhớ</span>
+                  </div>
+                  <div class="acc-pill unknown-pill">
+                    <span class="acc-pill-icon">✕</span>
+                    <span class="acc-pill-val" id="stats-unknown-count">0</span>
+                    <span class="acc-pill-lbl">Chưa nhớ</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stats-breakdown-section">
+                <div class="breakdown-title">Theo phân loại nội dung:</div>
+                <div class="breakdown-chips-row">
+                  <div class="breakdown-chip" id="chip-cat-vocab">
+                    <span class="chip-icon">📖</span> Từ vựng: <strong id="stats-cat-vocab">0</strong>
+                  </div>
+                  <div class="breakdown-chip" id="chip-cat-kanji">
+                    <span class="chip-icon">⛩️</span> Chữ Hán: <strong id="stats-cat-kanji">0</strong>
+                  </div>
+                  <div class="breakdown-chip" id="chip-cat-grammar">
+                    <span class="chip-icon">📐</span> Ngữ pháp: <strong id="stats-cat-grammar">0</strong>
+                  </div>
+                </div>
+
+                <div class="breakdown-title" style="margin-top: 14px;">Theo cấp độ JLPT:</div>
+                <div class="breakdown-chips-row" id="stats-level-chips">
+                  <span class="jlpt-mini-chip" data-lvl="N5">N5: <b id="lvl-stat-n5">0</b></span>
+                  <span class="jlpt-mini-chip" data-lvl="N4">N4: <b id="lvl-stat-n4">0</b></span>
+                  <span class="jlpt-mini-chip" data-lvl="N3">N3: <b id="lvl-stat-n3">0</b></span>
+                  <span class="jlpt-mini-chip" data-lvl="N2">N2: <b id="lvl-stat-n2">0</b></span>
+                  <span class="jlpt-mini-chip" data-lvl="N1">N1: <b id="lvl-stat-n1">0</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HÀNG 3: NHẬT KÝ CÁC PHIÊN HỌC GẦN ĐÂY (REAL STUDY SESSIONS) -->
+          <div class="dict-card" style="margin-top: 24px;">
+            <div class="stats-card-header" style="margin-bottom: 16px;">
+              <h3 style="font-size: 16px; font-weight: 700; margin: 0;">📜 Nhật ký các phiên học gần đây</h3>
+              <span style="font-size: 12.5px; color: var(--text-muted);" id="stats-sessions-total-count">0 phiên học</span>
+            </div>
+
+            <!-- Danh sách phiên học chi tiết -->
+            <div id="stats-sessions-list" class="stats-sessions-container">
+              <!-- Render động danh sách các phiên học đã hoàn thành -->
+            </div>
+
+            <!-- Fallback tương thích ngược -->
+            <div id="stats-history-list" style="display: none;"></div>
           </div>
         </section>
 
@@ -1051,6 +1160,21 @@
              VIEW 9: CÀI ĐẶT & SAO LƯU (SETTINGS)
              ============================================== -->
         <section class="view-section" id="view-settings">
+          <div class="dict-card" style="max-width: 680px; margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Giao diện & Chủ đề (Theme)</h3>
+            <div class="form-group">
+              <label class="form-label">Chế độ hiển thị</label>
+              <select class="form-select" id="settings-theme-select">
+                <option value="light">☀️ Chế độ sáng (Light Mode)</option>
+                <option value="dark">🌙 Chế độ tối (Dark Mode)</option>
+                <option value="auto">💻 Theo hệ thống (System Default)</option>
+              </select>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 6px;">
+                Áp dụng đồng bộ cho Không gian làm việc, Danh sách từ, Bộ thẻ và màn hình Ôn tập Flashcard.
+              </p>
+            </div>
+          </div>
+
           <div class="dict-card" style="max-width: 680px; margin-bottom: 24px;">
             <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Tùy chọn Học tập & Âm thanh</h3>
             
@@ -1319,7 +1443,7 @@
        OVERLAY: REDESIGNED QUIZLET-STYLE FLASHCARD REVIEW
        ============================================== -->
   <div class="review-fullscreen-wrapper quizlet-theme" id="review-modal" style="display: none;">
-    <!-- Top Bar: Quay lại & Đánh dấu sao -->
+    <!-- Top Bar: Quay lại, Đổi theme & Đánh dấu sao -->
     <div class="quizlet-topbar">
       <button class="quizlet-back-btn" id="btn-exit-review" title="Quay lại danh sách bộ thẻ (Esc)">
         <span class="quizlet-back-arrow">←</span> Quay lại
@@ -1327,9 +1451,14 @@
 
       <div class="quizlet-top-title" id="review-deck-title-display">Bộ thẻ học tập</div>
 
-      <button class="quizlet-star-btn" id="btn-card-star-toggle" title="Đánh dấu sao / Thêm vào từ đã lưu (C)">
-        ☆
-      </button>
+      <div class="quizlet-top-actions">
+        <button class="quizlet-topbar-btn" id="btn-review-theme-toggle" title="Đổi giao diện Sáng / Tối">
+          <span id="review-theme-icon">🌙</span>
+        </button>
+        <button class="quizlet-star-btn" id="btn-card-star-toggle" title="Đánh dấu sao / Thêm vào từ đã lưu (C)">
+          ☆
+        </button>
+      </div>
     </div>
 
     <!-- Sân khấu chính: Mũi tên trái/phải và Thẻ Flashcard ở giữa -->
@@ -1342,37 +1471,95 @@
       <!-- Khung Thẻ Flashcard 3D lật mượt mà -->
       <div class="quizlet-card-viewport">
         <div class="quizlet-card-3d" id="review-card-box">
-          <!-- MẶT TRƯỚC: Chỉ hiển thị từ vựng/nghĩa theo chiều học + nút TTS -->
+          <!-- MẶT TRƯỚC: Từ vựng/Nghĩa + JLPT badge + Furigana/Reading + nút TTS -->
           <div class="quizlet-face face-front">
             <div class="quizlet-face-content">
+              <div class="card-jlpt-badge" id="card-front-badge" style="display: none;">N5</div>
               <div class="quizlet-kanji-huge" id="card-front-word">貿易</div>
+              <div class="quizlet-front-reading" id="card-front-reading" style="display: none;">ぼうえき</div>
               <button class="quizlet-tts-btn" id="btn-card-audio-front" title="Phát âm (R)">
                 🔊
               </button>
+              <div class="card-flip-prompt">Nhấn để lật thẻ (Space)</div>
             </div>
           </div>
 
           <!-- MẶT SAU: Hiển thị đầy đủ thông tin chi tiết -->
           <div class="quizlet-face face-back">
             <div class="quizlet-face-content">
-              <div class="quizlet-back-header">
-                <div class="quizlet-back-word" id="card-back-word">貿易</div>
-                <button class="quizlet-tts-btn back-tts" id="btn-card-audio-back" title="Phát âm (R)">
-                  🔊
-                </button>
+              <!-- GIAO DIỆN MẶT SAU CHO TỪ VỰNG THƯỜNG -->
+              <div id="vocab-back-content" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <div class="quizlet-back-header">
+                  <div class="quizlet-back-word" id="card-back-word">貿易</div>
+                  <button class="quizlet-tts-btn back-tts" id="btn-card-audio-back" title="Phát âm (R)">
+                    🔊
+                  </button>
+                </div>
+
+                <div class="quizlet-back-reading" id="card-back-reading">ぼうえき</div>
+                <div class="quizlet-back-hanviet" id="card-back-hanviet" style="display: none;">MẬU DỊCH</div>
+                <div class="quizlet-back-meaning" id="card-back-meaning">Ngoại thương, thương mại quốc tế</div>
+
+                <div class="quizlet-back-example-box" id="card-back-example-box" style="display: none;">
+                  <div class="example-jp-text" id="card-back-example-jp"></div>
+                  <div class="example-vi-text" id="card-back-example-vi"></div>
+                </div>
+
+                <div class="quizlet-back-notes" id="card-back-notes-box" style="display: none;">
+                  <span id="card-back-notes"></span>
+                </div>
               </div>
 
-              <div class="quizlet-back-reading" id="card-back-reading">ぼうえき</div>
-              <div class="quizlet-back-hanviet" id="card-back-hanviet" style="display: none;">MẬU DỊCH</div>
-              <div class="quizlet-back-meaning" id="card-back-meaning">Ngoại thương, thương mại quốc tế</div>
+              <!-- GIAO DIỆN MẶT SAU CHUYÊN BIỆT CHO CHỮ HÁN (KANJI) -->
+              <div id="kanji-back-content" class="kanji-back-layout" style="display: none;">
+                <!-- 1. Chữ Hán nhỏ hơn mặt trước + nút âm thanh -->
+                <div class="kanji-back-header">
+                  <div class="kanji-char-display" id="kanji-back-char">学</div>
+                  <button class="quizlet-tts-btn back-tts" id="btn-kanji-audio-back" title="Phát âm (R)">🔊</button>
+                </div>
 
-              <div class="quizlet-back-example-box" id="card-back-example-box" style="display: none;">
-                <div class="example-jp-text" id="card-back-example-jp"></div>
-                <div class="example-vi-text" id="card-back-example-vi"></div>
-              </div>
+                <!-- 4. Âm Hán Việt -->
+                <div class="kanji-back-hanviet" id="kanji-back-hanviet" style="display: none;">HỌC</div>
 
-              <div class="quizlet-back-notes" id="card-back-notes-box" style="display: none;">
-                <span id="card-back-notes"></span>
+                <!-- 5. Nghĩa tiếng Việt (nổi bật, nhấn mạnh) -->
+                <div class="kanji-back-meaning" id="kanji-back-meaning">học tập, trường học</div>
+
+                <!-- 2 & 3. Âm On (音読み) và Âm Kun (訓読み) -->
+                <div class="kanji-readings-grid" id="kanji-back-readings-grid">
+                  <div class="kanji-reading-col" id="kanji-col-onyomi" style="display: none;">
+                    <span class="reading-badge-label onyomi-label">Âm On (音読み)</span>
+                    <span class="reading-value" id="kanji-back-onyomi"></span>
+                  </div>
+                  <div class="kanji-reading-col" id="kanji-col-kunyomi" style="display: none;">
+                    <span class="reading-badge-label kunyomi-label">Âm Kun (訓読み)</span>
+                    <span class="reading-value" id="kanji-back-kunyomi"></span>
+                  </div>
+                </div>
+
+                <!-- 6 & 7. Số nét và Bộ thủ -->
+                <div class="kanji-meta-row" id="kanji-back-meta-row" style="display: none;">
+                  <div class="kanji-meta-item" id="kanji-item-strokes" style="display: none;">
+                    <span class="meta-icon">✍️</span>
+                    <span class="meta-label">Số nét:</span>
+                    <strong class="meta-val" id="kanji-back-strokes"></strong>
+                  </div>
+                  <div class="kanji-meta-item" id="kanji-item-radical" style="display: none;">
+                    <span class="meta-icon">🧩</span>
+                    <span class="meta-label">Bộ thủ:</span>
+                    <strong class="meta-val" id="kanji-back-radical"></strong>
+                  </div>
+                </div>
+
+                <!-- 8. Từ vựng ví dụ (Từ, cách đọc, nghĩa) -->
+                <div class="kanji-examples-section" id="kanji-back-examples-box" style="display: none;">
+                  <div class="kanji-section-title">Từ vựng ví dụ</div>
+                  <div class="kanji-example-list" id="kanji-back-example-list"></div>
+                </div>
+
+                <!-- 9. Ghi chú hoặc thông tin bổ sung -->
+                <div class="kanji-notes-section" id="kanji-back-notes-box" style="display: none;">
+                  <div class="kanji-notes-text" id="kanji-back-notes"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -1477,6 +1664,15 @@
         <button class="btn btn-ghost btn-sm" id="btn-close-review-settings" style="color: #94a3b8; padding: 2px 6px;">✕</button>
       </div>
       <div class="popover-body">
+        <div class="setting-item">
+          <label class="setting-label">Giao diện học tập:</label>
+          <select class="form-select quizlet-select" id="setting-review-theme">
+            <option value="light">☀️ Sáng (Light Mode)</option>
+            <option value="dark">🌙 Tối (Dark Mode)</option>
+            <option value="auto">💻 Theo hệ thống</option>
+          </select>
+        </div>
+
         <div class="setting-item">
           <label class="setting-label">Chiều hiển thị:</label>
           <select class="form-select quizlet-select" id="setting-study-direction">
