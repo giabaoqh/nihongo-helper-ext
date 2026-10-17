@@ -20,22 +20,13 @@ const levelStats = {};
 console.log('=== BẮT ĐẦU KIỂM ĐỊNH TOÀN DIỆN DỮ LIỆU TỪ VỰNG JLPT N1–N5 ===\n');
 
 for (const lvl of levels) {
-  const filePath = path.join(vocabDir, lvl + '.json');
-  const subFilePath = path.join(vocabDir, 'vocab', lvl + '.json');
+  const filePath = path.join(vocabDir, 'vocab', lvl + '.json');
   
   if (!fs.existsSync(filePath)) {
     throw new Error(`Tệp dữ liệu không tồn tại: ${filePath}`);
   }
-  if (!fs.existsSync(subFilePath)) {
-    throw new Error(`Tệp dữ liệu modular không tồn tại: ${subFilePath}`);
-  }
 
   const items = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  const subItems = JSON.parse(fs.readFileSync(subFilePath, 'utf8'));
-
-  if (items.length !== subItems.length) {
-    throw new Error(`Độ dài hai tệp mirror không đồng bộ: ${filePath} vs ${subFilePath}`);
-  }
 
   let lvlMissing = 0;
   let lvlEnglishOnly = 0;

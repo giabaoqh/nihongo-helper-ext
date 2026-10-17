@@ -1,6 +1,6 @@
 param (
-    [string]$SourceImage = "",
-    [string]$OutputDir = "D:\ExtensionJP\JPEX\icons"
+    [string]$SourceImage = (Join-Path $PSScriptRoot "assets\icon_original.jpg"),
+    [string]$OutputDir = (Join-Path $PSScriptRoot "..\JPEX\icons")
 )
 
 Add-Type -AssemblyName System.Drawing

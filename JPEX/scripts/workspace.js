@@ -1294,9 +1294,11 @@ function renderCurrentReviewCard() {
   if (btnPrev) btnPrev.disabled = AppState.reviewCurrentIndex === 0;
   if (btnNext) btnNext.disabled = AppState.reviewCurrentIndex >= total - 1;
 
-  // Reset hiệu ứng lật thẻ
+  // Reset hiệu ứng lật thẻ và vị trí cuộn của mặt sau
   const cardBox = document.getElementById('review-card-box');
   if (cardBox) cardBox.classList.remove('flipped');
+  const backFace = document.getElementById('review-card-back') || (typeof document.querySelector === 'function' ? document.querySelector('.quizlet-face.face-back') : null);
+  if (backFace) backFace.scrollTop = 0;
 
   // Cập nhật trạng thái Star (Đồng bộ với savedWords & card.isStarred)
   const starBtn = document.getElementById('btn-card-star-toggle');
@@ -1363,7 +1365,26 @@ function renderCurrentReviewCard() {
 
     // 5. Nghĩa tiếng Việt (nổi bật, rõ ràng)
     const kMeaningEl = document.getElementById('kanji-back-meaning');
-    if (kMeaningEl) kMeaningEl.innerText = kDetails.meaning || 'Chưa rõ nghĩa';
+    if (kMeaningEl) {
+      const kMeaningText = (kDetails.meaning || 'Chưa rõ nghĩa').trim();
+      const kConcise = extractConciseFlashcardMeanings(kMeaningText);
+      if (kConcise.length > 1) {
+        kMeaningEl.innerHTML = `
+          <ul class="flashcard-concise-list">
+            ${kConcise.map(m => `
+              <li class="flashcard-concise-item">
+                <span class="flashcard-concise-bullet">•</span>
+                <span class="flashcard-concise-text">${escapeHtml(m)}</span>
+              </li>
+            `).join('')}
+          </ul>
+        `;
+      } else if (kConcise.length === 1) {
+        kMeaningEl.innerHTML = `<div class="flashcard-concise-single">${escapeHtml(kConcise[0])}</div>`;
+      } else {
+        kMeaningEl.innerText = kMeaningText;
+      }
+    }
 
     // 2 & 3. Âm On và Âm Kun
     const colOn = document.getElementById('kanji-col-onyomi');
@@ -1458,10 +1479,28 @@ function renderCurrentReviewCard() {
 
     // HIỂN THỊ THEO CHIỀU HỌC: JP -> VI HOẶC VI -> JP
     if (AppState.reviewDirection === 'vi-jp') {
-      if (frontWord) frontWord.innerText = getPrimaryMeaningText(card.meaning || card.meaningVi || 'Chưa rõ nghĩa');
+      const conciseMeanings = extractConciseFlashcardMeanings(card.meaning || card.meaningVi || 'Chưa rõ nghĩa');
+      const primaryVi = conciseMeanings.length > 0 ? conciseMeanings.slice(0, 3).join(', ') : getPrimaryMeaningText(card.meaning || card.meaningVi || 'Chưa rõ nghĩa');
+      if (frontWord) {
+        frontWord.innerText = primaryVi;
+        if (primaryVi.length > 30) {
+          frontWord.style.fontSize = '26px';
+          frontWord.style.lineHeight = '1.35';
+        } else if (primaryVi.length > 15) {
+          frontWord.style.fontSize = '36px';
+          frontWord.style.lineHeight = '1.3';
+        } else {
+          frontWord.style.fontSize = '';
+          frontWord.style.lineHeight = '';
+        }
+      }
       if (frontReading) frontReading.style.display = 'none';
     } else {
-      if (frontWord) frontWord.innerText = card.word;
+      if (frontWord) {
+        frontWord.innerText = card.word;
+        frontWord.style.fontSize = '';
+        frontWord.style.lineHeight = '';
+      }
       if (frontReading) {
         if (card.reading && card.reading !== card.word) {
           frontReading.style.display = 'block';
@@ -1489,7 +1528,28 @@ function renderCurrentReviewCard() {
       backHanviet.innerText = card.hanviet ? card.hanviet.toUpperCase() : '';
       backHanviet.style.display = card.hanviet ? 'inline-block' : 'none';
     }
-    if (backMeaning) backMeaning.innerText = card.meaning || card.meaningVi || 'Chưa rõ nghĩa';
+
+    if (backMeaning) {
+      const rawMeaning = (card.meaning || card.meaningVi || 'Chưa rõ nghĩa').trim();
+      const conciseMeanings = extractConciseFlashcardMeanings(rawMeaning);
+
+      if (conciseMeanings.length > 1) {
+        backMeaning.innerHTML = `
+          <ul class="flashcard-concise-list">
+            ${conciseMeanings.map(m => `
+              <li class="flashcard-concise-item">
+                <span class="flashcard-concise-bullet">•</span>
+                <span class="flashcard-concise-text">${escapeHtml(m)}</span>
+              </li>
+            `).join('')}
+          </ul>
+        `;
+      } else if (conciseMeanings.length === 1) {
+        backMeaning.innerHTML = `<div class="flashcard-concise-single">${escapeHtml(conciseMeanings[0])}</div>`;
+      } else {
+        backMeaning.innerText = rawMeaning;
+      }
+    }
 
     if (exampleBox) {
       if (card.example && card.example.trim()) {
@@ -3010,6 +3070,100 @@ function parseMeaningSenses(rawText) {
     }
   }
   return uniqueSenses;
+}
+
+/**
+ * Trích xuất danh sách các nghĩa ngắn gọn, cô đọng cho mặt sau Flashcard
+ * Chắt lọc 1-5 nghĩa chính dạng từ/cụm từ ngắn gọn, loại bỏ ghi chú ngữ pháp và đoạn văn dài
+ */
+function extractConciseFlashcardMeanings(rawText) {
+  if (!rawText || typeof rawText !== 'string') return [];
+  let text = rawText.trim();
+  if (!text) return [];
+
+  // 1. Trường hợp HTML có thẻ <li>
+  if (/<li[^>]*>/i.test(text)) {
+    const liMatches = text.match(/<li[^>]*>([\s\S]*?)<\/li>/gi);
+    if (liMatches && liMatches.length > 0) {
+      const items = liMatches.map(li => li.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+      if (items.length > 0) return items.slice(0, 5);
+    }
+  }
+
+  // Loại bỏ các thẻ HTML khác nếu có
+  text = text.replace(/<[^>]+>/g, ' ');
+
+  // 2. Trường hợp đã là danh sách gạch đầu dòng (Markdown / bullet list)
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (lines.length > 1 && lines.every(l => /^[-•*0-9]+[.)\s]/.test(l))) {
+    const items = lines.map(l => l.replace(/^[-•*0-9]+[.)\s]+/, '').trim()).filter(Boolean);
+    if (items.length > 0) return items.slice(0, 5);
+  }
+
+  // Hàm dọn dẹp các chú thích trong dấu ngoặc đơn (ngữ pháp, chuyên ngành, ví dụ ngữ cảnh)
+  function cleanAnnotations(str) {
+    return str
+      .replace(/\(\([^)]*\)\)/g, '')
+      .replace(/\((?:thông tục|từ lóng|từ cổ|từ Mỹ|nghĩa Mỹ|y học|pháp lý|quân sự|thể dục|thể thao|tôn giáo|kỹ thuật|vật lý|toán học|ngôn ngữ học|hàng hải|chính trị|âm nhạc|định ngữ|xem|viết tắt|như|thường|\+)[^)]*\)/gi, '')
+      .replace(/\([^)]*(?:\.\.\.|mong|làm|việc|nghĩa|của|ở|khi|để)[^)]*\)/gi, '')
+      .replace(/\([^)]*\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // Hàm chuẩn hóa từng mục từ vựng ngắn gọn
+  function cleanItem(item) {
+    let s = item.replace(/^[-•*0-9]+[.)\s]+/, '').trim();
+    s = s.replace(/[-•,;.:_~]+$/, '').trim();
+    if (/^(?:sự|việc|cuộc)\s+/i.test(s)) {
+      const withoutPrefix = s.replace(/^(?:sự|việc|cuộc)\s+/i, '').trim();
+      if (withoutPrefix.split(' ').length <= 3 && withoutPrefix.length >= 2) {
+        s = withoutPrefix;
+      }
+    }
+    return s;
+  }
+
+  // Phân tách theo các phân đoạn ý nghĩa chính (chấm phẩy, xuống dòng, gạch ngang)
+  const majorSenses = text.split(/(?:;|\r?\n|\s*\/\s*|\s+-\s+)/).map(s => s.trim()).filter(Boolean);
+  const candidates = [];
+
+  for (const sense of majorSenses) {
+    const cleaned = cleanAnnotations(sense);
+    if (!cleaned) continue;
+
+    const parts = cleaned.split(/,\s*/).map(p => cleanItem(p)).filter(p => {
+      if (p.length < 2 || p.length > 45) return false;
+      // Bỏ qua cụm từ tiếng Anh thuần túy không dấu nếu bị lẫn
+      if (/^[a-zA-Z\s+]+$/.test(p) && p.split(' ').length > 1 && !/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(p)) return false;
+      if (/^(?:xem|như|thông tục|từ lóng|định ngữ)$/i.test(p)) return false;
+      return true;
+    });
+
+    candidates.push(...parts);
+  }
+
+  // Fallback an toàn nếu không trích xuất được từ phân tách
+  if (candidates.length === 0) {
+    const fallback = cleanAnnotations(text).split(/[;,.\n]/)[0].trim();
+    if (fallback) candidates.push(fallback);
+    else candidates.push(text.trim());
+  }
+
+  // Khử trùng lặp và viết hoa chữ cái đầu
+  const results = [];
+  const seenNorm = new Set();
+  for (const item of candidates) {
+    const norm = item.toLowerCase();
+    if (!seenNorm.has(norm)) {
+      seenNorm.add(norm);
+      const formatted = item.charAt(0).toUpperCase() + item.slice(1);
+      results.push(formatted);
+      if (results.length >= 5) break;
+    }
+  }
+
+  return results;
 }
 
 /**

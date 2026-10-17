@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE_DIR = path.join('d:', 'ExtensionJP', 'JPEX');
+const BASE_DIR = path.resolve(__dirname, '../JPEX');
 
 console.log('====================================================');
 console.log('KIỂM TRA HỆ THỐNG TOÀN DIỆN (COMPREHENSIVE TEST RUN)');
@@ -40,14 +40,10 @@ let grammarTotal = 0;
 // 1.1 Kiểm tra Từ vựng (Vocab)
 levels.forEach(lvl => {
   const p1 = path.join(BASE_DIR, 'data', 'jlpt', 'vocab', `${lvl}.json`);
-  const p2 = path.join(BASE_DIR, 'data', 'jlpt', `${lvl}.json`);
   assert(fs.existsSync(p1), `File vocab/${lvl}.json tồn tại`);
-  assert(fs.existsSync(p2), `File tương thích ngược ${lvl}.json tồn tại`);
 
   const d1 = JSON.parse(fs.readFileSync(p1, 'utf8'));
-  const d2 = JSON.parse(fs.readFileSync(p2, 'utf8'));
   assert(d1.length === expectedVocabCounts[lvl], `Vocab ${lvl.toUpperCase()} có đúng ${expectedVocabCounts[lvl]} từ (thực tế: ${d1.length})`);
-  assert(d1.length === d2.length, `Vocab ${lvl.toUpperCase()} đồng bộ 100% giữa 2 đường dẫn`);
 
   vocabTotal += d1.length;
 

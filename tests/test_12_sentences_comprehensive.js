@@ -3,7 +3,7 @@
  * Verifying 12 Required Test Cases, Numbers/Counters, Romaji, and Grammar
  */
 
-const SentenceAnalyzer = require('./scripts/analyzer.js');
+const SentenceAnalyzer = require('../JPEX/scripts/analyzer.js');
 
 async function runTests() {
   await SentenceAnalyzer.init();

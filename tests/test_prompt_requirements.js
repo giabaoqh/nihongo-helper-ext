@@ -29,7 +29,7 @@ let englishOnlyCount = 0;
 const viCharRegex = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
 
 levels.forEach(lvl => {
-  const filePath = path.join(__dirname, 'JPEX', 'data', 'jlpt', 'vocab', `${lvl}.json`);
+  const filePath = path.join(__dirname, '..', 'JPEX', 'data', 'jlpt', 'vocab', `${lvl}.json`);
   assert(fs.existsSync(filePath), `File dữ liệu ${lvl}.json tồn tại`);
   const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
   totalVocab += data.length;
@@ -55,8 +55,8 @@ assert(englishOnlyCount === 0, `Không có từ nào chỉ có tiếng Anh hoặ
 // PHẦN 2: XÓA TÍNH NĂNG TRA CỨU JLPT ĐỘC LẬP TẠI POPUP
 // ----------------------------------------------------
 console.log('\n--- 2. Kiểm tra việc gỡ bỏ tra cứu JLPT độc lập tại popup ---');
-const popupHtml = fs.readFileSync(path.join(__dirname, 'JPEX', 'popup.html'), 'utf8');
-const popupJs = fs.readFileSync(path.join(__dirname, 'JPEX', 'scripts', 'popup.js'), 'utf8');
+const popupHtml = fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'popup.html'), 'utf8');
+const popupJs = fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'scripts', 'popup.js'), 'utf8');
 
 assert(!popupHtml.includes('id="jlpt-tab"'), 'Popup HTML không còn section độc lập #jlpt-tab');
 assert(!popupHtml.includes('data-tab="jlpt-tab"'), 'Popup HTML không còn nút tab data-tab="jlpt-tab"');
@@ -68,8 +68,8 @@ assert(!popupJs.includes('function loadAndRenderJLPTWords'), 'Popup JS không c�
 // PHẦN 3: TÍCH HỢP TẬP TRUNG JLPT VÀO WORKSPACE
 // ----------------------------------------------------
 console.log('\n--- 3. Kiểm tra tích hợp JLPT vào Workspace ---');
-const workspaceHtml = fs.readFileSync(path.join(__dirname, 'JPEX', 'workspace.html'), 'utf8');
-const workspaceJs = fs.readFileSync(path.join(__dirname, 'JPEX', 'scripts', 'workspace.js'), 'utf8');
+const workspaceHtml = fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'workspace.html'), 'utf8');
+const workspaceJs = fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'scripts', 'workspace.js'), 'utf8');
 
 assert(workspaceHtml.includes('id="nav-jlpt"'), 'Workspace Sidebar có mục menu JLPT N1–N5');
 assert(workspaceHtml.includes('id="view-jlpt"'), 'Workspace có view section #view-jlpt');
@@ -95,7 +95,7 @@ assert(workspaceJs.includes("switchView('guide')"), 'Workspace JS có sự kiệ
 // PHẦN 5: BẢO TOÀN DỮ LIỆU CÁ NHÂN VÀ TÍNH NĂNG NỀN TẢNG
 // ----------------------------------------------------
 console.log('\n--- 5. Kiểm tra bảo toàn các tính năng cốt lõi ---');
-const storageJs = fs.readFileSync(path.join(__dirname, 'JPEX', 'scripts', 'storage.js'), 'utf8');
+const storageJs = fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'scripts', 'storage.js'), 'utf8');
 assert(storageJs.includes('getDecks'), 'Hàm getDecks được bảo toàn');
 assert(storageJs.includes('saveDeck'), 'Hàm saveDeck được bảo toàn');
 assert(storageJs.includes('getSavedWords'), 'Hàm getSavedWords được bảo toàn');

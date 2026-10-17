@@ -57,8 +57,8 @@ async function runTests() {
     }
   };
 
-  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
-  const workspaceCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/workspace.js'), 'utf8');
+  const storageCode = fs.readFileSync(path.resolve(__dirname, '../JPEX/scripts/storage.js'), 'utf8');
+  const workspaceCode = fs.readFileSync(path.resolve(__dirname, '../JPEX/scripts/workspace.js'), 'utf8');
 
   class MockJPEXDatabase {
     constructor() {}

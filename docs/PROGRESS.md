@@ -65,8 +65,22 @@
 - [x] Phát hiện và sửa lỗi BUG-02: Lệch pha đồng bộ folder và câu ví dụ khi lưu thẻ flashcard trong `storage.js` (`saveCard`).
 - [x] Phát hiện và sửa lỗi BUG-03: Thư mục "ma" và từ vựng mồ côi khi xóa bộ thẻ tùy chỉnh trong `storage.js` (`deleteDeck`).
 - [x] Kiểm tra và xác nhận hồi quy thuật toán phân tích câu (Tokenizer) trên 4 cụm từ trọng yếu: `さらに`, `eスポーツ`, `待っているだけなので`, `不可能であるように思えるかもしれない`.
-- [x] Xây dựng Master QA Test Suite (`test_master_qa_suite.js`) bao quát 7 phân vùng (Sections A–G) với 120 kiểm thử tự động.
+- [x] Xây dựng Master QA Test Suite (`tests/test_master_qa_suite.js`) bao quát 8 phân vùng (Sections A–H) với 145 kiểm thử tự động.
 - [x] Thiết lập cấu hình gói tiêu chuẩn `package.json` với lệnh `npm test` và `npm run test:all`.
-- [x] Chạy toàn bộ 7 bộ kiểm thử tự động trong dự án: Tổng cộng 382/382 kiểm thử ĐẠT (100% PASS).
 - [x] Xuất bản tài liệu QA chuẩn mực: `TEST_PLAN.md`, `TEST_RESULTS.md`, `BUG_FIX_LOG.md`.
+
+#### Phần 9: Tinh gọn & Chuẩn hóa Kiến trúc Mã nguồn Dự án (Codebase Cleanup Stages 1–4)
+- [x] **Giai đoạn 1 (Structural Cleanup):** Chuyển toàn bộ tài liệu kỹ thuật vào `docs/`, chuyển công cụ tạo icon và asset vào `scripts/`, tạo thư mục chuẩn `tests/`.
+- [x] **Giai đoạn 2 (JLPT Vocab Deduplication):** Xác thực mã băm SHA-256 đối chiếu 100% giữa các tệp từ vựng phẳng và phân cấp; loại bỏ 5 tệp phẳng trùng lặp `JPEX/data/jlpt/n1.json` đến `n5.json` (tiết kiệm ~11.29 MB và 146.299 dòng code dư thừa); đồng bộ hóa toàn bộ đường dẫn sang `data/jlpt/vocab/`.
+- [x] **Giai đoạn 3 (Test Suite Organization):** 
+  - Quy tụ toàn bộ 16 tệp kiểm thử duy trì vào thư mục `tests/`.
+  - Thẩm định và loại bỏ tệp nháp không có assertion `test_kana_tokenization.js` (được bao phủ bởi `tests/test_12_sentences_comprehensive.js`).
+  - Nâng cấp `tests/test_sync_flow.js` phù hợp với hành vi chống ô nhiễm bộ thẻ của Bug 1 và cơ chế đồng bộ 2 chiều (19/19 assertions PASS).
+  - Cập nhật 100% đường dẫn tương đối trong các tệp test (`../JPEX/...`).
+  - Bổ sung các lệnh npm script chuyên biệt và cập nhật `npm run test:all` chạy đủ 16 tệp kiểm thử (721/721 assertions ĐẠT).
+- [x] **Giai đoạn 4 (Documentation Organization & Verification):**
+  - Di chuyển `JPEX/FEATURES.md` sang `docs/FEATURES.md`, giúp thư mục `JPEX/` tinh gọn và chỉ chứa tài nguyên phục vụ đóng gói extension.
+  - Cập nhật danh mục liên kết tài liệu trong `README.md`.
+  - Cập nhật minh bạch báo cáo tiến độ và thẩm định giới hạn kiểm thử tự động trong `docs/TEST_RESULTS.md`.
+
 

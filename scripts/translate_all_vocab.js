@@ -153,7 +153,7 @@ let missingAll = 0;
 const statsByLevel = {};
 
 for (const lvl of levels) {
-  const filePath = path.join(vocabDir, lvl + '.json');
+  const filePath = path.join(subVocabDir, lvl + '.json');
   const items = JSON.parse(fs.readFileSync(filePath, 'utf8'));
   let lvlVerified = 0;
   let lvlMissing = 0;
@@ -197,7 +197,6 @@ for (const lvl of levels) {
   };
 
   fs.writeFileSync(filePath, JSON.stringify(enriched, null, 2), 'utf8');
-  fs.writeFileSync(path.join(subVocabDir, lvl + '.json'), JSON.stringify(enriched, null, 2), 'utf8');
   console.log(`Updated ${lvl.toUpperCase()}: Total = ${enriched.length}, Verified = ${lvlVerified}, Missing = ${lvlMissing}`);
 }
 

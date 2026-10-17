@@ -2131,10 +2131,8 @@ async function getJLPTData(category = 'vocab', level = 'N5') {
   const targetLevel = validLevels.includes(normLevel) ? normLevel : 'N5';
   const lvlFile = targetLevel.toLowerCase() + '.json';
 
-  // Đường dẫn hỗ trợ cả dạng phẳng và phân mục con
-  const relativePath = (normCategory === 'vocab') 
-    ? `data/jlpt/${lvlFile}` 
-    : `data/jlpt/${normCategory}/${lvlFile}`;
+  // Đường dẫn phân mục chuẩn hóa: data/jlpt/{category}/{level}.json
+  const relativePath = `data/jlpt/${normCategory}/${lvlFile}`;
 
   try {
     const url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)

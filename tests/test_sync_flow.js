@@ -54,7 +54,7 @@ global.chrome = {
 };
 
 // Nạp mã nguồn storage.js
-const storageCode = fs.readFileSync(path.join(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+const storageCode = fs.readFileSync(path.join(__dirname, '../JPEX/scripts/storage.js'), 'utf8');
 eval(storageCode);
 
 async function runSyncTests() {
@@ -183,9 +183,9 @@ async function runSyncTests() {
     assert.ok(sw, 'Không tìm thấy "会社" trong savedWords');
   });
 
-  test('Từ tra cứu tự động tạo thẻ Flashcard tương ứng trong deck "Mặc định"', () => {
-    const card = allCards3.find(c => c.word === '会社' && c.deckId === 'deck_default');
-    assert.ok(card, 'Không tìm thấy thẻ "会社" trong deck_default');
+  test('Lưu từ tra cứu KHÔNG tự ý tạo thẻ Flashcard rác trong deck (Bug 1 safeguard)', () => {
+    const card = allCards3.find(c => c.word === '会社');
+    assert.strictEqual(card, undefined, 'Lưu từ không được tạo thẻ flashcard rác');
   });
 
   // ----------------------------------------------------
@@ -248,23 +248,23 @@ async function runSyncTests() {
   // KỊCH BẢN 6: Sửa thông tin từ vựng -> Đồng bộ nhất quán
   // ----------------------------------------------------
   console.log('\n--- 6. Sửa thông tin (reading/meaning) của thẻ Flashcard ---');
-  const cardToEdit = (await getAllCards()).find(c => c.word === '会社');
+  const cardToEdit = (await getAllCards()).find(c => c.word === '貿易' && c.deckId === 'deck_default');
   await saveCard({
     id: cardToEdit.id,
     deckId: cardToEdit.deckId,
-    word: '会社',
-    reading: 'かいしゃ',
-    hanviet: 'Hội xã (Doanh nghiệp)',
-    meaning: 'Công ty, doanh nghiệp'
+    word: '貿易',
+    reading: 'ぼうえき',
+    hanviet: 'Mậu dịch quốc tế (Đã sửa)',
+    meaning: 'Thương mại, buôn bán quốc tế (Đã sửa)'
   });
 
   const savedWordsAfterEdit = await getSavedWords();
-  const editedSavedWord = savedWordsAfterEdit.find(w => w.word === '会社' || w.kanji === '会社');
+  const editedSavedWord = savedWordsAfterEdit.find(w => w.word === '貿易' || w.kanji === '貿易');
 
   test('Cập nhật thẻ Flashcard tự động đồng bộ sang mục Từ đã lưu (savedWords)', () => {
-    assert.ok(editedSavedWord, 'Không tìm thấy "会社" trong savedWords');
-    assert.strictEqual(editedSavedWord.hanviet, 'Hội xã (Doanh nghiệp)');
-    assert.strictEqual(editedSavedWord.meaning, 'Công ty, doanh nghiệp');
+    assert.ok(editedSavedWord, 'Không tìm thấy "貿易" trong savedWords');
+    assert.strictEqual(editedSavedWord.hanviet, 'Mậu dịch quốc tế (Đã sửa)');
+    assert.strictEqual(editedSavedWord.meaning, 'Thương mại, buôn bán quốc tế (Đã sửa)');
   });
 
   // ----------------------------------------------------

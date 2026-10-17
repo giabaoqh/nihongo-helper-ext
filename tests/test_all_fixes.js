@@ -1,6 +1,7 @@
 const fs = require('fs');
+const path = require('path');
 
-const storageContent = fs.readFileSync('JPEX/scripts/storage.js', 'utf8');
+const storageContent = fs.readFileSync(path.resolve(__dirname, '../JPEX/scripts/storage.js'), 'utf8');
 
 // Mock chrome.storage.local
 const store = {

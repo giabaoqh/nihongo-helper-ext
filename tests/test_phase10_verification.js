@@ -20,7 +20,7 @@
  */
 
 const assert = require('assert');
-const SentenceAnalyzer = require('./scripts/analyzer.js');
+const SentenceAnalyzer = require('../JPEX/scripts/analyzer.js');
 
 let passedTests = 0;
 let totalTests = 0;

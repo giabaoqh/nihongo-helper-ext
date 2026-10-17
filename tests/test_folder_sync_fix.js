@@ -54,7 +54,7 @@ global.chrome = {
 };
 
 // Nạp mã nguồn storage.js
-const storageCode = fs.readFileSync(path.join(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+const storageCode = fs.readFileSync(path.join(__dirname, '../JPEX/scripts/storage.js'), 'utf8');
 eval(storageCode);
 
 async function runFolderSyncTests() {

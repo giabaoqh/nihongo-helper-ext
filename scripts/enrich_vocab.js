@@ -26,7 +26,7 @@ let verifiedVocab = 0;
 let missingVocab = 0;
 
 for (const lvl of levels) {
-  const filePath = path.join(vocabDir, lvl + '.json');
+  const filePath = path.join(subVocabDir, lvl + '.json');
   const items = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
   const enriched = items.map(item => {
@@ -64,9 +64,7 @@ for (const lvl of levels) {
   });
 
   totalVocab += enriched.length;
-  // Lưu cả 2 vị trí để đảm bảo tính tương thích ngược hoàn hảo
   fs.writeFileSync(filePath, JSON.stringify(enriched, null, 2), 'utf8');
-  fs.writeFileSync(path.join(subVocabDir, lvl + '.json'), JSON.stringify(enriched, null, 2), 'utf8');
   console.log(`Saved vocab ${lvl}.json: ${enriched.length} items`);
 }
 

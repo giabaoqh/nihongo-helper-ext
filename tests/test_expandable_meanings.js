@@ -19,7 +19,7 @@ function assert(condition, message) {
 }
 
 // Nạp mã nguồn workspace.js để kiểm thử các hàm tiện ích
-const workspaceJs = fs.readFileSync(path.join(__dirname, 'JPEX', 'scripts', 'workspace.js'), 'utf8');
+const workspaceJs = fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'scripts', 'workspace.js'), 'utf8');
 
 // Tạo mock môi trường thực thi để eval các hàm từ workspace.js
 const sandbox = {
@@ -55,7 +55,7 @@ const { parseMeaningSenses, getPrimaryMeaningText, formatExpandableMeaning } = s
 // ----------------------------------------------------
 console.log('--- TEST 1: Kiểm thử từ vựng 空く (あく) theo yêu cầu đề bài ---');
 
-const n4Data = JSON.parse(fs.readFileSync(path.join(__dirname, 'JPEX', 'data', 'jlpt', 'vocab', 'n4.json'), 'utf8'));
+const n4Data = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'data', 'jlpt', 'vocab', 'n4.json'), 'utf8'));
 const aku = n4Data.find(w => w.word === '空く' && w.reading === 'あく');
 
 assert(!!aku, 'Tìm thấy từ 空く (あく) trong tập dữ liệu N4');
@@ -101,7 +101,7 @@ let totalChecked = 0;
 let parseErrors = 0;
 
 levels.forEach(lvl => {
-  const list = JSON.parse(fs.readFileSync(path.join(__dirname, 'JPEX', 'data', 'jlpt', 'vocab', `${lvl}.json`), 'utf8'));
+  const list = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'data', 'jlpt', 'vocab', `${lvl}.json`), 'utf8'));
   totalChecked += list.length;
   list.forEach((item, idx) => {
     try {
@@ -130,7 +130,7 @@ assert(workspaceJs.includes('getPrimaryMeaningText(choice.meaning || choice.mean
 assert(workspaceJs.includes('getPrimaryMeaningText(card.meaning || card.meaningVi'), 'Flashcard chiều Vi->JP áp dụng getPrimaryMeaningText');
 
 // Kiểm tra CSS styles
-const workspaceCss = fs.readFileSync(path.join(__dirname, 'JPEX', 'styles', 'workspace.css'), 'utf8');
+const workspaceCss = fs.readFileSync(path.join(__dirname, '..', 'JPEX', 'styles', 'workspace.css'), 'utf8');
 assert(workspaceCss.includes('.meaning-display-wrapper'), 'CSS có định nghĩa .meaning-display-wrapper');
 assert(workspaceCss.includes('.btn-toggle-meaning'), 'CSS có định nghĩa .btn-toggle-meaning');
 assert(workspaceCss.includes('.meaning-extended-drawer'), 'CSS có định nghĩa .meaning-extended-drawer');

@@ -14,6 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const ROOT_DIR = path.resolve(__dirname, '..');
 
 let totalTests = 0;
 let passedTests = 0;
@@ -41,7 +42,7 @@ async function runSectionA() {
   console.log('========================================================');
 
   // A1. Manifest validation
-  const manifestPath = path.resolve(__dirname, 'JPEX/manifest.json');
+  const manifestPath = path.resolve(ROOT_DIR, 'JPEX/manifest.json');
   assert(fs.existsSync(manifestPath), 'Tệp manifest.json tồn tại');
 
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -54,7 +55,7 @@ async function runSectionA() {
   // A2. Icons existence
   const iconSizes = [16, 32, 48, 128];
   iconSizes.forEach(size => {
-    const iconFile = path.resolve(__dirname, `JPEX/icons/icon${size}.png`);
+    const iconFile = path.resolve(ROOT_DIR, `JPEX/icons/icon${size}.png`);
     assert(fs.existsSync(iconFile), `Biểu tượng icon${size}.png tồn tại và có kích thước > 0`, `${iconFile}`);
   });
 
@@ -71,7 +72,7 @@ async function runSectionA() {
   ];
 
   coreScripts.forEach(scriptRel => {
-    const fullPath = path.resolve(__dirname, scriptRel);
+    const fullPath = path.resolve(ROOT_DIR, scriptRel);
     assert(fs.existsSync(fullPath), `Tệp script tồn tại: ${scriptRel}`);
     const code = fs.readFileSync(fullPath, 'utf8');
     let syntaxError = null;
@@ -84,8 +85,8 @@ async function runSectionA() {
   });
 
   // A4. DOM ID check: workspace.html vs workspace.js
-  const wsHtml = fs.readFileSync(path.resolve(__dirname, 'JPEX/workspace.html'), 'utf8');
-  const wsJs = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/workspace.js'), 'utf8');
+  const wsHtml = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/workspace.html'), 'utf8');
+  const wsJs = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/scripts/workspace.js'), 'utf8');
 
   // Check critical modal card elements
   assert(wsHtml.includes('id="card-form-word"'), 'workspace.html có card-form-word');
@@ -98,7 +99,7 @@ async function runSectionA() {
   assert(wsHtml.includes('id="btn-cancel-card-modal"'), 'workspace.html có btn-cancel-card-modal');
 
   // A5. DOM check popup.html
-  const popupHtml = fs.readFileSync(path.resolve(__dirname, 'JPEX/popup.html'), 'utf8');
+  const popupHtml = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/popup.html'), 'utf8');
   assert(popupHtml.includes('id="search-input"'), 'popup.html có search-input');
   assert(popupHtml.includes('id="search-results"'), 'popup.html có search-results');
   assert(popupHtml.includes('id="btn-header-workspace"'), 'popup.html có btn-header-workspace');
@@ -114,7 +115,7 @@ async function runSectionB() {
   console.log('📌 PHẦN B: KIỂM THỬ XỬ LÝ TIẾNG NHẬT, TOKENIZER & PHÂN TÍCH CÂU');
   console.log('========================================================');
 
-  const analyzer = require(path.resolve(__dirname, 'JPEX/scripts/analyzer.js'));
+  const analyzer = require(path.resolve(ROOT_DIR, 'JPEX/scripts/analyzer.js'));
   await analyzer.init();
 
   // B1. Regression phrases
@@ -223,7 +224,7 @@ async function runSectionC() {
   };
 
   // Load storage.js in an isolated context
-  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+  const storageCode = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/scripts/storage.js'), 'utf8');
   const ctx = {
     chrome: mockChrome,
     console: { log: () => {}, warn: () => {}, error: () => {} },
@@ -369,7 +370,7 @@ async function runSectionD() {
     }
   };
 
-  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+  const storageCode = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/scripts/storage.js'), 'utf8');
   const ctx = {
     chrome: mockChrome,
     console: { log: () => {}, warn: () => {}, error: () => {} },
@@ -489,7 +490,7 @@ async function runSectionE() {
     }
   };
 
-  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+  const storageCode = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/scripts/storage.js'), 'utf8');
   const ctx = {
     chrome: mockChrome,
     console: { log: () => {}, warn: () => {}, error: () => {} },
@@ -580,7 +581,7 @@ async function runSectionF() {
   let totalMissingMeaning = 0;
 
   levels.forEach(lvl => {
-    const p = path.resolve(__dirname, `JPEX/data/jlpt/vocab/${lvl}.json`);
+    const p = path.resolve(ROOT_DIR, `JPEX/data/jlpt/vocab/${lvl}.json`);
     assert(fs.existsSync(p), `Tệp từ vựng JLPT ${lvl.toUpperCase()} tồn tại (JPEX/data/jlpt/vocab/${lvl}.json)`);
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
     assert(data.length === expectedVocabCounts[lvl], `Cấp độ ${lvl.toUpperCase()} có chính xác ${expectedVocabCounts[lvl]} từ`);
@@ -597,12 +598,12 @@ async function runSectionF() {
 
   // F2. Expandable meanings logic test
   // In workspace.js, formatExpandableMeaning splits long meanings and renders "Xem thêm"
-  const wsJs = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/workspace.js'), 'utf8');
+  const wsJs = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/scripts/workspace.js'), 'utf8');
   assert(wsJs.includes('formatExpandableMeaning') || wsJs.includes('expand-meaning'), 'Có hàm định dạng thu gọn / mở rộng nghĩa thông minh formatExpandableMeaning');
   assert(wsJs.includes('Xem thêm') || wsJs.includes('show-more'), 'Có nút nhãn "Xem thêm" khi từ có nhiều nghĩa');
 
   // F3. In-App User Guide presence
-  const wsHtml = fs.readFileSync(path.resolve(__dirname, 'JPEX/workspace.html'), 'utf8');
+  const wsHtml = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/workspace.html'), 'utf8');
   assert(wsHtml.includes('id="view-guide"') && wsHtml.includes('id="nav-guide"'), 'Có tab và section Hướng dẫn sử dụng trực tiếp trong Workspace (id="view-guide", id="nav-guide")');
   assert(wsHtml.includes('id="guide-sec-a"') && wsHtml.includes('id="guide-sec-f"'), 'Hướng dẫn sử dụng chi tiết đầy đủ 6 phần (Mục A đến Mục F) bằng tiếng Việt');
 }
@@ -646,7 +647,7 @@ async function runSectionG() {
     }
   };
 
-  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+  const storageCode = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/scripts/storage.js'), 'utf8');
   const ctx = {
     chrome: mockChrome,
     console: { log: () => {}, warn: () => {}, error: () => {} },
@@ -703,7 +704,7 @@ async function runSectionH() {
     }
   };
 
-  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+  const storageCode = fs.readFileSync(path.resolve(ROOT_DIR, 'JPEX/scripts/storage.js'), 'utf8');
   const ctx = {
     chrome: mockChrome,
     console: { log: () => {}, warn: () => {}, error: () => {} },

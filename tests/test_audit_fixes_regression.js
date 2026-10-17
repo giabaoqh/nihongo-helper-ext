@@ -52,7 +52,7 @@ async function runAuditTests() {
     }
   };
 
-  const storageCode = fs.readFileSync(path.resolve(__dirname, 'JPEX/scripts/storage.js'), 'utf8');
+  const storageCode = fs.readFileSync(path.resolve(__dirname, '../JPEX/scripts/storage.js'), 'utf8');
   const ctx = {
     chrome: mockChrome,
     console: { log: () => {}, warn: () => {}, error: () => {} },
@@ -233,20 +233,20 @@ async function runAuditTests() {
   // 5. Kiểm thử CSS Theme & Tokens
   console.log('\n--- 5. Kiểm thử Dark / Light Mode CSS Tokens ---');
   test('theme.css có định nghĩa [data-theme="dark"]', () => {
-    const themeCss = fs.readFileSync(path.resolve(__dirname, 'JPEX/styles/theme.css'), 'utf8');
+    const themeCss = fs.readFileSync(path.resolve(__dirname, '../JPEX/styles/theme.css'), 'utf8');
     assert(themeCss.includes('[data-theme="dark"]'), 'Phải có selector [data-theme="dark"]');
     assert(themeCss.includes('--bg-primary: #1e293b'), 'Có biến nền tối chuẩn');
     assert(themeCss.includes('--text-primary: #f8fafc'), 'Có biến chữ sáng chuẩn');
   });
 
   test('analyzer.css có định nghĩa [data-theme="dark"]', () => {
-    const analyzerCss = fs.readFileSync(path.resolve(__dirname, 'JPEX/styles/analyzer.css'), 'utf8');
+    const analyzerCss = fs.readFileSync(path.resolve(__dirname, '../JPEX/styles/analyzer.css'), 'utf8');
     assert(analyzerCss.includes('[data-theme="dark"]'), 'Phải có selector [data-theme="dark"]');
     assert(analyzerCss.includes('--analyzer-card-bg: #1e293b'), 'Có biến nền thẻ tối');
   });
 
   test('analyzer.html có nút chuyển theme', () => {
-    const analyzerHtml = fs.readFileSync(path.resolve(__dirname, 'JPEX/analyzer.html'), 'utf8');
+    const analyzerHtml = fs.readFileSync(path.resolve(__dirname, '../JPEX/analyzer.html'), 'utf8');
     assert(analyzerHtml.includes('id="btn-analyzer-theme-toggle"'), 'Phải có nút btn-analyzer-theme-toggle');
     assert(analyzerHtml.includes('id="analyzer-theme-icon"'), 'Phải có icon theme');
   });

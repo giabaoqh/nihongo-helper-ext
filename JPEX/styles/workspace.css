@@ -1253,7 +1253,37 @@ body {
   transform: rotateY(180deg) translate3d(0, 0, 0);
   background: var(--review-card-back-bg);
   overflow-y: auto;
+  overflow-x: hidden;
   z-index: 1;
+  justify-content: flex-start;
+  padding: 26px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--review-shortcuts-border, rgba(255, 255, 255, 0.2)) transparent;
+}
+
+.quizlet-face.face-back::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quizlet-face.face-back::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 12px 0;
+}
+
+.quizlet-face.face-back::-webkit-scrollbar-thumb {
+  background: var(--review-shortcuts-border, rgba(255, 255, 255, 0.25));
+  border-radius: 4px;
+}
+
+.quizlet-face.face-back::-webkit-scrollbar-thumb:hover {
+  background: var(--primary, #0284c7);
+}
+
+.quizlet-face.face-back .quizlet-face-content {
+  margin: auto 0;
+  min-height: min-content;
+  width: 100%;
+  padding-bottom: 8px;
 }
 
 .quizlet-card-3d.flipped .quizlet-face.face-back {
@@ -1381,10 +1411,110 @@ body {
   font-size: 20px;
   font-weight: 600;
   color: var(--review-meaning-color);
-  line-height: 1.45;
-  max-width: 600px;
+  line-height: 1.55;
+  width: 100%;
+  max-width: 100%;
   margin-bottom: 12px;
+  word-break: break-word;
+  overflow-wrap: break-word;
   transition: color 0.25s ease;
+}
+
+/* Giao diện danh sách nghĩa ngắn gọn, tinh tế cho Flashcard */
+.flashcard-concise-list {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px auto 0 auto;
+  padding: 0;
+  list-style: none;
+  max-width: 520px;
+  width: fit-content;
+  text-align: left;
+}
+
+.flashcard-concise-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--review-meaning-color, #f1f5f9);
+  line-height: 1.5;
+}
+
+.flashcard-concise-bullet {
+  color: var(--primary, #0284c7);
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  opacity: 0.95;
+}
+
+.flashcard-concise-text {
+  flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.flashcard-concise-single {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--review-meaning-color, #f1f5f9);
+  line-height: 1.5;
+  text-align: center;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Định dạng cho nghĩa dài / nhiều phân đoạn */
+.quizlet-back-meaning.is-long {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.65;
+  text-align: left;
+  background: var(--review-example-bg, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--review-example-border, rgba(0, 0, 0, 0.08));
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+
+/* Định dạng cho nghĩa cực dài (>220 ký tự) */
+.quizlet-back-meaning.is-extra-long {
+  font-size: 14.5px;
+  line-height: 1.65;
+  padding: 12px 16px;
+}
+
+/* Danh sách từng phân đoạn định nghĩa rõ ràng khi có dấu chấm phẩy ; */
+.meaning-definitions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.meaning-def-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1.6;
+}
+
+.meaning-def-bullet {
+  color: var(--primary, #0284c7);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.meaning-def-text {
+  flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .quizlet-back-example-box {
@@ -1392,8 +1522,9 @@ body {
   border: 1px solid var(--review-example-border);
   border-radius: 10px;
   padding: 10px 16px;
-  max-width: 620px;
+  max-width: 100%;
   width: 100%;
+  box-sizing: border-box;
   text-align: left;
   margin-top: 6px;
   transition: background-color 0.25s ease, border-color 0.25s ease;
@@ -1693,6 +1824,46 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .quizlet-card-3d {
     transition: transform 0.01ms !important;
+  }
+}
+
+/* Responsive Flashcard Viewport & Spacing */
+@media (max-width: 768px) {
+  .quizlet-stage-container {
+    padding: 6px 12px;
+  }
+  .quizlet-card-viewport {
+    margin: 0 8px;
+    min-height: 360px;
+  }
+  .quizlet-face {
+    padding: 20px 20px;
+  }
+  .quizlet-face.face-back {
+    padding: 18px 20px;
+  }
+  .quizlet-back-meaning.is-long {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+}
+
+@media (max-height: 700px) {
+  .quizlet-card-viewport {
+    min-height: 340px;
+    max-height: 420px;
+  }
+  .quizlet-face {
+    padding: 16px 20px;
+  }
+  .quizlet-face.face-back {
+    padding: 14px 20px;
+  }
+  .quizlet-kanji-huge {
+    font-size: 48px;
+  }
+  .quizlet-back-word {
+    font-size: 30px;
   }
 }
 
@@ -2155,9 +2326,12 @@ body {
   font-size: 20px;
   font-weight: 700;
   color: var(--review-meaning-color);
-  line-height: 1.4;
+  line-height: 1.5;
   margin: 2px 0 6px 0;
-  max-width: 580px;
+  width: 100%;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .kanji-readings-grid {

@@ -13,7 +13,7 @@
  */
 
 const path = require('path');
-const sa = require(path.resolve(__dirname, 'JPEX/scripts/analyzer.js'));
+const sa = require(path.resolve(__dirname, '../JPEX/scripts/analyzer.js'));
 
 let total = 0;
 let passed = 0;
@@ -33,7 +33,7 @@ async function run() {
   console.log('🧪 BẮT ĐẦU KIỂM THỬ TOÀN DIỆN CÁC YÊU CẦU CỦA NGƯỜI DÙNG');
   console.log('================================================================\n');
 
-  await sa.init({ dataDir: path.resolve(__dirname, 'JPEX/data') });
+  await sa.init({ dataDir: path.resolve(__dirname, '../JPEX/data') });
 
   // 1. Một từ Kanji đơn giản có nghĩa trong từ điển
   console.log('--- TEST 1: Từ Kanji đơn giản có nghĩa trong từ điển (本, 私) ---');

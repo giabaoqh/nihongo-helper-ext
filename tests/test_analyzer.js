@@ -15,7 +15,7 @@
  */
 
 const path = require('path');
-const analyzer = require(path.resolve(__dirname, 'JPEX/scripts/analyzer.js'));
+const analyzer = require(path.resolve(__dirname, '../JPEX/scripts/analyzer.js'));
 
 let totalTests = 0;
 let passedTests = 0;

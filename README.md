@@ -117,6 +117,17 @@ Giao diện học tập tập trung cao độ, ẩn hoàn toàn sidebar và các
   - **Tatoeba Project** ([tatoeba.org](https://tatoeba.org) - CC BY 2.0 FR): Câu ví dụ song ngữ Nhật - Anh kèm định danh câu (`tatoeba_id`).
   - **JPEX Kanji Database:** Cơ sở dữ liệu 11.092 mục từ Hán Việt chuẩn xác nội bộ, cho phép tra cứu và đối chiếu âm Hán Việt hoàn toàn ngoại tuyến.
 
+---
+
+## 📚 Tài liệu kỹ thuật chi tiết (`docs/`)
+
+- [Kiến trúc & Bối cảnh dự án (Project Context)](docs/PROJECT_CONTEXT.md)
+- [Danh sách tính năng & Hướng dẫn sử dụng (Features & Guide)](docs/FEATURES.md)
+- [Kế hoạch kiểm thử tự động (Test Plan)](docs/TEST_PLAN.md)
+- [Báo cáo kết quả kiểm thử (Test Results)](docs/TEST_RESULTS.md)
+- [Nhật ký sửa lỗi hệ thống (Bug Fix Log)](docs/BUG_FIX_LOG.md)
+- [Tiến độ & Nhật ký các mốc triển khai (Progress Log)](docs/PROGRESS.md)
+
 ### ⚠️ Tuyên bố miễn trừ trách nhiệm (Disclaimer)
 > Tổ chức kỳ thi JLPT (Japan Foundation và Japan Educational Exchanges and Services) **không phát hành** danh sách từ vựng hay Hán tự chính thức cho các cấp độ N1–N5 kể từ kỳ thi đổi mới năm 2010. Danh sách từ vựng trong tiện ích này dựa trên tiêu chuẩn cộng đồng uy tín của Jonathan Waller và OpenJLPT, là tài liệu hỗ trợ học tập tham khảo, **không tuyên bố là danh sách chính thức hoặc đầy đủ tuyệt đối** của kỳ thi JLPT thực tế.
 

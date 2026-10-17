@@ -83,7 +83,7 @@ Xây dựng một hệ thống kiểm thử tự động, lặp lại được (
 ### Khối F: Thư viện JLPT N1–N5 & Trình bày Nghĩa Đa tầng
 - **Mức độ ưu tiên:** HIGH (P1)
 - **Tiêu chí chấp nhận:**
-  - Cả 5 cấp độ N1–N5 có đầy đủ tệp dữ liệu tại `JPEX/data/jlpt/vocab/` và `JPEX/data/jlpt/`.
+  - Cả 5 cấp độ N1–N5 có đầy đủ tệp dữ liệu chuẩn hóa tại `JPEX/data/jlpt/vocab/`.
   - Tổng số lượng từ vựng đạt chính xác 7.811 mục từ (N5: 674, N4: 630, N3: 1.659, N2: 1.778, N1: 3.070).
   - 100% mục từ có nghĩa tiếng Việt đầy đủ (`totalMissingMeaning = 0`), không còn placeholder hay mảng rỗng.
   - Cơ chế hiển thị nghĩa thông minh (`formatExpandableMeaning`):
